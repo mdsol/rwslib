@@ -4,7 +4,7 @@ from urllib import urlencode
 
 
 
-from rwsobjects import RWSException, RWSError, RWSStudies, RWSStudyVersions, RWSSubjects, RWSErrorResponse
+from rwsobjects import RWSException, RWSError, RWSStudies, RWSStudyMetadataVersions, RWSSubjects, RWSErrorResponse
 from rwsobjects import ODM_NS, parseXMLString #TODO: Consider moving this elsewhere
 
 """
@@ -134,36 +134,41 @@ class RWSConnection(object):
         return RWSStudies(r.text)
 
 
-    def study_drafts(self, studyname):
+    def study_drafts(self, protocolname):
         """Return the list of study drafts"""
         #https://partner.mdsol.com/RaveWebServices/metadata/studies/IANTEST/drafts
 
-        url = self._make_url('metadata','studies',studyname,'drafts')
+        url = self._make_url('metadata','studies',protocolname,'drafts')
 
         r = self._get(url=url, auth=True)
 
-        return RWSStudyVersions(r.text)
+        return RWSStudyMetadataVersions(r.text)
 
-    def study_versions(self, studyname):
+    def study_versions(self, protocolname):
         """Return the list of study versions"""
         #https://partner.mdsol.com/RaveWebServices/metadata/studies/IANTEST/versions
 
-        url = self._make_url('metadata','studies',studyname,'versions')
+        url = self._make_url('metadata','studies',protocolname,'versions')
 
         r = self._get(url=url, auth=True)
 
-        return RWSStudyVersions(r.text)
+        return RWSStudyMetadataVersions(r.text)
 
 
-    def study_version(self, studyname, versionoid):
-        url = self._make_url('metadata','studies',studyname,'versions',str(versionoid))
+    def study_version(self, protocolname, versionoid):
+        """Return the text of a study version
+
+        https://{{ host}}.mdsol.com/RaveWebServices/metadata/studies/{{ protocol_name }}/versions/{{ version_oid }}
+        """
+
+        url = self._make_url('metadata','studies',protocolname,'versions',str(versionoid))
 
         r = self._get(url=url, auth=True)
 
         return r.text
 
 
-    def ensure_no_environment_in_study_name(self, studyname):
+    def ensure_no_environment_in_protocol_name(self, studyname):
         """Check that environment name has not been mixed into study name"""
         if "(" in studyname:
             raise ValueError("Environment included in study name, ( detected")
@@ -174,24 +179,24 @@ class RWSConnection(object):
         if "(" in environment_name:
             raise ValueError("Environment should not include parenthesis! e.g. 'Dev' not '(Dev)'")
 
-    def make_study_name_from_study_and_environment(self, studyname, environment_name):
-        """Given a study name an environment name, make a study name string"""
-        studyname_environment = studyname
+    def make_study_name_from_protocolname_and_environment(self, protocolname, environment_name):
+        """Given a protocol name an environment name, make a study name string"""
+        studyname_environment = protocolname
         if environment_name != '':
-            studyname_environment = "%s(%s)" % (studyname, environment_name)
+            studyname_environment = "%s(%s)" % (protocolname, environment_name)
         return studyname_environment
 
 
-    def study_subjects(self, studyname, environment_name=''):
+    def study_subjects(self, protocolname, environment_name=''):
         """
         Return the list of study subjects
            https://partner.mdsol.com/RaveWebServices/studies/Fixitol(Dev)/subjects
         """
 
-        self.ensure_no_environment_in_study_name(studyname)
+        self.ensure_no_environment_in_protocol_name(protocolname)
         self.ensure_no_parens_in_environment_name(environment_name)
 
-        studyname_environment = self.make_study_name_from_study_and_environment(studyname, environment_name)
+        studyname_environment = self.make_study_name_from_protocolname_and_environment(protocolname, environment_name)
 
 
         url = self._make_url('studies',studyname_environment,'subjects',links="all") #status="all" -Not convinced of value of status
@@ -200,10 +205,10 @@ class RWSConnection(object):
 
         return RWSSubjects(r.text)
 
-    def study_datasets(self, studyname, environment_name='', ds_type='regular', rawsuffix=None):
+    def study_datasets(self, protocol_name, environment_name='', ds_type='regular', rawsuffix=None):
         """
-        Return the full datasets listing
-           https://partner.mdsol.com/RaveWebServices/studies/IANTEST%28Prod%29/datasets/regular
+        Return the text of the full datasets listing as an ODM string
+           https://{{ host }}.mdsol.com/RaveWebServices/studies/{{ protocol_name }} ({{ environment_name}})/datasets/regular
         """
 
         if ds_type not in ['regular','raw']:
@@ -211,10 +216,10 @@ class RWSConnection(object):
 
 
 
-        self.ensure_no_environment_in_study_name(studyname)
+        self.ensure_no_environment_in_protocol_name(protocol_name)
         self.ensure_no_parens_in_environment_name(environment_name)
 
-        studyname_environment = self.make_study_name_from_study_and_environment(studyname, environment_name)
+        studyname_environment = self.make_study_name_from_protocolname_and_environment(protocol_name, environment_name)
 
         kwargs = {}
 
@@ -230,11 +235,19 @@ class RWSConnection(object):
 
 
 if __name__ == '__main__':
-    rave = RWSConnection('https://innovate.mdsol.com', 'isparks','jimbob81')
+
+    from _settings import username, password #Not exactly 12 factor, but a start
+    rave = RWSConnection('https://innovate.mdsol.com', username, password)
 
     studyname = 'Mediflex' #IANTEST
 
-    print rave.version()
+    # print rave.version()
+    #
+    # print rave.last_result.url
+    # print rave.last_result.status_code
+    # print rave.last_result.headers['content-type']
+    # print rave.last_result.text
+
 
     # try:
     #     for study in rave.studies():
@@ -244,19 +257,33 @@ if __name__ == '__main__':
     #     print rave.last_result.headers['content-type']
     # except RWSException, e:
     #     print e.rws_error.creationdatetime
+
+
+
+
     # #print rave.last_result.headers
     # #print rave.last_result.status_code
     #
     # drafts = rave.study_drafts(studyname)
     #
+    # print drafts.fileoid
+    # print drafts.study.studyname
+    #
     # for version in drafts:
     #     print version.name, version.oid
-    #
-    # versions = rave.study_versions(studyname)
-    # for version in rave.study_versions(studyname):
-    #     print version.name, version.oid
+    #     print dir(version)
 
-    #print rave.study_version('IANTEST',1212)
+    versions = rave.study_versions(studyname)
+    print versions.fileoid
+    print versions.study.studyname
+    for version in versions:
+        print version.name, version.oid
+
+
+    print rave.study_version(studyname,1015)
+
+    #Stopping here....
+    import sys; sys.exit()
 
     val = rave.study_datasets(studyname,'Dev', ds_type='regular', rawsuffix='.RAW')
     doc = parseXMLString(val)

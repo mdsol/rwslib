@@ -10,5 +10,8 @@ rwslib provides a convenient interface to RWS without hiding the implementation 
 using rwslib you should have a simple way to request a list of studies from RWS but still be able to
 get to the HTTP headers, content body etc returned by RWS.
 
+Documentation
+-------------
 
+Documentated with Sphinx. See /docs/build/index.html
 
