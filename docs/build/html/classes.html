@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Class Reference &mdash; rwslib 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
+    <link rel="prev" title="API" href="api.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/mdsol.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="previous chapter">API</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/classes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-rws">
+<span id="class-reference"></span><h1>Class Reference<a class="headerlink" href="#module-rws" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rws.RWSConnection">
+<em class="property">class </em><tt class="descclassname">rws.</tt><tt class="descname">RWSConnection</tt><big>(</big><em>domain</em>, <em>username=None</em>, <em>password=None</em><big>)</big><a class="headerlink" href="#rws.RWSConnection" title="Permalink to this definition">¶</a></dt>
+<dd><p>A connection to RWS</p>
+<dl class="method">
+<dt id="rws.RWSConnection.studies">
+<tt class="descname">studies</tt><big>(</big><big>)</big><a class="headerlink" href="#rws.RWSConnection.studies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of studies</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rws.RWSConnection.study_datasets">
+<tt class="descname">study_datasets</tt><big>(</big><em>protocol_name</em>, <em>environment_name=''</em>, <em>ds_type='regular'</em>, <em>rawsuffix=None</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Return the text of the full datasets listing as an ODM string</dt>
+<dd><a class="reference external" href="https:/">https:/</a>/{{ host }}.mdsol.com/RaveWebServices/studies/{{ protocol_name }} ({{ environment_name}})/datasets/regular</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rws.RWSConnection.study_drafts">
+<tt class="descname">study_drafts</tt><big>(</big><em>protocolname</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_drafts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of study drafts</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rws.RWSConnection.study_subjects">
+<tt class="descname">study_subjects</tt><big>(</big><em>protocolname</em>, <em>environment_name=''</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_subjects" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Return the list of study subjects</dt>
+<dd><a class="reference external" href="https://partner.mdsol.com/RaveWebServices/studies/Fixitol(Dev)/subjects">https://partner.mdsol.com/RaveWebServices/studies/Fixitol(Dev)/subjects</a></dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rws.RWSConnection.study_version">
+<tt class="descname">study_version</tt><big>(</big><em>protocolname</em>, <em>versionoid</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the text of a study version</p>
+<p><a class="reference external" href="https:/">https:/</a>/{{ host}}.mdsol.com/RaveWebServices/metadata/studies/{{ protocol_name }}/versions/{{ version_oid }}</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rws.RWSConnection.study_versions">
+<tt class="descname">study_versions</tt><big>(</big><em>protocolname</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_versions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of study versions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rws.RWSConnection.version">
+<tt class="descname">version</tt><big>(</big><big>)</big><a class="headerlink" href="#rws.RWSConnection.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the RWS version number.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API"
+             >previous</a> |</li>
+        <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Medidata Solutions Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
