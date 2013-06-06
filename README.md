@@ -13,5 +13,5 @@ get to the HTTP headers, content body etc returned by RWS.
 Documentation
 -------------
 
-Documentated with Sphinx. See /docs/build/index.html
+Documented with Sphinx. See /docs/build/index.html
 

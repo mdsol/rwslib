@@ -169,7 +169,7 @@ class RWSConnection(object):
 
     def study_version(self, projectname, versionoid):
         """Return the ODM representation of a study version as text"""
-        #https://{{ host}}.mdsol.com/RaveWebServices/metadata/studies/{{ protocol_name }}/versions/{{ version_oid }}
+        #https://{{ host}}.mdsol.com/RaveWebServices/metadata/studies/{{ project_name }}/versions/{{ version_oid }}
 
         url = self._make_url('metadata', 'studies', projectname, 'versions', str(versionoid))
 
@@ -184,7 +184,7 @@ class RWSConnection(object):
             raise ValueError("Environment should not include parenthesis! e.g. 'Dev' not '(Dev)'")
 
     def make_study_name_from_projectname_and_environment(self, projectname, environment_name):
-        """Given a protocol name an environment name, make a study name string"""
+        """Given a project name and environment name, make a study name string"""
         studyname_environment = projectname
         if environment_name != '':
             studyname_environment = "%s(%s)" % (projectname, environment_name)
@@ -208,17 +208,17 @@ class RWSConnection(object):
 
         return RWSSubjects(r.text)
 
-    def study_datasets(self, protocol_name, environment_name='PROD', dataset_type='regular', rawsuffix=None):
+    def study_datasets(self, projectname, environment_name='PROD', dataset_type='regular', rawsuffix=None):
         """
         Return the text of the full datasets listing as an ODM string"""
-        #https://{{ host }}.mdsol.com/RaveWebServices/studies/{{ protocol_name }} ({{ environment_name}})/datasets/regular
+        #https://{{ host }}.mdsol.com/RaveWebServices/studies/{{ projectname }} ({{ environment_name}})/datasets/regular
 
         if dataset_type not in ['regular', 'raw']:
             raise ValueError("Dataset type not regular or raw")
 
         self.ensure_no_parens_in_environment_name(environment_name)
 
-        studyname_environment = self.make_study_name_from_projectname_and_environment(protocol_name, environment_name)
+        studyname_environment = self.make_study_name_from_projectname_and_environment(projectname, environment_name)
 
         kwargs = {}
 
@@ -238,7 +238,7 @@ if __name__ == '__main__':
 
     rave = RWSConnection('https://innovate.mdsol.com', username, password)
 
-    studyname = 'Mediflex' #IANTEST
+    projectname = 'Mediflex' #IANTEST
 
     # print rave.version()
     #
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     # #print rave.last_result.headers
     # #print rave.last_result.status_code
     #
-    drafts = rave.study_drafts(studyname)
+    drafts = rave.study_drafts(projectname)
     #
     # print drafts.fileoid
     # print drafts.study.studyname
@@ -282,7 +282,7 @@ if __name__ == '__main__':
     # print rave.study_version(studyname,1015)
 
 
-    val = rave.study_datasets(studyname, 'Dev', dataset_type='regular', rawsuffix='.RAW')
+    val = rave.study_datasets(projectname, 'Dev', dataset_type='regular', rawsuffix='.RAW')
     doc = parseXMLString(val)
 
     #Set None mapping to ODM so that we can XPath
@@ -298,9 +298,7 @@ if __name__ == '__main__':
         counts[oid] = cnt
 
     print counts
-    import sys;
-
-    sys.exit()
+    import sys; sys.exit()
 
 
     #print doc.findall(ODM_NS + 'ClinicalData') #)/SubjectData/StudyEventData/FormData')
