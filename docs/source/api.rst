@@ -161,7 +161,7 @@ Example::
         <GlobalVariables>
           <StudyName>Mediflex</StudyName>
           <StudyDescription></StudyDescription>
-          <projectname>Mediflex</projectname>
+          <ProtocolName>Mediflex</ProtocolName>
         </GlobalVariables>
         <BasicDefinitions>
         ....
