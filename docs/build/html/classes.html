@@ -93,45 +93,38 @@
 
 <dl class="method">
 <dt id="rws.RWSConnection.study_datasets">
-<tt class="descname">study_datasets</tt><big>(</big><em>protocol_name</em>, <em>environment_name=''</em>, <em>ds_type='regular'</em>, <em>rawsuffix=None</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_datasets" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Return the text of the full datasets listing as an ODM string</dt>
-<dd><a class="reference external" href="https:/">https:/</a>/{{ host }}.mdsol.com/RaveWebServices/studies/{{ protocol_name }} ({{ environment_name}})/datasets/regular</dd>
-</dl>
+<tt class="descname">study_datasets</tt><big>(</big><em>protocol_name</em>, <em>environment_name='PROD'</em>, <em>dataset_type='regular'</em>, <em>rawsuffix=None</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the text of the full datasets listing as an ODM string</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rws.RWSConnection.study_drafts">
-<tt class="descname">study_drafts</tt><big>(</big><em>protocolname</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_drafts" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">study_drafts</tt><big>(</big><em>projectname</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_drafts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the list of study drafts</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rws.RWSConnection.study_subjects">
-<tt class="descname">study_subjects</tt><big>(</big><em>protocolname</em>, <em>environment_name=''</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_subjects" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Return the list of study subjects</dt>
-<dd><a class="reference external" href="https://partner.mdsol.com/RaveWebServices/studies/Fixitol(Dev)/subjects">https://partner.mdsol.com/RaveWebServices/studies/Fixitol(Dev)/subjects</a></dd>
-</dl>
+<tt class="descname">study_subjects</tt><big>(</big><em>projectname</em>, <em>environment_name='PROD'</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_subjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of study subjects, defaults to the PROD environment</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rws.RWSConnection.study_version">
-<tt class="descname">study_version</tt><big>(</big><em>protocolname</em>, <em>versionoid</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_version" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the text of a study version</p>
-<p><a class="reference external" href="https:/">https:/</a>/{{ host}}.mdsol.com/RaveWebServices/metadata/studies/{{ protocol_name }}/versions/{{ version_oid }}</p>
+<tt class="descname">study_version</tt><big>(</big><em>projectname</em>, <em>versionoid</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the ODM representation of a study version as text</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rws.RWSConnection.study_versions">
-<tt class="descname">study_versions</tt><big>(</big><em>protocolname</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_versions" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">study_versions</tt><big>(</big><em>projectname</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_versions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the list of study versions</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rws.RWSConnection.version">
 <tt class="descname">version</tt><big>(</big><big>)</big><a class="headerlink" href="#rws.RWSConnection.version" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the RWS version number.</p>
+<dd><p>Return the RWS version number</p>
 </dd></dl>
 
 </dd></dl>

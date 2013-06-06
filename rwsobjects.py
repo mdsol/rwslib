@@ -5,6 +5,22 @@ from lxml import etree
 MEDI_NS = '{http://www.mdsol.com/ns/odm/metadata}'
 ODM_NS = '{http://www.cdisc.org/ns/odm/v1.3}'
 
+
+def getEnvironmentFromNameAndProtocol(studyname, protocolname):
+    """Extract environment name using studyname and protocolname to guide"""
+    #StudyName =    "TEST (1) (DEV)"
+    #ProtocolName = "TEST (1)"
+    #Raw Env      =           "(DEV)"
+
+    raw_env = studyname[len(protocolname):].strip()
+
+    if '(' in raw_env:
+        l_brace_pos = raw_env.rfind('(')
+        r_brace_pos = raw_env.rfind(')')
+        return raw_env[l_brace_pos+1:r_brace_pos]
+    else:
+        return raw_env
+
 def parseXMLString(xml):
     """Parse XML string, return root"""
 
@@ -37,18 +53,21 @@ class RWSException(Exception):
 
 class XMLRepr(object):
     """Classes that represent objects passed back from RWS as XML"""
-    pass
+    def __init__(self, xml):
+        self.root = parseXMLString(xml)
 
 
 class ODMDoc(XMLRepr):
     """All ODM responses have the same wrapper"""
     def __init__(self, xml):
-        self.root = root = parseXMLString(xml)
+        #Call base class
+        XMLRepr.__init__(self, xml)
+        r_get = self.root.get
 
-        self.filetype = root.get('FileType')
-        self.creationdatetime = root.get('CreationDateTime')
-        self.fileoid = root.get("FileOID")
-        self.ODMVersion = root.get("ODMVersion")
+        self.filetype = r_get('FileType')
+        self.creationdatetime = r_get('CreationDateTime')
+        self.fileoid = r_get("FileOID")
+        self.ODMVersion = r_get("ODMVersion")
 
 
 
@@ -67,10 +86,11 @@ class RWSError(ODMDoc):
     """
     def __init__(self, xml):
         ODMDoc.__init__(self, xml)
-        self.errordescription = self.root.get(MEDI_NS + "ErrorDescription")
+        r_get = self.root.get
+        self.errordescription = r_get(MEDI_NS + "ErrorDescription")
 
 
-class RWSErrorResponse(object):
+class RWSErrorResponse(XMLRepr):
     """
  <Response
     ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
@@ -81,13 +101,15 @@ class RWSErrorResponse(object):
     </Response>
     """
     def __init__(self, xml):
-        self.root = root = parseXMLString(xml)
+        #Call base class
+        XMLRepr.__init__(self, xml)
+        r_get = self.root.get
 
-        self.referencenumber = root.get("ReferenceNumber")
-        self.inboundodmfileoid = root.get('InboundODMFileOID')
-        self.istransactionsuccessful = root.get('IsTransactionSuccessful') == "1"
-        self.reasoncode = root.get("ReasonCode")
-        self.errordescription = self.root.get("ErrorClientResponseMessage")
+        self.referencenumber = r_get("ReferenceNumber")
+        self.inboundodmfileoid = r_get('InboundODMFileOID')
+        self.istransactionsuccessful = r_get('IsTransactionSuccessful') == "1"
+        self.reasoncode = r_get("ReasonCode")
+        self.errordescription = r_get("ErrorClientResponseMessage")
 
 
 
@@ -123,11 +145,7 @@ class RWSStudyListItem(object):
         self.studyname = e_global_variables.find(ODM_NS + 'StudyName').text
         self.protocolname = e_global_variables.find(ODM_NS + 'ProtocolName').text
 
-        #This is nasty (nastier than a regex though?)
-        try:
-            self.environment = self.studyname.split('(')[1].split(')')[0]
-        except:
-            self.environment = ''
+        self.environment = getEnvironmentFromNameAndProtocol(self.studyname, self.protocolname)
 
         return self
 
@@ -162,9 +180,7 @@ class RWSStudies(list, ODMDoc): #I hate multi-inheritance generally.
         #Get basic properties
         ODMDoc.__init__(self, xml)
 
-        root = self.root #from ODMDoc
-
-        for estudy in root.findall(ODM_NS + 'Study'):
+        for estudy in self.root.findall(ODM_NS + 'Study'):
             self.append(RWSStudyListItem.fromElement(estudy))
 
 
@@ -285,3 +301,5 @@ class RWSSubjects(list, ODMDoc): #I hate multi-inheritance generally.
 
         for e_clindata in root.findall(ODM_NS + 'ClinicalData'):
             self.append(RWSSubjectListItem.fromElement(e_clindata))
+
+

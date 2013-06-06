@@ -6,7 +6,7 @@
 Welcome to rwslib's documentation!
 ==================================
 
-rwslib is a python library that provides a simple interface to Ravce Web Services (RWS)
+rwslib is a python library that provides a simple interface to Rav#e Web Services (RWS)
 
 
 Contents:

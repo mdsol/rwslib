@@ -3,14 +3,14 @@ API
 
 The rwslib API.
 
-ProtocolNames, StudyNames and Environments
+Projectnames, Studynames and Environments
 ------------------------------------------
 
 rwslib uses some standard definitions for studyname, protocol names and environments. It defines them as:
 
-* ProtocolName - The name of the study without environment e.g. the Mediflex in **Mediflex** (Dev)
+* Projectname  - The name of the study without environment e.g. the Mediflex in **Mediflex** (Dev)
 * Environment  - The environment within the study e.g. the Dev in Mediflex (**Dev**)
-* StudyName    - The combination of ProtocolName and Environment **Mediflex (Dev)**
+* StudyName    - The combination of projectname and environment **Mediflex (Dev)**
 
 
 version()
@@ -57,16 +57,16 @@ Example::
     >>> for study in studies:
     ...    print "OID",study.oid
     ...    print "Name",study.studyname
-    ...    print "Protocolname",study.protocolname
+    ...    print "projectname",study.projectname
     ...    print "IsProd?",study.isProd()
     ...
     OID Mediflex(Dev)
     Name Mediflex (Dev)
-    Protocolname Mediflex
+    projectname Mediflex
     IsProd? False
 
 
-study_drafts(protocol_name)
+study_drafts(projectname)
 ---------------------------
 
 Authorization is required for this method.
@@ -76,7 +76,7 @@ study attributes and a list of MetaDataVersion objects representing Rave Archite
 
 Calls::
 
-    https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ protocol_name }}/drafts
+    https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ projectname }}/drafts
 
 
 Example::
@@ -85,8 +85,8 @@ Example::
     >>> from rwslib import RWSConnection
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')
 
-    >>> protocol_name = 'Mediflex'
-    >>> drafts = r.study_drafts(protocol_name)
+    >>> projectname = 'Mediflex'
+    >>> drafts = r.study_drafts(projectname)
 
     >>> drafts.fileoid
     e88d622d-8ddd-476c-8978-ccfe23b26969
@@ -100,7 +100,7 @@ Example::
     Draft1 126
 
 
-study_versions(protocol_name)
+study_versions(projectname)
 -----------------------------
 
 Authorization is required for this method.
@@ -110,7 +110,7 @@ study attributes and a list of MetaDataVersion objects representing Rave Archite
 
 Calls::
 
-    https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ protocol_name }}/versions
+    https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ projectname }}/versions
 
 Example::
 
@@ -118,8 +118,8 @@ Example::
     >>> from rwslib import RWSConnection
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')
 
-    >>> protocol_name = 'Mediflex'
-    >>> versions = r.study_versions(protocol_name)
+    >>> projectname = 'Mediflex'
+    >>> versions = r.study_versions(projectname)
 
     >>> versions.fileoid
     66567494-c76a-4b94-afbb-64f5c1b21cbb
@@ -136,7 +136,7 @@ Example::
 
 
 
-study_version(protocol_name, version_oid)
+study_version(projectname, version_oid)
 -----------------------------------------
 
 Authorization is required for this method.
@@ -145,7 +145,7 @@ Returns a unicode string of the ODM Metadata for this study version.
 
 Calls::
 
-    https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ protocol_name }}/versions/{{ version_oid }}
+    https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ projectname }}/versions/{{ version_oid }}
 
 Example::
 
@@ -153,15 +153,15 @@ Example::
     >>> from rwslib import RWSConnection
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')
 
-    >>> protocol_name = 'Mediflex'
+    >>> projectname = 'Mediflex'
     >>> version_oid = 1015
-    >>> r.study_version(protocol_name, version_oid)
+    >>> r.study_version(projectname, version_oid)
     <ODM FileType="Snapshot" Granularity="Metadata" CreationDateTime="2013-06-05T08:30:45.900-00:00" FileOID="012d24dd-d7d8-44fe-997b-b287ae4faf7e" ODMVersion="1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns="http://www.cdisc.org/ns/odm/v1.3">
       <Study OID="Mediflex">
         <GlobalVariables>
           <StudyName>Mediflex</StudyName>
           <StudyDescription></StudyDescription>
-          <ProtocolName>Mediflex</ProtocolName>
+          <projectname>Mediflex</projectname>
         </GlobalVariables>
         <BasicDefinitions>
         ....
