@@ -47,8 +47,23 @@ class RWSConnection(object):
     """A connection to RWS"""
 
     def __init__(self, domain, username=None, password=None):
-        """Create a connection to Rave"""
-        self.domain = domain
+        """Create a connection to Rave
+
+          If the domain does not start with http then it is assumed to be the name of the medidata
+          url and https:// will be added as a prefix and .mdsol.com will be added as a postfix.
+
+          e.g.
+
+          innovate      = https://innovate.mdsol.com
+          http://mytest = http:/mytest
+
+        """
+
+        if domain.lower().startswith('http'):
+            self.domain = domain
+        else:
+            self.domain = 'https://%s.mdsol.com' % domain
+
         self.username = username
         self.password = password
 
@@ -75,7 +90,11 @@ class RWSConnection(object):
             #Is it a RWS response?
             if r.text.startswith('<Response'):
                 error = RWSErrorResponse(r.text)
+                raise RWSException(error.errordescription, error)
+            else:
+                error = RWSError(r.text)
             raise RWSException(error.errordescription, error)
+
 
         return r
 
@@ -134,9 +153,17 @@ class RWSConnection(object):
         r = self._get(url='version')
         return r.text
 
+    # def libraries(self):
+    #TODO: Supposedly a URL but I have never seen it work.
+    #     """Return the list of libraries"""
+    #     r = self._get(url="libraries", auth=True)
+    #     print r.text
 
-    def studies(self):
-        """Return the list of studies as a RWSStudies object"""
+
+    def clinical_studies(self):
+        """Return the list of clinical studies as a RWSStudies object.
+           Clinical studies are the studies that you have access to as an EDC user.
+        """
         r = self._get(url='studies', auth=True)
 
         if r.status_code != 200:
@@ -144,6 +171,41 @@ class RWSConnection(object):
             raise RWSException(error.errordescription, error)
 
         return RWSStudies(r.text)
+
+    def metadata_studies(self):
+        """Return the list of metadata studies as a RWSStudies object.
+           metadata_studies are the list of studies that you have access to as an
+           Architect user.
+        """
+
+        url = self._make_url('metadata', 'studies')
+
+        r = self._get(url=url, auth=True)
+
+        if r.status_code != 200:
+            error = RWSError(r.text)
+            raise RWSException(error.errordescription, error)
+
+        return RWSStudies(r.text)
+
+    def metadata_libraries(self):
+        """Return the list of metadata libraries as a RWSStudies object.
+           metadata_libraries are the list of libraries that you have access to as an
+           Architect Global Library Volume user
+        """
+        #https://partner.mdsol.com/RaveWebServices/metadata/libraries
+
+        url = self._make_url('metadata', 'libraries')
+
+        r = self._get(url=url, auth=True)
+
+        if r.status_code != 200:
+            error = RWSError(r.text)
+            raise RWSException(error.errordescription, error)
+
+        return RWSStudies(r.text)
+
+
 
 
     def study_drafts(self, projectname):
@@ -156,6 +218,17 @@ class RWSConnection(object):
 
         return RWSStudyMetadataVersions(r.text)
 
+    def library_drafts(self, projectname):
+        """Return the list of Global Library drafts"""
+        #https://innovate.mdsol.com/RaveWebServices/metadata/libraries/IANTEST/drafts
+
+        url = self._make_url('metadata', 'libraries', projectname, 'drafts')
+
+        r = self._get(url=url, auth=True)
+
+        return RWSStudyMetadataVersions(r.text)
+
+
     def study_versions(self, projectname):
         """Return the list of study versions"""
         #https://partner.mdsol.com/RaveWebServices/metadata/studies/IANTEST/versions
@@ -165,6 +238,17 @@ class RWSConnection(object):
         r = self._get(url=url, auth=True)
 
         return RWSStudyMetadataVersions(r.text)
+
+    def library_versions(self, projectname):
+        """Return the list of library versions"""
+        #https://partner.mdsol.com/RaveWebServices/metadata/libraries/IANTEST/versions
+
+        url = self._make_url('metadata', 'libraries', projectname, 'versions')
+
+        r = self._get(url=url, auth=True)
+
+        return RWSStudyMetadataVersions(r.text)
+
 
 
     def study_version(self, projectname, versionoid):
@@ -176,6 +260,17 @@ class RWSConnection(object):
         r = self._get(url=url, auth=True)
 
         return r.text
+
+    def library_version(self, projectname, versionoid):
+        """Return the ODM representation of a global library version as text"""
+        #https://{{ host}}.mdsol.com/RaveWebServices/metadata/libraries/{{ project_name }}/versions/{{ version_oid }}
+
+        url = self._make_url('metadata', 'libraries', projectname, 'versions', str(versionoid))
+
+        r = self._get(url=url, auth=True)
+
+        return r.text
+
 
 
     def ensure_no_parens_in_environment_name(self, environment_name):
@@ -208,7 +303,7 @@ class RWSConnection(object):
 
         return RWSSubjects(r.text)
 
-    def study_datasets(self, projectname, environment_name='PROD', dataset_type='regular', rawsuffix=None):
+    def study_datasets(self, projectname, environment_name='PROD', dataset_type='regular', rawsuffix=None, start=None):
         """
         Return the text of the full datasets listing as an ODM string"""
         #https://{{ host }}.mdsol.com/RaveWebServices/studies/{{ projectname }} ({{ environment_name}})/datasets/regular
@@ -225,6 +320,9 @@ class RWSConnection(object):
         if rawsuffix is not None:
             kwargs['rawsuffix'] = rawsuffix
 
+        if start is not None:
+            kwargs['start'] = start
+
         url = self._make_url('studies', studyname_environment, 'datasets', dataset_type, **kwargs)
 
         r = self._get(url=url, auth=True)
@@ -236,7 +334,7 @@ if __name__ == '__main__':
 
     from _settings import username, password #Not exactly 12 factor, but a start
 
-    rave = RWSConnection('https://innovate.mdsol.com', username, password)
+    rave = RWSConnection('innovate', username, password)
 
     projectname = 'Mediflex' #IANTEST
 
@@ -249,7 +347,7 @@ if __name__ == '__main__':
 
 
     # try:
-    #     for study in rave.studies():
+    #     for study in rave.clinical_studies():
     #         print study.studyname
     #         print study.environment
     #         print study.isProd()
@@ -257,13 +355,51 @@ if __name__ == '__main__':
     # except RWSException, e:
     #     print e.rws_error.creationdatetime
 
+    # try:
+    #     for study in rave.metadata_studies():
+    #         print study.studyname
+    #         print study.environment
+    #         print study.isProd()
+    #     print rave.last_result.headers['content-type']
+    # except RWSException, e:
+    #     print e.rws_error.creationdatetime
+
+    # try:
+    #     ml = rave.metadata_libraries()
+    #     print ml.filetype
+    #     print ml.fileoid
+    #     print ml.creationdatetime
+    #     for study in ml:
+    #         print "------"
+    #         print "OID",study.oid
+    #         print "Name",study.studyname
+    #         print "protocolname",study.protocolname
+    #         print "IsProd?",study.isProd()
+    #         print "ProjectType",study.projecttype
+    # except RWSException, e:
+    #     print e.rws_error.creationdatetime
+
+
+    # drafts = rave.library_drafts('Rave CDASH')
+    # print drafts.fileoid
+    # for draft in drafts:
+    #      print draft.name, draft.oid
+
+
+    # versions = rave.library_versions('Rave CDASH')
+    # print versions.fileoid
+    #
+    # print versions.study.studyname
+    #
+    # for version in versions:
+    #     print "%s - %s" % (version.name, version.oid,)
 
 
 
     # #print rave.last_result.headers
     # #print rave.last_result.status_code
     #
-    drafts = rave.study_drafts(projectname)
+    #drafts = rave.study_drafts(projectname)
     #
     # print drafts.fileoid
     # print drafts.study.studyname
@@ -272,17 +408,25 @@ if __name__ == '__main__':
     #     print version.name, version.oid
     #     print dir(version)
 
-    # versions = rave.study_versions(studyname)
+    # versions = rave.study_versions('Mediflex')
     # print versions.fileoid
     # print versions.study.studyname
     # for version in versions:
     #     print version.name, version.oid
-    #
-    #
-    # print rave.study_version(studyname,1015)
 
+    #
+    #print rave.study_versions('Mediflex')
+
+    #print rave.library_version('Rave CDASH', 398)
 
     val = rave.study_datasets(projectname, 'Dev', dataset_type='regular', rawsuffix='.RAW')
+
+    print val
+    print rave.last_result.url
+
+
+    import sys; sys.exit()
+
     doc = parseXMLString(val)
 
     #Set None mapping to ODM so that we can XPath
@@ -298,7 +442,6 @@ if __name__ == '__main__':
         counts[oid] = cnt
 
     print counts
-    import sys; sys.exit()
 
 
     #print doc.findall(ODM_NS + 'ClinicalData') #)/SubjectData/StudyEventData/FormData')

@@ -56,10 +56,15 @@
 <li><a class="reference internal" href="#">API</a><ul>
 <li><a class="reference internal" href="#projectnames-studynames-and-environments">Projectnames, Studynames and Environments</a></li>
 <li><a class="reference internal" href="#version">version()</a></li>
-<li><a class="reference internal" href="#studies">studies()</a></li>
+<li><a class="reference internal" href="#clinical-studies">clinical_studies()</a></li>
+<li><a class="reference internal" href="#metadata-studies">metadata_studies()</a></li>
 <li><a class="reference internal" href="#study-drafts-projectname">study_drafts(projectname)</a></li>
+<li><a class="reference internal" href="#library-drafts-projectname">library_drafts(projectname)</a></li>
 <li><a class="reference internal" href="#study-versions-projectname">study_versions(projectname)</a></li>
+<li><a class="reference internal" href="#library-versions-projectname">library_versions(projectname)</a></li>
 <li><a class="reference internal" href="#study-version-projectname-version-oid">study_version(projectname, version_oid)</a></li>
+<li><a class="reference internal" href="#library-version-projectname-version-oid">library_version(projectname, version_oid)</a></li>
+<li><a class="reference internal" href="#study-datasets-projectname">study_datasets(projectname)</a></li>
 </ul>
 </li>
 </ul>
@@ -114,49 +119,98 @@
 <div class="section" id="version">
 <h2>version()<a class="headerlink" href="#version" title="Permalink to this headline">¶</a></h2>
 <p>Returns the text result of calling:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/version</pre>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/version</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization optional</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization optional</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
 <span class="go">1.8.0</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="studies">
-<h2>studies()<a class="headerlink" href="#studies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="clinical-studies">
+<h2>clinical_studies()<a class="headerlink" href="#clinical-studies" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
-<p>Returns a RWSStudies object which has ODM document attributes and a list of RWSStudy objects.</p>
+<p>Returns a RWSStudies object which has ODM document attributes and a list of RWSStudy objects. These are
+the clinical studies that you have access to as an EDC user.</p>
 <p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/version</pre>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/studies</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization required</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">studies</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">clinical_studies</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">ODMVersion</span>
-<span class="go">&#39;1.3&#39;</span>
+<span class="go">1.3</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">fileoid</span>
-<span class="go">&#39;aa0dc756-b9f3-4bb2-ab4c-ee91e573e8fb&#39;</span>
+<span class="go">aa0dc756-b9f3-4bb2-ab4c-ee91e573e8fb</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">filetype</span>
-<span class="go">&#39;Snapshot&#39;</span>
+<span class="go">Snapshot</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">creationdatetime</span>
-<span class="go">&#39;2013-06-04T15:58:24.781-00:00&#39;</span>
+<span class="go">2013-06-04T15:58:24.781-00:00</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">studies</span><span class="p">)</span>
 <span class="go">1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">study</span> <span class="ow">in</span> <span class="n">studies</span><span class="p">:</span>
 <span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;OID&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">oid</span>
 <span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;Name&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
-<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;projectname&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">projectname</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;protocolname&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">protocolname</span>
 <span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;IsProd?&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">isProd</span><span class="p">()</span>
 <span class="gp">...</span>
 <span class="go">OID Mediflex(Dev)</span>
 <span class="go">Name Mediflex (Dev)</span>
-<span class="go">projectname Mediflex</span>
+<span class="go">protocolname Mediflex</span>
 <span class="go">IsProd? False</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="metadata-studies">
+<h2>metadata_studies()<a class="headerlink" href="#metadata-studies" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Returns a RWSStudies object which has ODM document attributes and a list of RWSStudy objects. These are
+the studies you have access to as an Architect user. Use clinical_studies to get a list of studies that
+you an interact with as an EDC user.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/studies</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization required</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">metadata_studies</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">ODMVersion</span>
+<span class="go">1.3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">fileoid</span>
+<span class="go">4e7f5b37-3f77-4a80-8b91-c48978103bae</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">filetype</span>
+<span class="go">Snapshot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">creationdatetime</span>
+<span class="go">2013-06-07T02:13:31</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">studies</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">study</span> <span class="ow">in</span> <span class="n">studies</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;------&quot;</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;OID&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">oid</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;Name&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;protocolname&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">protocolname</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;IsProd?&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">isProd</span><span class="p">()</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;ProjectType&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">projecttype</span>
+<span class="gp">...</span>
+<span class="go">------</span>
+<span class="go">OID Bill&#39;s New Library</span>
+<span class="go">Name Bill&#39;s New Library</span>
+<span class="go">protocolname Bill&#39;s New Library</span>
+<span class="go">IsProd? False</span>
+<span class="go">ProjectType GlobalLibraryVolume</span>
+<span class="go">------</span>
+<span class="go">OID Rave CDASH</span>
+<span class="go">Name Rave CDASH</span>
+<span class="go">protocolname Rave CDASH</span>
+<span class="go">IsProd? False</span>
+<span class="go">ProjectType GlobalLibraryVolume</span>
+</pre></div>
+</div>
+<p>Studies returned in the list from metadata_studies() have an empty environment attribute since they represent
+study designs, they do not have associated environments.</p>
 </div>
 <div class="section" id="study-drafts-projectname">
 <h2>study_drafts(projectname)<a class="headerlink" href="#study-drafts-projectname" title="Permalink to this headline">¶</a></h2>
@@ -164,11 +218,11 @@
 <p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
 study attributes and a list of MetaDataVersion objects representing Rave Architect Drafts.</p>
 <p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ projectname }}/drafts</pre>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/studies/{{ projectname }}/drafts</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">study_drafts</span><span class="p">(</span><span class="n">projectname</span><span class="p">)</span>
@@ -186,13 +240,35 @@ study attributes and a list of MetaDataVersion objects representing Rave Archite
 </pre></div>
 </div>
 </div>
+<div class="section" id="library-drafts-projectname">
+<h2>library_drafts(projectname)<a class="headerlink" href="#library-drafts-projectname" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
+study attributes and a list of MetaDataVersion objects representing Rave Architect Global Library Drafts</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries/{{ projectname }}/drafts</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">library_drafts</span><span class="p">(</span><span class="s">&#39;Rave CDASH&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">drafts</span><span class="o">.</span><span class="n">fileoid</span>
+<span class="go">be117ac3-e7ea-48fc-8bd8-373eb387703f</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">draft</span> <span class="ow">in</span> <span class="n">drafts</span><span class="p">:</span>
+<span class="go">     print &quot;%s - %s&quot; % (draft.name, draft.oid,)</span>
+<span class="go">Rave CDASH 01 - 397</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="study-versions-projectname">
 <h2>study_versions(projectname)<a class="headerlink" href="#study-versions-projectname" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
 <p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
 study attributes and a list of MetaDataVersion objects representing Rave Architect Versions.</p>
 <p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ projectname }}/versions</pre>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/studies/{{ projectname }}/versions</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
@@ -216,26 +292,54 @@ study attributes and a list of MetaDataVersion objects representing Rave Archite
 </pre></div>
 </div>
 </div>
-<div class="section" id="study-version-projectname-version-oid">
-<h2>study_version(projectname, version_oid)<a class="headerlink" href="#study-version-projectname-version-oid" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="library-versions-projectname">
+<h2>library_versions(projectname)<a class="headerlink" href="#library-versions-projectname" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
-<p>Returns a unicode string of the ODM Metadata for this study version.</p>
+<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
+study attributes and a list of MetaDataVersion objects representing Rave Global Library Versions for
+a library volume.</p>
 <p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ projectname }}/versions/{{ version_oid }}</pre>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries/{{ projectname }}/versions</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">library_versions</span><span class="p">(</span><span class="s">&#39;Rave CDASH&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">fileoid</span>
+<span class="go">50252a80-e233-4d30-9e69-b510e965e44a</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
+<span class="go">Rave CDASH</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> - </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">version</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="o">.</span><span class="n">oid</span><span class="p">,)</span>
+<span class="go">1.0 - 398</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="study-version-projectname-version-oid">
+<h2>study_version(projectname, version_oid)<a class="headerlink" href="#study-version-projectname-version-oid" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Returns a unicode string of the ODM Metadata for this study version.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/studies/{{ projectname }}/versions/{{ version_oid }}</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+
 <span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">version_oid</span> <span class="o">=</span> <span class="mi">1015</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">study_version</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="n">version_oid</span><span class="p">)</span>
-<span class="go">&lt;ODM FileType=&quot;Snapshot&quot; Granularity=&quot;Metadata&quot; CreationDateTime=&quot;2013-06-05T08:30:45.900-00:00&quot; FileOID=&quot;012d24dd-d7d8-44fe-997b-b287ae4faf7e&quot; ODMVersion=&quot;1.3&quot; xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot; xmlns=&quot;http://www.cdisc.org/ns/odm/v1.3&quot;&gt;</span>
+<span class="go">&lt;ODM FileType=&quot;Snapshot&quot; Granularity=&quot;Metadata&quot; CreationDateTime=&quot;2013-06-05T08:30:45.900-00:00&quot;</span>
+<span class="go">     FileOID=&quot;012d24dd-d7d8-44fe-997b-b287ae4faf7e&quot; ODMVersion=&quot;1.3&quot;</span>
+<span class="go">     xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot; xmlns=&quot;http://www.cdisc.org/ns/odm/v1.3&quot;&gt;</span>
 <span class="go">  &lt;Study OID=&quot;Mediflex&quot;&gt;</span>
 <span class="go">    &lt;GlobalVariables&gt;</span>
 <span class="go">      &lt;StudyName&gt;Mediflex&lt;/StudyName&gt;</span>
 <span class="go">      &lt;StudyDescription&gt;&lt;/StudyDescription&gt;</span>
-<span class="go">      &lt;projectname&gt;Mediflex&lt;/projectname&gt;</span>
+<span class="go">      &lt;ProtocolName&gt;Mediflex&lt;/ProtocolName&gt;</span>
 <span class="go">    &lt;/GlobalVariables&gt;</span>
 <span class="go">    &lt;BasicDefinitions&gt;</span>
 <span class="go">    ....</span>
@@ -246,6 +350,106 @@ does include some XML helper methods that make working with XML that is generate
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">At this time RWS does not provide a way retrieve the ODM for a Draft, only for a Version.</p>
+</div>
+</div>
+<div class="section" id="library-version-projectname-version-oid">
+<h2>library_version(projectname, version_oid)<a class="headerlink" href="#library-version-projectname-version-oid" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Returns a unicode string of the ODM Metadata for this study version.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries/{{ projectname }}/versions/{{ version_oid }}</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">library_version</span><span class="p">(</span><span class="s">&quot;Rave CDASH&quot;</span><span class="p">,</span> <span class="mi">395</span><span class="p">)</span>
+<span class="go">&lt;ODM FileType=&quot;Snapshot&quot; Granularity=&quot;Metadata&quot; CreationDateTime=&quot;2013-06-07T15:36:23.531-00:00&quot; FileOID=&quot;f914dbf8-41fc-492b-bc8f-f4c98e471c38&quot; ODMVersion=&quot;1.3&quot; xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot; xmlns=&quot;http://www.cdisc.org/ns/odm/v1.3&quot;&gt;</span>
+<span class="go">  &lt;Study OID=&quot;Rave CDASH&quot; mdsol:ProjectType=&quot;GlobalLibraryVolume&quot;&gt;</span>
+<span class="go">    &lt;GlobalVariables&gt;</span>
+<span class="go">      &lt;StudyName&gt;Rave CDASH&lt;/StudyName&gt;</span>
+<span class="go">      &lt;StudyDescription&gt;&lt;/StudyDescription&gt;</span>
+<span class="go">      &lt;ProtocolName&gt;Rave CDASH&lt;/ProtocolName&gt;</span>
+<span class="go">    &lt;/GlobalVariables&gt;</span>
+<span class="go">    &lt;BasicDefinitions /&gt;</span>
+<span class="go">    &lt;MetaDataVersion OID=&quot;398&quot; Name=&quot;1.0&quot; mdsol:PrimaryFormOID=&quot;SUBJECT&quot; mdsol:DefaultMatrixOID=&quot;PRIMARY&quot; mdsol:SignaturePrompt=&quot;I hereby confirm that all data is accurate to the best of my knowledge.&quot;&gt;</span>
+<span class="go">      &lt;Protocol&gt;</span>
+<span class="go">      ...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="study-datasets-projectname">
+<h2>study_datasets(projectname)<a class="headerlink" href="#study-datasets-projectname" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.
+Clinical Views must be active for this method to work.</p>
+<p>Returns a unicode string of the ODM Clinical Data for all datasets for the study.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a potentially very large download for an existing study.</p>
+</div>
+<p>This method takes a variety of options:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>environment_name={{env}}</td>
+<td>Only extracts dataset information for the environment named. Defaults to PROD</td>
+</tr>
+<tr class="row-odd"><td>rawsuffix={{suffix}}</td>
+<td>e.g. .RAW means raw field definitions are suffixes with .RAW  ex. AE_STDT.RAW</td>
+</tr>
+<tr class="row-even"><td>dataset_type={{regular|raw}}</td>
+<td>Limit extracts to regular or raw data</td>
+</tr>
+<tr class="row-odd"><td>start={{ISO 8601 date}}</td>
+<td>Request changes to this dataset since the start date. Note that CV&#8217;s must be set
+to Include Inactive for this option to work.</td>
+</tr>
+</tbody>
+</table>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/studies/{{ projectname }} ({{ environment_name}})/datasets/{{regular|raw}}?&lt;{{options}}</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">study_datasets</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="s">&#39;Dev&#39;</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span><span class="s">&#39;regular&#39;</span><span class="p">,</span> <span class="n">rawsuffix</span><span class="o">=</span><span class="s">&#39;.RAW&#39;</span><span class="p">)</span>
+<span class="go">ï»¿&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="go">   &lt;ODM FileType=&quot;Snapshot&quot; FileOID=&quot;6b967555-8e05-4890-afb2-c2d2f1496031&quot;</span>
+<span class="go">        CreationDateTime=&quot;2013-06-07T13:13:52.883-00:00&quot;</span>
+<span class="go">        ODMVersion=&quot;1.3&quot; xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot;</span>
+<span class="go">        xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; xmlns=&quot;http://www.cdisc.org/</span>
+<span class="go">        ....</span>
+<span class="go">        &lt;ClinicalData StudyOID=&quot;Mediflex(Dev)&quot; MetaDataVersionOID=&quot;16&quot;&gt;</span>
+<span class="go">            &lt;SubjectData SubjectKey=&quot;123 ABC&quot;&gt;</span>
+<span class="go">                &lt;SiteRef LocationOID=&quot;MDSOL&quot; /&gt;</span>
+<span class="go">                &lt;StudyEventData StudyEventOID=&quot;SUBJECT&quot;&gt;</span>
+<span class="go">                    &lt;FormData FormOID=&quot;AE&quot; FormRepeatKey=&quot;1&quot;&gt;</span>
+<span class="go">                        &lt;ItemGroupData ItemGroupOID=&quot;AE_LOG_LINE&quot; ItemGroupRepeatKey=&quot;1&quot;&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AEYN&quot; Value=&quot;Y&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AETERM&quot; Value=&quot;HEADACHE&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AESTDTC&quot; Value=&quot;2008-01-01&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AESTDTC.RAW&quot; Value=&quot;01 JAN 2008&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AEONG&quot; Value=&quot;N&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AEENDTC&quot; Value=&quot;2008-01-01&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AEENDTC.RAW&quot; Value=&quot;01 JAN 2008&quot; /&gt;</span>
+<span class="go">                            ...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that this XML string includes the Byte Order Mark (BOM) as sent by RWS and does not include line breaks
+as shown in the above example. Depending on how you intend to parse the XML returned you may need to
+strip the BOM.</p>
 </div>
 </div>
 </div>

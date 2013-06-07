@@ -86,14 +86,23 @@
 <em class="property">class </em><tt class="descclassname">rws.</tt><tt class="descname">RWSConnection</tt><big>(</big><em>domain</em>, <em>username=None</em>, <em>password=None</em><big>)</big><a class="headerlink" href="#rws.RWSConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>A connection to RWS</p>
 <dl class="method">
-<dt id="rws.RWSConnection.studies">
-<tt class="descname">studies</tt><big>(</big><big>)</big><a class="headerlink" href="#rws.RWSConnection.studies" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the list of studies as a RWSStudies object</p>
+<dt id="rws.RWSConnection.clinical_studies">
+<tt class="descname">clinical_studies</tt><big>(</big><big>)</big><a class="headerlink" href="#rws.RWSConnection.clinical_studies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of clinical studies as a RWSStudies object.
+Clinical studies are the studies that you have access to as an EDC user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rws.RWSConnection.metadata_studies">
+<tt class="descname">metadata_studies</tt><big>(</big><big>)</big><a class="headerlink" href="#rws.RWSConnection.metadata_studies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the list of metadata studies as a RWSStudies object.
+metadata_studies are the list of studies that you have access to as an
+Architect user.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="rws.RWSConnection.study_datasets">
-<tt class="descname">study_datasets</tt><big>(</big><em>projectname</em>, <em>environment_name='PROD'</em>, <em>dataset_type='regular'</em>, <em>rawsuffix=None</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_datasets" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">study_datasets</tt><big>(</big><em>projectname</em>, <em>environment_name='PROD'</em>, <em>dataset_type='regular'</em>, <em>rawsuffix=None</em>, <em>start=None</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_datasets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the text of the full datasets listing as an ODM string</p>
 </dd></dl>
 

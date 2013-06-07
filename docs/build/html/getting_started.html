@@ -103,13 +103,18 @@
 <p>Before you can do any work with rwslib you must create a connection to a Rave instance. This is done
 through the RWSConnection object:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;my_username&#39;</span><span class="p">,</span><span class="s">&#39;my_password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;my_username&#39;</span><span class="p">,</span><span class="s">&#39;my_password&#39;</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="c">#Get the rave version from rws</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
 <span class="go">1.8.0</span>
 </pre></div>
 </div>
+<p>Note that the first parameter to the RWSConnection is the name of the url you wish to connect to. A url
+that does not start with &#8220;http&#8221; is assumed to be the sub-domain of mdsol.com. In the example above &#8220;innovate&#8221;
+is treated as &#8220;<a class="reference external" href="https://innovate.mdsol.com">https://innovate.mdsol.com</a>&#8221;.</p>
+<p>If you wish to override this behaviour, simply supply a base URL that includes http or https at the start of
+the url.</p>
 <p>It is important to understand that an RWSConnection is not a persistent connection to Rave, it is simply
 a convenience class for making calls to RWS endpoints.</p>
 <p>Note that most of the methods of RWSConnection require authentication. There are some that do not, version()
@@ -130,7 +135,7 @@ happens to be one of them so this is also valid:</p>
 keeps the result of the RWS call in it&#8217;s last_result attribute. This is very useful for debugging
 RWS calls since it allows you to find out what headers were sent, what URL was called etc.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c">#Get the rave version from rws</span>

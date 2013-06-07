@@ -68,6 +68,7 @@ class ODMDoc(XMLRepr):
         self.creationdatetime = r_get('CreationDateTime')
         self.fileoid = r_get("FileOID")
         self.ODMVersion = r_get("ODMVersion")
+        self.granularity = r_get("Granularity",None)
 
 
 
@@ -120,16 +121,18 @@ class RWSStudyListItem(object):
         self.studyname = None
         self.protocolname = None
         self.environment = None
+        self.projecttype = None
+
 
     def isProd(self):
         """Is production if environment is empty"""
-        return self.environment == ''
+        return self.environment == '' and self.projecttype != 'GlobalLibraryVolume'
 
     @classmethod
     def fromElement(cls, elem):
         """Read properties from an XML Element
 
-         <Study OID="Fixitol(Dev)">
+         <Study OID="Fixitol(Dev) mdsol:ProjectType="GlobalLibraryVolume">
             <GlobalVariables>
                   <StudyName>Fixitol (Dev)</StudyName>
                   <StudyDescription/>
@@ -141,9 +144,15 @@ class RWSStudyListItem(object):
         self = cls()
 
         self.oid = elem.get('OID')
+
+        #Not all returned documents have a projecttype (GlobalLibraryVolumes do)
+        self.projecttype =  elem.get(MEDI_NS + "ProjectType")
+
         e_global_variables = elem.find(ODM_NS + 'GlobalVariables')
         self.studyname = e_global_variables.find(ODM_NS + 'StudyName').text
         self.protocolname = e_global_variables.find(ODM_NS + 'ProtocolName').text
+
+
 
         self.environment = getEnvironmentFromNameAndProtocol(self.studyname, self.protocolname)
 
