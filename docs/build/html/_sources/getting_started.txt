@@ -1,8 +1,7 @@
 Getting started
 ***************
 
-A quick primer on working with RWSLib
-
+A quick primer on working with rwslib
 
 
 Creating a connection to RWS
@@ -12,11 +11,18 @@ Before you can do any work with rwslib you must create a connection to a Rave in
 through the RWSConnection object::
 
     >>> from rwslib import RWSConnection
-    >>> rws = RWSConnection('https://innovate.mdsol.com', 'my_username','my_password')
+    >>> rws = RWSConnection('innovate', 'my_username','my_password')
 
     >>> #Get the rave version from rws
     >>> rws.version()
     1.8.0
+
+Note that the first parameter to the RWSConnection is the name of the url you wish to connect to. A url
+that does not start with "http" is assumed to be the sub-domain of mdsol.com. In the example above "innovate"
+is treated as "https://innovate.mdsol.com".
+
+If you wish to override this behaviour, simply supply a base URL that includes http or https at the start of
+the url.
 
 It is important to understand that an RWSConnection is not a persistent connection to Rave, it is simply
 a convenience class for making calls to RWS endpoints.
@@ -41,7 +47,7 @@ keeps the result of the RWS call in it's last_result attribute. This is very use
 RWS calls since it allows you to find out what headers were sent, what URL was called etc.
 
     >>> from rwslib import RWSConnection
-    >>> rws = RWSConnection('https://innovate.mdsol.com')
+    >>> rws = RWSConnection('innovate')
 
     >>> #Get the rave version from rws
     >>> rws.version()

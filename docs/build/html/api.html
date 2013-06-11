@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
-    <link rel="next" title="Class Reference" href="classes.html" />
+    <link rel="next" title="Retrieving Clinical Data" href="retrieve_clinical_data.html" />
     <link rel="prev" title="Getting started" href="getting_started.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="classes.html" title="Class Reference"
+          <a href="retrieve_clinical_data.html" title="Retrieving Clinical Data"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="getting_started.html" title="Getting started"
@@ -56,10 +56,8 @@
 <li><a class="reference internal" href="#">API</a><ul>
 <li><a class="reference internal" href="#projectnames-studynames-and-environments">Projectnames, Studynames and Environments</a></li>
 <li><a class="reference internal" href="#version">version()</a></li>
-<li><a class="reference internal" href="#studies">studies()</a></li>
-<li><a class="reference internal" href="#study-drafts-projectname">study_drafts(projectname)</a></li>
-<li><a class="reference internal" href="#study-versions-projectname">study_versions(projectname)</a></li>
-<li><a class="reference internal" href="#study-version-projectname-version-oid">study_version(projectname, version_oid)</a></li>
+<li><a class="reference internal" href="#build-version">build_version()</a></li>
+<li><a class="reference internal" href="#flush-cache">flush_cache()</a></li>
 </ul>
 </li>
 </ul>
@@ -68,8 +66,8 @@
   <p class="topless"><a href="getting_started.html"
                         title="previous chapter">Getting started</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="classes.html"
-                        title="next chapter">Class Reference</a></p>
+  <p class="topless"><a href="retrieve_clinical_data.html"
+                        title="next chapter">Retrieving Clinical Data</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/api.txt"
@@ -114,138 +112,50 @@
 <div class="section" id="version">
 <h2>version()<a class="headerlink" href="#version" title="Permalink to this headline">¶</a></h2>
 <p>Returns the text result of calling:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/version</pre>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/version</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization optional</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization optional</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
 <span class="go">1.8.0</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="studies">
-<h2>studies()<a class="headerlink" href="#studies" title="Permalink to this headline">¶</a></h2>
-<p>Authorization is required for this method.</p>
-<p>Returns a RWSStudies object which has ODM document attributes and a list of RWSStudy objects.</p>
-<p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/version</pre>
+<div class="section" id="build-version">
+<h2>build_version()<a class="headerlink" href="#build-version" title="Permalink to this headline">¶</a></h2>
+<p>Returns the text result of calling:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/version/build</pre>
 </div>
+<p>Diagnostics returns a 200 response code and the internal build number.</p>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization required</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">studies</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">ODMVersion</span>
-<span class="go">&#39;1.3&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">fileoid</span>
-<span class="go">&#39;aa0dc756-b9f3-4bb2-ab4c-ee91e573e8fb&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">filetype</span>
-<span class="go">&#39;Snapshot&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">creationdatetime</span>
-<span class="go">&#39;2013-06-04T15:58:24.781-00:00&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">studies</span><span class="p">)</span>
-<span class="go">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">study</span> <span class="ow">in</span> <span class="n">studies</span><span class="p">:</span>
-<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;OID&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">oid</span>
-<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;Name&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
-<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;projectname&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">projectname</span>
-<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;IsProd?&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">isProd</span><span class="p">()</span>
-<span class="gp">...</span>
-<span class="go">OID Mediflex(Dev)</span>
-<span class="go">Name Mediflex (Dev)</span>
-<span class="go">projectname Mediflex</span>
-<span class="go">IsProd? False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization optional</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">build_version</span><span class="p">()</span>
+<span class="go">5.6.5.12</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="study-drafts-projectname">
-<h2>study_drafts(projectname)<a class="headerlink" href="#study-drafts-projectname" title="Permalink to this headline">¶</a></h2>
-<p>Authorization is required for this method.</p>
-<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
-study attributes and a list of MetaDataVersion objects representing Rave Architect Drafts.</p>
-<p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ projectname }}/drafts</pre>
+<div class="section" id="flush-cache">
+<h2>flush_cache()<a class="headerlink" href="#flush-cache" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method call.</p>
+<p>Returns the text result of calling:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/webservice.aspx?CacheFlush</pre>
 </div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Calling flush_cache unnecessarily causes RWS to re-load objects, causing additional resource utilization that
+could have a detrimental affect on Rave performance.</p>
+</div>
+<p>Flushes the RWS cache. Generally Rave and RWS manage their own caching. You should not need to use this method
+in normal operation. Returns a RWSResponse object with a istransactionsuccessful attribute:</p>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">study_drafts</span><span class="p">(</span><span class="n">projectname</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span><span class="o">.</span><span class="n">fileoid</span>
-<span class="go">e88d622d-8ddd-476c-8978-ccfe23b26969</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
-<span class="go">Mediflex</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">draft</span> <span class="ow">in</span> <span class="n">drafts</span><span class="p">:</span>
-<span class="gp">... </span>   <span class="k">print</span> <span class="n">draft</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">draft</span><span class="o">.</span><span class="n">oid</span>
-<span class="go">Draft2 1006</span>
-<span class="go">Draft1 126</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization REQUIRED</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">flush_cache</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span><span class="o">.</span><span class="n">istransactionsucessful</span>
+<span class="go">True</span>
 </pre></div>
-</div>
-</div>
-<div class="section" id="study-versions-projectname">
-<h2>study_versions(projectname)<a class="headerlink" href="#study-versions-projectname" title="Permalink to this headline">¶</a></h2>
-<p>Authorization is required for this method.</p>
-<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
-study attributes and a list of MetaDataVersion objects representing Rave Architect Versions.</p>
-<p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ projectname }}/versions</pre>
-</div>
-<p>Example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">study_versions</span><span class="p">(</span><span class="n">projectname</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">fileoid</span>
-<span class="go">66567494-c76a-4b94-afbb-64f5c1b21cbb</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
-<span class="go">Mediflex</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">:</span>
-<span class="gp">... </span>   <span class="k">print</span> <span class="n">version</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="o">.</span><span class="n">oid</span>
-<span class="go">v19 1015</span>
-<span class="go">v18 1007</span>
-<span class="go">v17 999</span>
-<span class="go">v16 481</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="study-version-projectname-version-oid">
-<h2>study_version(projectname, version_oid)<a class="headerlink" href="#study-version-projectname-version-oid" title="Permalink to this headline">¶</a></h2>
-<p>Authorization is required for this method.</p>
-<p>Returns a unicode string of the ODM Metadata for this study version.</p>
-<p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}.mdsol.com/RaveWebServices/metadata/studies/{{ projectname }}/versions/{{ version_oid }}</pre>
-</div>
-<p>Example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">version_oid</span> <span class="o">=</span> <span class="mi">1015</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">study_version</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="n">version_oid</span><span class="p">)</span>
-<span class="go">&lt;ODM FileType=&quot;Snapshot&quot; Granularity=&quot;Metadata&quot; CreationDateTime=&quot;2013-06-05T08:30:45.900-00:00&quot; FileOID=&quot;012d24dd-d7d8-44fe-997b-b287ae4faf7e&quot; ODMVersion=&quot;1.3&quot; xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot; xmlns=&quot;http://www.cdisc.org/ns/odm/v1.3&quot;&gt;</span>
-<span class="go">  &lt;Study OID=&quot;Mediflex&quot;&gt;</span>
-<span class="go">    &lt;GlobalVariables&gt;</span>
-<span class="go">      &lt;StudyName&gt;Mediflex&lt;/StudyName&gt;</span>
-<span class="go">      &lt;StudyDescription&gt;&lt;/StudyDescription&gt;</span>
-<span class="go">      &lt;projectname&gt;Mediflex&lt;/projectname&gt;</span>
-<span class="go">    &lt;/GlobalVariables&gt;</span>
-<span class="go">    &lt;BasicDefinitions&gt;</span>
-<span class="go">    ....</span>
-</pre></div>
-</div>
-<p>rwslib does not automatically parse this xml for you (you may want to control this yourself) but rwslib
-does include some XML helper methods that make working with XML that is generated from web-services easier.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">At this time RWS does not provide a way retrieve the ODM for a Draft, only for a Version.</p>
 </div>
 </div>
 </div>
@@ -266,7 +176,7 @@ does include some XML helper methods that make working with XML that is generate
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="classes.html" title="Class Reference"
+          <a href="retrieve_clinical_data.html" title="Retrieving Clinical Data"
              >next</a> |</li>
         <li class="right" >
           <a href="getting_started.html" title="Getting started"

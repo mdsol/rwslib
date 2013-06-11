@@ -68,6 +68,7 @@ class ODMDoc(XMLRepr):
         self.creationdatetime = r_get('CreationDateTime')
         self.fileoid = r_get("FileOID")
         self.ODMVersion = r_get("ODMVersion")
+        self.granularity = r_get("Granularity",None)
 
 
 
@@ -111,6 +112,56 @@ class RWSErrorResponse(XMLRepr):
         self.reasoncode = r_get("ReasonCode")
         self.errordescription = r_get("ErrorClientResponseMessage")
 
+class RWSResponse(XMLRepr):
+    """
+    <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+              InboundODMFileOID=""
+              IsTransactionSuccessful="1"
+              SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords="">
+    </Response>
+    """
+    def __init__(self, xml):
+        #Call base class
+        XMLRepr.__init__(self, xml)
+        r_get = self.root.get
+
+        self.referencenumber = r_get("ReferenceNumber")
+        self.inboundodmfileoid = r_get('InboundODMFileOID')
+        self.istransactionsuccessful = r_get('IsTransactionSuccessful') == "1"
+
+        self.subjects_touched = 0
+        self.folders_touched = 0
+        self.forms_touched = 0
+        self.fields_touched = 0
+        self.loglines_touched = 0
+
+        success_stats = r_get('SuccessStatistics')
+
+        if success_stats.startswith('Rave objects touched:'):
+            success_stats = success_stats[len('Rave objects touched:')+1:] #Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0
+            parts = success_stats.split(' ') #[Subjects=0;,Folders=0;,Forms=0;,Fields=0;,LogLines=0]
+            for part in parts:
+                name, value = part.split('=')
+                if value[-1] == ';':
+                    value = value[:-1]
+                if name == 'Subjects':
+                    self.subjects_touched = int(value)
+                elif name == 'Folders':
+                    self.folders_touched = int(value)
+                elif name == 'Forms':
+                    self.forms_touched = int(value)
+                elif name == 'Fields':
+                    self.fields_touched = int(value)
+                elif name == 'LogLines':
+                    self.loglines_touched = int(value)
+                else:
+                    raise KeyError('Unknown Rave Object %s in response %s' % name, success_stats)
+
+        self.new_records = r_get("NewRecords")
+
+
+
+
 
 
 class RWSStudyListItem(object):
@@ -120,16 +171,18 @@ class RWSStudyListItem(object):
         self.studyname = None
         self.protocolname = None
         self.environment = None
+        self.projecttype = None
+
 
     def isProd(self):
         """Is production if environment is empty"""
-        return self.environment == ''
+        return self.environment == '' and self.projecttype != 'GlobalLibraryVolume'
 
     @classmethod
     def fromElement(cls, elem):
         """Read properties from an XML Element
 
-         <Study OID="Fixitol(Dev)">
+         <Study OID="Fixitol(Dev) mdsol:ProjectType="GlobalLibraryVolume">
             <GlobalVariables>
                   <StudyName>Fixitol (Dev)</StudyName>
                   <StudyDescription/>
@@ -141,9 +194,15 @@ class RWSStudyListItem(object):
         self = cls()
 
         self.oid = elem.get('OID')
+
+        #Not all returned documents have a projecttype (GlobalLibraryVolumes do)
+        self.projecttype =  elem.get(MEDI_NS + "ProjectType", "Project")
+
         e_global_variables = elem.find(ODM_NS + 'GlobalVariables')
         self.studyname = e_global_variables.find(ODM_NS + 'StudyName').text
         self.protocolname = e_global_variables.find(ODM_NS + 'ProtocolName').text
+
+
 
         self.environment = getEnvironmentFromNameAndProtocol(self.studyname, self.protocolname)
 
