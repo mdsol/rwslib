@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Working with Global Library Metadata &mdash; rwslib 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
+    <link rel="next" title="Class Reference" href="classes.html" />
+    <link rel="prev" title="Working with Architect Metadata" href="working_architect.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="Class Reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="working_architect.html" title="Working with Architect Metadata"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/mdsol.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Working with Global Library Metadata</a><ul>
+<li><a class="reference internal" href="#library-drafts-projectname">library_drafts(projectname)</a></li>
+<li><a class="reference internal" href="#library-versions-projectname">library_versions(projectname)</a></li>
+<li><a class="reference internal" href="#library-version-projectname-version-oid">library_version(projectname, version_oid)</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="working_architect.html"
+                        title="previous chapter">Working with Architect Metadata</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="classes.html"
+                        title="next chapter">Class Reference</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/working_metadata.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="working-with-global-library-metadata">
+<span id="glv"></span><h1>Working with Global Library Metadata<a class="headerlink" href="#working-with-global-library-metadata" title="Permalink to this headline">¶</a></h1>
+<p>rwslib provides access to metadata stored in Rave Global Library Volumes. You must provide credentials that
+have access to Global Library Volumes to read this metadata. See <a class="reference internal" href="working_architect.html#architect"><em>Working with Architect Metadata</em></a> for information on working
+with Architect Study Designs.</p>
+<div class="section" id="library-drafts-projectname">
+<h2>library_drafts(projectname)<a class="headerlink" href="#library-drafts-projectname" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
+study attributes and a list of MetaDataVersion objects representing Rave Architect Global Library Drafts</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries/{{ projectname }}/drafts</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">library_drafts</span><span class="p">(</span><span class="s">&#39;Rave CDASH&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">drafts</span><span class="o">.</span><span class="n">fileoid</span>
+<span class="go">be117ac3-e7ea-48fc-8bd8-373eb387703f</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">draft</span> <span class="ow">in</span> <span class="n">drafts</span><span class="p">:</span>
+<span class="go">     print &quot;%s - %s&quot; % (draft.name, draft.oid,)</span>
+<span class="go">Rave CDASH 01 - 397</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="library-versions-projectname">
+<h2>library_versions(projectname)<a class="headerlink" href="#library-versions-projectname" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
+study attributes and a list of MetaDataVersion objects representing Rave Global Library Versions for
+a library volume.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries/{{ projectname }}/versions</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">library_versions</span><span class="p">(</span><span class="s">&#39;Rave CDASH&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">fileoid</span>
+<span class="go">50252a80-e233-4d30-9e69-b510e965e44a</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
+<span class="go">Rave CDASH</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> - </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">version</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="o">.</span><span class="n">oid</span><span class="p">,)</span>
+<span class="go">1.0 - 398</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="library-version-projectname-version-oid">
+<h2>library_version(projectname, version_oid)<a class="headerlink" href="#library-version-projectname-version-oid" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Returns a unicode string of the ODM Metadata for this study version.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries/{{ projectname }}/versions/{{ version_oid }}</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">library_version</span><span class="p">(</span><span class="s">&quot;Rave CDASH&quot;</span><span class="p">,</span> <span class="mi">395</span><span class="p">)</span>
+<span class="go">&lt;ODM FileType=&quot;Snapshot&quot; Granularity=&quot;Metadata&quot; CreationDateTime=&quot;2013-06-07T15:36:23.531-00:00&quot; FileOID=&quot;f914dbf8-41fc-492b-bc8f-f4c98e471c38&quot; ODMVersion=&quot;1.3&quot; xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot; xmlns=&quot;http://www.cdisc.org/ns/odm/v1.3&quot;&gt;</span>
+<span class="go">  &lt;Study OID=&quot;Rave CDASH&quot; mdsol:ProjectType=&quot;GlobalLibraryVolume&quot;&gt;</span>
+<span class="go">    &lt;GlobalVariables&gt;</span>
+<span class="go">      &lt;StudyName&gt;Rave CDASH&lt;/StudyName&gt;</span>
+<span class="go">      &lt;StudyDescription&gt;&lt;/StudyDescription&gt;</span>
+<span class="go">      &lt;ProtocolName&gt;Rave CDASH&lt;/ProtocolName&gt;</span>
+<span class="go">    &lt;/GlobalVariables&gt;</span>
+<span class="go">    &lt;BasicDefinitions /&gt;</span>
+<span class="go">    &lt;MetaDataVersion OID=&quot;398&quot; Name=&quot;1.0&quot; mdsol:PrimaryFormOID=&quot;SUBJECT&quot; mdsol:DefaultMatrixOID=&quot;PRIMARY&quot; mdsol:SignaturePrompt=&quot;I hereby confirm that all data is accurate to the best of my knowledge.&quot;&gt;</span>
+<span class="go">      &lt;Protocol&gt;</span>
+<span class="go">      ...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">At this time RWS does not provide a way retrieve the ODM for a Draft, only for a Version.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="Class Reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="working_architect.html" title="Working with Architect Metadata"
+             >previous</a> |</li>
+        <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Medidata Solutions Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

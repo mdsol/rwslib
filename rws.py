@@ -2,7 +2,7 @@ __author__ = 'isparks'
 import requests
 from urllib import urlencode
 
-from rwsobjects import RWSException, RWSError, RWSStudies, RWSStudyMetadataVersions, RWSSubjects, RWSErrorResponse
+from rwsobjects import RWSException, RWSError, RWSStudies, RWSStudyMetadataVersions, RWSSubjects, RWSErrorResponse, RWSResponse
 from rwsobjects import ODM_NS, parseXMLString #TODO: Consider moving this elsewhere
 
 
@@ -95,7 +95,6 @@ class RWSConnection(object):
                 error = RWSError(r.text)
             raise RWSException(error.errordescription, error)
 
-
         return r
 
     def get_auth(self):
@@ -153,6 +152,24 @@ class RWSConnection(object):
         r = self._get(url='version')
         return r.text
 
+    def build_version(self):
+        """Return the RWS build version number"""
+        r = self._get(url= self._make_url('version','build'))
+        return r.text
+
+
+    def diagnostics(self):
+        """Returns OK if RWS self-check is ok"""
+        r = self._get(url='diagnostics')
+        return r.text
+
+
+    def flush_cache(self):
+        """Calls RWS cache-flush"""
+        r = self._get(url='webservice.aspx?CacheFlush',auth=True)
+        return RWSResponse(r.text)
+
+
     # def libraries(self):
     #TODO: Supposedly a URL but I have never seen it work.
     #     """Return the list of libraries"""
@@ -165,11 +182,6 @@ class RWSConnection(object):
            Clinical studies are the studies that you have access to as an EDC user.
         """
         r = self._get(url='studies', auth=True)
-
-        if r.status_code != 200:
-            error = RWSError(r.text)
-            raise RWSException(error.errordescription, error)
-
         return RWSStudies(r.text)
 
     def metadata_studies(self):
@@ -179,13 +191,7 @@ class RWSConnection(object):
         """
 
         url = self._make_url('metadata', 'studies')
-
         r = self._get(url=url, auth=True)
-
-        if r.status_code != 200:
-            error = RWSError(r.text)
-            raise RWSException(error.errordescription, error)
-
         return RWSStudies(r.text)
 
     def metadata_libraries(self):
@@ -198,14 +204,7 @@ class RWSConnection(object):
         url = self._make_url('metadata', 'libraries')
 
         r = self._get(url=url, auth=True)
-
-        if r.status_code != 200:
-            error = RWSError(r.text)
-            raise RWSException(error.errordescription, error)
-
         return RWSStudies(r.text)
-
-
 
 
     def study_drafts(self, projectname):
@@ -234,9 +233,7 @@ class RWSConnection(object):
         #https://partner.mdsol.com/RaveWebServices/metadata/studies/IANTEST/versions
 
         url = self._make_url('metadata', 'studies', projectname, 'versions')
-
         r = self._get(url=url, auth=True)
-
         return RWSStudyMetadataVersions(r.text)
 
     def library_versions(self, projectname):
@@ -244,11 +241,8 @@ class RWSConnection(object):
         #https://partner.mdsol.com/RaveWebServices/metadata/libraries/IANTEST/versions
 
         url = self._make_url('metadata', 'libraries', projectname, 'versions')
-
         r = self._get(url=url, auth=True)
-
         return RWSStudyMetadataVersions(r.text)
-
 
 
     def study_version(self, projectname, versionoid):
@@ -256,7 +250,6 @@ class RWSConnection(object):
         #https://{{ host}}.mdsol.com/RaveWebServices/metadata/studies/{{ project_name }}/versions/{{ version_oid }}
 
         url = self._make_url('metadata', 'studies', projectname, 'versions', str(versionoid))
-
         r = self._get(url=url, auth=True)
 
         return r.text
@@ -266,11 +259,8 @@ class RWSConnection(object):
         #https://{{ host}}.mdsol.com/RaveWebServices/metadata/libraries/{{ project_name }}/versions/{{ version_oid }}
 
         url = self._make_url('metadata', 'libraries', projectname, 'versions', str(versionoid))
-
         r = self._get(url=url, auth=True)
-
         return r.text
-
 
 
     def ensure_no_parens_in_environment_name(self, environment_name):
@@ -303,7 +293,14 @@ class RWSConnection(object):
 
         return RWSSubjects(r.text)
 
-    def study_datasets(self, projectname, environment_name='PROD', dataset_type='regular', rawsuffix=None, start=None):
+    def study_datasets(self, projectname,
+                            environment_name='PROD',
+                             dataset_type='regular',
+                             rawsuffix=None,
+                             start=None,
+                             versionitem=None,
+                             codelistsuffix=None,
+                             decodesuffix=None):
         """
         Return the text of the full datasets listing as an ODM string"""
         #https://{{ host }}.mdsol.com/RaveWebServices/studies/{{ projectname }} ({{ environment_name}})/datasets/regular
@@ -322,6 +319,15 @@ class RWSConnection(object):
 
         if start is not None:
             kwargs['start'] = start
+
+        if versionitem is not None:
+            kwargs['versionitem'] = versionitem
+
+        if codelistsuffix is not None:
+            kwargs['codelistsuffix'] = codelistsuffix
+
+        if codelistsuffix is not None:
+            kwargs['decodesuffix'] = decodesuffix
 
         url = self._make_url('studies', studyname_environment, 'datasets', dataset_type, **kwargs)
 
@@ -416,16 +422,19 @@ if __name__ == '__main__':
 
     #
     #print rave.study_versions('Mediflex')
+    #print rave.last_result.url
+    print rave.diagnostics()
+    print rave.build_version()
+    print rave.flush_cache().istransactionsuccessful
 
     #print rave.library_version('Rave CDASH', 398)
 
-    val = rave.study_datasets(projectname, 'Dev', dataset_type='regular', rawsuffix='.RAW')
+    # val = rave.study_datasets(projectname, 'Dev', dataset_type='regular', rawsuffix='.RAW', versionitem="VERSION")
+    # print rave.last_result.headers['X-MWS-CV-Last-Updated']
 
-    print val
-    print rave.last_result.url
+    import sys;
 
-
-    import sys; sys.exit()
+    sys.exit()
 
     doc = parseXMLString(val)
 
@@ -458,5 +467,4 @@ if __name__ == '__main__':
     # print rave.last_result.elapsed
     #rave.make_request_for("Study", "Environment", "Site", "Subject")
     #How do I know which MetaDataVersion applies?
-
 

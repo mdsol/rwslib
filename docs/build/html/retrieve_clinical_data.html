@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Retrieving Clinical Data &mdash; rwslib 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
+    <link rel="next" title="Working with Architect Metadata" href="working_architect.html" />
+    <link rel="prev" title="API" href="api.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="working_architect.html" title="Working with Architect Metadata"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/mdsol.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Retrieving Clinical Data</a><ul>
+<li><a class="reference internal" href="#clinical-studies">clinical_studies()</a></li>
+<li><a class="reference internal" href="#study-datasets-projectname">study_datasets(projectname)</a></li>
+<li><a class="reference internal" href="#x-mws-cv-last-updated">X-MWS-CV-Last-Updated</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="previous chapter">API</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="working_architect.html"
+                        title="next chapter">Working with Architect Metadata</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/retrieve_clinical_data.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="retrieving-clinical-data">
+<h1>Retrieving Clinical Data<a class="headerlink" href="#retrieving-clinical-data" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="clinical-studies">
+<span id="id1"></span><h2>clinical_studies()<a class="headerlink" href="#clinical-studies" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Returns a RWSStudies object which has ODM document attributes and a list of RWSStudy objects. These are
+the clinical studies that you have access to as an EDC user.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/studies</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization required</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">clinical_studies</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">ODMVersion</span>
+<span class="go">1.3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">fileoid</span>
+<span class="go">aa0dc756-b9f3-4bb2-ab4c-ee91e573e8fb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">filetype</span>
+<span class="go">Snapshot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">creationdatetime</span>
+<span class="go">2013-06-04T15:58:24.781-00:00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">studies</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">study</span> <span class="ow">in</span> <span class="n">studies</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;OID&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">oid</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;Name&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;protocolname&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">protocolname</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;IsProd?&quot;</span><span class="p">,</span><span class="n">study</span><span class="o">.</span><span class="n">isProd</span><span class="p">()</span>
+<span class="gp">...</span>
+<span class="go">OID Mediflex(Dev)</span>
+<span class="go">Name Mediflex (Dev)</span>
+<span class="go">protocolname Mediflex</span>
+<span class="go">IsProd? False</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="study-datasets-projectname">
+<h2>study_datasets(projectname)<a class="headerlink" href="#study-datasets-projectname" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.
+Clinical Views must be active for this method to work.</p>
+<p>Returns a unicode string of the ODM Clinical Data for all datasets for the study.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is a potentially very large download for an existing study.</p>
+</div>
+<p>This method takes a variety of options:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>environment_name={{env}}</td>
+<td>Only extracts dataset information for the environment named. Defaults to PROD</td>
+</tr>
+<tr class="row-odd"><td>rawsuffix={{suffix}}</td>
+<td>e.g. .RAW means raw field definitions are suffixes with .RAW  ex. AE_STDT.RAW</td>
+</tr>
+<tr class="row-even"><td>dataset_type={{regular|raw}}</td>
+<td>Limit extracts to regular or raw data. Default is regular.</td>
+</tr>
+<tr class="row-odd"><td>start={{ISO 8601 date}}</td>
+<td>Request changes to this dataset since the start date. Note that CV&#8217;s must be set
+to Include Inactive for this option to work.</td>
+</tr>
+<tr class="row-even"><td>versionitem={{version_suffix}}</td>
+<td>Add MetaDataVersionOID=&#8221;&lt;&lt;datetime&gt;&gt;&#8221; and additional itemlevel version ItemData
+element per ItemGroup to identify last CV update date and CRF Version each
+itemgroup was entered under e.g. &lt;ItemData ItemOID=&#8221;AE.VERSION&#8221; Value=&#8221;16&#8221; /&gt;</td>
+</tr>
+<tr class="row-odd"><td>codelistsuffix={{cl_suffix}}</td>
+<td>Add name of codelist as an item for each field with data dictionary.
+e.g. codelistsuffix=&#8221;CL&#8221; results in
+&lt;ItemData ItemDataOID=&#8221;DM.SEX.CL&#8221; Value=&#8221;GENDERS&#8221;/&gt;</td>
+</tr>
+<tr class="row-even"><td>decodesuffix={{decode_suffix}}</td>
+<td>Add user value of codelist entry as an item for each field with data dictionary.
+e.g.decodesuffix=&#8221;DECODE&#8221; results in
+&lt;ItemData ItemDataOID=&#8221;DM.SEX.DECODE&#8221; Value=&#8221;Male&#8221;/&gt;</td>
+</tr>
+</tbody>
+</table>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/studies/{{ projectname }} ({{ environment_name}})/datasets/{{regular|raw}}?&lt;{{options}}</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">study_datasets</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="s">&#39;Dev&#39;</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span><span class="s">&#39;regular&#39;</span><span class="p">,</span> <span class="n">rawsuffix</span><span class="o">=</span><span class="s">&#39;.RAW&#39;</span><span class="p">)</span>
+<span class="go">ï»¿&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="go">   &lt;ODM FileType=&quot;Snapshot&quot; FileOID=&quot;6b967555-8e05-4890-afb2-c2d2f1496031&quot;</span>
+<span class="go">        CreationDateTime=&quot;2013-06-07T13:13:52.883-00:00&quot;</span>
+<span class="go">        ODMVersion=&quot;1.3&quot; xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot;</span>
+<span class="go">        xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; xmlns=&quot;http://www.cdisc.org/</span>
+<span class="go">        ....</span>
+<span class="go">        &lt;ClinicalData StudyOID=&quot;Mediflex(Dev)&quot; MetaDataVersionOID=&quot;16&quot;&gt;</span>
+<span class="go">            &lt;SubjectData SubjectKey=&quot;123 ABC&quot;&gt;</span>
+<span class="go">                &lt;SiteRef LocationOID=&quot;MDSOL&quot; /&gt;</span>
+<span class="go">                &lt;StudyEventData StudyEventOID=&quot;SUBJECT&quot;&gt;</span>
+<span class="go">                    &lt;FormData FormOID=&quot;AE&quot; FormRepeatKey=&quot;1&quot;&gt;</span>
+<span class="go">                        &lt;ItemGroupData ItemGroupOID=&quot;AE_LOG_LINE&quot; ItemGroupRepeatKey=&quot;1&quot;&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AEYN&quot; Value=&quot;Y&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AETERM&quot; Value=&quot;HEADACHE&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AESTDTC&quot; Value=&quot;2008-01-01&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AESTDTC.RAW&quot; Value=&quot;01 JAN 2008&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AEONG&quot; Value=&quot;N&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AEENDTC&quot; Value=&quot;2008-01-01&quot; /&gt;</span>
+<span class="go">                            &lt;ItemData ItemOID=&quot;AE.AEENDTC.RAW&quot; Value=&quot;01 JAN 2008&quot; /&gt;</span>
+<span class="go">                            ...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Note that this XML string includes the Byte Order Mark (BOM) as sent by RWS and does not include line breaks
+as shown in the above example. Depending on how you intend to parse the XML returned you may need to
+strip the BOM.</p>
+</div>
+</div>
+<div class="section" id="x-mws-cv-last-updated">
+<h2>X-MWS-CV-Last-Updated<a class="headerlink" href="#x-mws-cv-last-updated" title="Permalink to this headline">¶</a></h2>
+<p>Clinical View Datasets return a header, X-MWS-CV-Last-Updated, which tells you the last time a Clinical View was
+updated. This is especially important with Incremental calls to know whether the dataset has actually been updated
+since your last call.</p>
+<p>You can get the value of X-MWS-CV-Last-Updated via the last_result.headers property:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xml</span> <span class="o">=</span> <span class="n">rave</span><span class="o">.</span><span class="n">study_datasets</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="s">&#39;Dev&#39;</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span><span class="s">&#39;regular&#39;</span><span class="p">,</span> <span class="n">rawsuffix</span><span class="o">=</span><span class="s">&#39;.RAW&#39;</span><span class="p">,</span> <span class="n">versionitem</span><span class="o">=</span><span class="s">&quot;VERSION&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">last_result</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;X-MWS-CV-Last-Updated&#39;</span><span class="p">]</span>
+<span class="go">2013-05-02T19:11:46</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="working_architect.html" title="Working with Architect Metadata"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="API"
+             >previous</a> |</li>
+        <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Medidata Solutions Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

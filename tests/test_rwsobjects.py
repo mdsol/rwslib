@@ -76,6 +76,28 @@ class TestRWSError(unittest.TestCase):
         self.assertEqual("2013-04-08T10:28:49.578-00:00", err.creationdatetime)
 
 
+class TestRWSResponse(unittest.TestCase):
+    """Test that RWResponse correctly reads an RWS response"""
+
+    def test_parse(self):
+        text = """<Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+              InboundODMFileOID=""
+              IsTransactionSuccessful="1"
+              SuccessStatistics="Rave objects touched: Subjects=1; Folders=2; Forms=3; Fields=4; LogLines=5" NewRecords="">
+    </Response>""".decode('utf-8')
+
+        response = rwsobjects.RWSResponse(text)
+
+        self.assertEqual("82e942b0-48e8-4cf4-b299-51e2b6a89a1b", response.referencenumber)
+        self.assertEqual(True, response.istransactionsuccessful)
+        self.assertEqual(1, response.subjects_touched)
+        self.assertEqual(2, response.folders_touched)
+        self.assertEqual(3, response.forms_touched)
+        self.assertEqual(4, response.fields_touched)
+        self.assertEqual(5, response.loglines_touched)
+
+
+
 
 
 

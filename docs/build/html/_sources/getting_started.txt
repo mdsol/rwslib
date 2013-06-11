@@ -1,8 +1,7 @@
 Getting started
 ***************
 
-A quick primer on working with RWSLib
-
+A quick primer on working with rwslib
 
 
 Creating a connection to RWS
