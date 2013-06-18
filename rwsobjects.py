@@ -56,6 +56,11 @@ class XMLRepr(object):
     def __init__(self, xml):
         self.root = parseXMLString(xml)
 
+    def __str__(self):
+        """String representation of same"""
+        return etree.tostring(self.root)
+
+
 
 class ODMDoc(XMLRepr):
     """All ODM responses have the same wrapper"""
@@ -139,9 +144,9 @@ class RWSResponse(XMLRepr):
 
         if success_stats.startswith('Rave objects touched:'):
             success_stats = success_stats[len('Rave objects touched:')+1:] #Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0
-            parts = success_stats.split(' ') #[Subjects=0;,Folders=0;,Forms=0;,Fields=0;,LogLines=0]
+            parts = success_stats.split(';') #[Subjects=0, Folders=0, Forms=0, Fields=0, LogLines=0]
             for part in parts:
-                name, value = part.split('=')
+                name, value = part.strip().split('=')
                 if value[-1] == ';':
                     value = value[:-1]
                 if name == 'Subjects':
@@ -155,11 +160,52 @@ class RWSResponse(XMLRepr):
                 elif name == 'LogLines':
                     self.loglines_touched = int(value)
                 else:
-                    raise KeyError('Unknown Rave Object %s in response %s' % name, success_stats)
+                    raise KeyError('Unknown Rave Object %s in response %s' % (name, success_stats,))
 
         self.new_records = r_get("NewRecords")
 
 
+class RWSPostResponse(RWSResponse):
+    """
+    <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+              InboundODMFileOID=""
+              IsTransactionSuccessful="1"
+              SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords=""
+              SubjectNumberInStudy="1103" SubjectNumberInStudySite="55">
+    </Response>
+    """
+    def __init__(self, xml):
+        #Call base class
+        RWSResponse.__init__(self, xml)
+        r_get = self.root.get
+        #These counts may only come as a result of a Clinical data POST
+        snis = r_get('SubjectNumberInStudy',None)
+        self.subjects_in_study = int(snis) if snis is not None else None
+
+        sniss = r_get('SubjectNumberInStudySite',None)
+        self.subjects_in_study_site = int(sniss) if sniss is not None else None
+
+
+
+class RWSPostErrorResponse(RWSResponse):
+    """Responses to Clinical data post messages have additional Attributes to normal RWS Response messages"""
+    # <Response
+    #     ReferenceNumber="5b1fa9a3-0cf3-46b6-8304-37c2e3b7d04f"
+    #     InboundODMFileOID="1"
+    #     IsTransactionSuccessful = "0"
+    #     ReasonCode="RWS00024"
+    #     ErrorOriginLocation="/ODM/ClinicalData[1]/SubjectData[1]"
+    #     SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0"
+    #     ErrorClientResponseMessage="Subject already exists.">
+    #     </Response>
+    def __init__(self, xml):
+        RWSResponse.__init__(self, xml)
+
+        #Get additional properties
+        r_get = self.root.get
+        self.reason_code = r_get('ReasonCode')
+        self.error_origin_location = r_get('ErrorOriginLocation')
+        self.error_client_response_message = r_get('ErrorClientResponseMessage')
 
 
 

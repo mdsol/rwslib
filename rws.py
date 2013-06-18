@@ -2,7 +2,8 @@ __author__ = 'isparks'
 import requests
 from urllib import urlencode
 
-from rwsobjects import RWSException, RWSError, RWSStudies, RWSStudyMetadataVersions, RWSSubjects, RWSErrorResponse, RWSResponse
+from rwsobjects import RWSException, RWSError, RWSStudies, RWSStudyMetadataVersions, RWSSubjects, \
+                       RWSErrorResponse, RWSResponse, RWSPostErrorResponse, RWSPostResponse
 from rwsobjects import ODM_NS, parseXMLString #TODO: Consider moving this elsewhere
 
 
@@ -147,6 +148,54 @@ class RWSConnection(object):
 
         return r
 
+
+    def _post(self, **kwargs):
+        """
+        Wraps a post request:
+
+        Requires:
+
+        url (the base URL to call, domain and RaveWebServices endpoint will be added)
+        auth=True (default to false if not present, whether to add basic auth to this request)
+
+        """
+        if not 'url' in kwargs:
+            raise AttributeError('No url set')
+        else:
+            url = self._make_url(self.base_url, kwargs['url'])
+            del kwargs['url']
+
+        #Add authorization headers?
+        if 'auth' in kwargs:
+            if kwargs['auth'] == True:
+                kwargs['auth'] = self.get_auth()
+            else:
+                #Remove from request
+                del kwargs['auth']
+
+        #Do the execution
+        r = self.execute(requests.post, url, **kwargs)
+
+        if r.status_code == 401:
+            #Either you didn't supply auth header and it was required OR your credentials were
+            #wrong. RWS handles each differently
+
+            #You didn't supply auth (text response from RWS)
+            if r.text == 'Authorization Header not provided':
+                raise AuthorizationException(r.text)
+
+            #There was some problem with your credentials (XML response from RWS)
+            error = RWSErrorResponse(r.text)
+            raise RWSException(error.errordescription, error)
+
+        #Catch all.
+        if r.status_code != 200:
+            error = RWSPostErrorResponse(r.text)
+            raise RWSException(error.error_client_response_message, error)
+
+        #Ok, we did some kind of update, wrap that
+        return RWSPostResponse(r.text)
+
     def version(self):
         """Return the RWS version number"""
         r = self._get(url='version')
@@ -154,7 +203,7 @@ class RWSConnection(object):
 
     def build_version(self):
         """Return the RWS build version number"""
-        r = self._get(url= self._make_url('version','build'))
+        r = self._get(url=self._make_url('version', 'build'))
         return r.text
 
 
@@ -166,7 +215,7 @@ class RWSConnection(object):
 
     def flush_cache(self):
         """Calls RWS cache-flush"""
-        r = self._get(url='webservice.aspx?CacheFlush',auth=True)
+        r = self._get(url='webservice.aspx?CacheFlush', auth=True)
         return RWSResponse(r.text)
 
 
@@ -293,14 +342,24 @@ class RWSConnection(object):
 
         return RWSSubjects(r.text)
 
+
+    def post_data(self, odm_data, content_type="text/xml"):
+        """Post an ODM data transaction to Rave, get back an RWSResponse object"""
+
+        r = self._post(url="webservice.aspx?PostODMClinicalData", auth=True,
+                       data=odm_data,
+                       headers={'Content-type': content_type})
+        return r
+
+
     def study_datasets(self, projectname,
-                            environment_name='PROD',
-                             dataset_type='regular',
-                             rawsuffix=None,
-                             start=None,
-                             versionitem=None,
-                             codelistsuffix=None,
-                             decodesuffix=None):
+                       environment_name='PROD',
+                       dataset_type='regular',
+                       rawsuffix=None,
+                       start=None,
+                       versionitem=None,
+                       codelistsuffix=None,
+                       decodesuffix=None):
         """
         Return the text of the full datasets listing as an ODM string"""
         #https://{{ host }}.mdsol.com/RaveWebServices/studies/{{ projectname }} ({{ environment_name}})/datasets/regular
@@ -338,9 +397,12 @@ class RWSConnection(object):
 
 if __name__ == '__main__':
 
-    from _settings import username, password #Not exactly 12 factor, but a start
+    from _settings import accounts #Not exactly 12 factor, but a start
 
-    rave = RWSConnection('innovate', username, password)
+    account_name = 'innovate'
+    account = accounts[account_name]
+
+    rave = RWSConnection(account_name, account['username'], account['password'])
 
     projectname = 'Mediflex' #IANTEST
 
@@ -413,19 +475,49 @@ if __name__ == '__main__':
     # for version in drafts:
     #     print version.name, version.oid
     #     print dir(version)
-
+    #
     # versions = rave.study_versions('Mediflex')
     # print versions.fileoid
     # print versions.study.studyname
     # for version in versions:
     #     print version.name, version.oid
+    #
+    # version = rave.study_version('Mediflex',1015)
+    # print version
+
+    data = """<?xml version="1.0" encoding="utf-8" ?>
+<ODM CreationDateTime="2013-06-17T17:03:29" FileOID="3b9fea8b-e825-4e5f-bdc8-1464bdd7a664" FileType="Transactional" ODMVersion="1.3" Originator="test system" xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
+  <ClinicalData MetaDataVersionOID="1" StudyOID="Mediflex (DEV)">
+    <SubjectData SubjectKey="Subject ABC" TransactionType="Insert">
+      <SiteRef LocationOID="MDSOL" />
+      <StudyEventData StudyEventOID="SUBJECT">
+        <FormData FormOID="EN" FormRepeatKey="1" TransactionType="Update">
+          <ItemGroupData ItemGroupOID="EN" mdsol:Submission="SpecifiedItemsOnly">
+            <ItemData ItemOID="SUBJID" Value="1" />
+            <ItemData ItemOID="SUBJINIT" Value="AAA" />
+          </ItemGroupData>
+        </FormData>
+      </StudyEventData>
+    </SubjectData>
+  </ClinicalData>
+</ODM>
+"""
+
+
+
+    try:
+        resp = rave.post_data(data)
+        print resp
+
+    except Exception, e:
+        print e.message
 
     #
     #print rave.study_versions('Mediflex')
     #print rave.last_result.url
-    print rave.diagnostics()
-    print rave.build_version()
-    print rave.flush_cache().istransactionsuccessful
+    #print rave.diagnostics()
+    #print rave.build_version()
+    #print rave.flush_cache().istransactionsuccessful
 
     #print rave.library_version('Rave CDASH', 398)
 
