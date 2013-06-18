@@ -16,6 +16,9 @@ Contents:
 
    getting_started
    api
+   retrieve_clinical_data
+   working_architect
+   working_metadata
    classes
 
 
