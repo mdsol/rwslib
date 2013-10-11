@@ -111,6 +111,10 @@ class RWSConnection(object):
             if r.text == 'Authorization Header not provided':
                 raise AuthorizationException(r.text)
 
+            if '<h2>HTTP Error 401.0 - Unauthorized</h2>' in r.text:
+                raise RWSException("Unauthorized.", r.text)
+
+
             #There was some problem with your credentials (XML response from RWS)
             error = RWSErrorResponse(r.text)
             raise RWSException(error.errordescription, error)

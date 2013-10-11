@@ -193,15 +193,15 @@ Parses responses from PostODMClinicalData messages with the format::
         RWSResponse.__init__(self, xml)
         r_get = self.root.get
         #These counts may only come as a result of a Clinical data POST
-        snis = r_get('SubjectNumberInStudy',None)
+        snis = r_get('SubjectNumberInStudy')
         self.subjects_in_study = int(snis) if snis is not None else None
 
-        sniss = r_get('SubjectNumberInStudySite',None)
+        sniss = r_get('SubjectNumberInStudySite')
         self.subjects_in_study_site = int(sniss) if sniss is not None else None
 
         #DraftImported only comes from a MetaData Post
         #In which case successStatistics will be SuccessStatistics="N/A"
-        self.draft_imported = r_get("DraftImported",None)
+        self.draft_imported = r_get("DraftImported")
 
 
 
