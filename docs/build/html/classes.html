@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
-    <link rel="prev" title="Using Builders" href="using_builders.html" /> 
+    <link rel="prev" title="ODM Adapter Requests" href="odm_adapter.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,7 +37,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="using_builders.html" title="Using Builders"
+          <a href="odm_adapter.html" title="ODM Adapter Requests"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
       </ul>
@@ -48,8 +48,8 @@
               <img class="logo" src="_static/mdsol.png" alt="Logo"/>
             </a></p>
   <h4>Previous topic</h4>
-  <p class="topless"><a href="using_builders.html"
-                        title="previous chapter">Using Builders</a></p>
+  <p class="topless"><a href="odm_adapter.html"
+                        title="previous chapter">ODM Adapter Requests</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/classes.txt"
@@ -79,100 +79,331 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-rws">
-<span id="class-reference"></span><h1>Class Reference<a class="headerlink" href="#module-rws" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rwslib">
+<span id="class-reference"></span><h1>Class Reference<a class="headerlink" href="#module-rwslib" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="rws.RWSConnection">
-<em class="property">class </em><tt class="descclassname">rws.</tt><tt class="descname">RWSConnection</tt><big>(</big><em>domain</em>, <em>username=None</em>, <em>password=None</em><big>)</big><a class="headerlink" href="#rws.RWSConnection" title="Permalink to this definition">¶</a></dt>
+<dt id="rwslib.RWSConnection">
+<em class="property">class </em><tt class="descclassname">rwslib.</tt><tt class="descname">RWSConnection</tt><big>(</big><em>domain</em>, <em>username=None</em>, <em>password=None</em><big>)</big><a class="headerlink" href="#rwslib.RWSConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>A connection to RWS</p>
 <dl class="method">
-<dt id="rws.RWSConnection.clinical_studies">
-<tt class="descname">clinical_studies</tt><big>(</big><big>)</big><a class="headerlink" href="#rws.RWSConnection.clinical_studies" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the list of clinical studies as a RWSStudies object.
-Clinical studies are the studies that you have access to as an EDC user.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rws.RWSConnection.metadata_studies">
-<tt class="descname">metadata_studies</tt><big>(</big><big>)</big><a class="headerlink" href="#rws.RWSConnection.metadata_studies" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the list of metadata studies as a RWSStudies object.
-metadata_studies are the list of studies that you have access to as an
-Architect user.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rws.RWSConnection.study_datasets">
-<tt class="descname">study_datasets</tt><big>(</big><em>projectname</em>, <em>environment_name='PROD'</em>, <em>dataset_type='regular'</em>, <em>rawsuffix=None</em>, <em>start=None</em>, <em>versionitem=None</em>, <em>codelistsuffix=None</em>, <em>decodesuffix=None</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_datasets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the text of the full datasets listing as an ODM string</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rws.RWSConnection.study_drafts">
-<tt class="descname">study_drafts</tt><big>(</big><em>projectname</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_drafts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the list of study drafts</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rws.RWSConnection.study_subjects">
-<tt class="descname">study_subjects</tt><big>(</big><em>projectname</em>, <em>environment_name='PROD'</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_subjects" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the list of study subjects, defaults to the PROD environment</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rws.RWSConnection.study_version">
-<tt class="descname">study_version</tt><big>(</big><em>projectname</em>, <em>versionoid</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_version" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the ODM representation of a study version as text</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rws.RWSConnection.study_versions">
-<tt class="descname">study_versions</tt><big>(</big><em>projectname</em><big>)</big><a class="headerlink" href="#rws.RWSConnection.study_versions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the list of study versions</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="rws.RWSConnection.version">
-<tt class="descname">version</tt><big>(</big><big>)</big><a class="headerlink" href="#rws.RWSConnection.version" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the RWS version number</p>
+<dt id="rwslib.RWSConnection.send_request">
+<tt class="descname">send_request</tt><big>(</big><em>request_object</em><big>)</big><a class="headerlink" href="#rwslib.RWSConnection.send_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send request to RWS endpoint. The request object passed provides the URL endpoint and the HTTP method.
+Takes the text response from RWS and allows the request object to modify it for return. This allows the request
+object to return text, an XML document object, a CSV file or anything else that can be generated from the text
+response from RWS.</p>
 </dd></dl>
 
 </dd></dl>
 
-<span class="target" id="module-builders"></span><dl class="class">
-<dt id="builders.ODM">
-<em class="property">class </em><tt class="descclassname">builders.</tt><tt class="descname">ODM</tt><big>(</big><em>originator</em>, <em>description=''</em>, <em>creationdatetime='2013-06-18T09:44:44'</em>, <em>fileoid=None</em><big>)</big><a class="headerlink" href="#builders.ODM" title="Permalink to this definition">¶</a></dt>
+<span class="target" id="module-rwslib.builders"></span><dl class="class">
+<dt id="rwslib.builders.ODM">
+<em class="property">class </em><tt class="descclassname">rwslib.builders.</tt><tt class="descname">ODM</tt><big>(</big><em>originator</em>, <em>description=''</em>, <em>creationdatetime='2013-10-08T11:56:27'</em>, <em>fileoid=None</em><big>)</big><a class="headerlink" href="#rwslib.builders.ODM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Models the ODM object</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="builders.ClinicalData">
-<em class="property">class </em><tt class="descclassname">builders.</tt><tt class="descname">ClinicalData</tt><big>(</big><em>projectname</em>, <em>environment</em><big>)</big><a class="headerlink" href="#builders.ClinicalData" title="Permalink to this definition">¶</a></dt>
+<dt id="rwslib.builders.ClinicalData">
+<em class="property">class </em><tt class="descclassname">rwslib.builders.</tt><tt class="descname">ClinicalData</tt><big>(</big><em>projectname</em>, <em>environment</em><big>)</big><a class="headerlink" href="#rwslib.builders.ClinicalData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Models the ODM ClinicalData object</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="builders.SubjectData">
-<em class="property">class </em><tt class="descclassname">builders.</tt><tt class="descname">SubjectData</tt><big>(</big><em>sitelocationoid</em>, <em>subjectname</em>, <em>transaction_type</em><big>)</big><a class="headerlink" href="#builders.SubjectData" title="Permalink to this definition">¶</a></dt>
+<dt id="rwslib.builders.SubjectData">
+<em class="property">class </em><tt class="descclassname">rwslib.builders.</tt><tt class="descname">SubjectData</tt><big>(</big><em>sitelocationoid</em>, <em>subjectname</em>, <em>transaction_type</em><big>)</big><a class="headerlink" href="#rwslib.builders.SubjectData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Models the ODM SubjectData and ODM SiteRef objects</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="builders.StudyEventData">
-<em class="property">class </em><tt class="descclassname">builders.</tt><tt class="descname">StudyEventData</tt><big>(</big><em>study_event_oid</em>, <em>transaction_type=None</em>, <em>study_event_repeat_key=None</em><big>)</big><a class="headerlink" href="#builders.StudyEventData" title="Permalink to this definition">¶</a></dt>
+<dt id="rwslib.builders.StudyEventData">
+<em class="property">class </em><tt class="descclassname">rwslib.builders.</tt><tt class="descname">StudyEventData</tt><big>(</big><em>study_event_oid</em>, <em>transaction_type=None</em>, <em>study_event_repeat_key=None</em><big>)</big><a class="headerlink" href="#rwslib.builders.StudyEventData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Models the ODM StudyEventData object</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="builders.ItemGroupData">
-<em class="property">class </em><tt class="descclassname">builders.</tt><tt class="descname">ItemGroupData</tt><big>(</big><em>transaction_type=None</em>, <em>item_group_repeat_key=1</em>, <em>whole_item_group=False</em><big>)</big><a class="headerlink" href="#builders.ItemGroupData" title="Permalink to this definition">¶</a></dt>
+<dt id="rwslib.builders.ItemGroupData">
+<em class="property">class </em><tt class="descclassname">rwslib.builders.</tt><tt class="descname">ItemGroupData</tt><big>(</big><em>transaction_type=None</em>, <em>item_group_repeat_key=1</em>, <em>whole_item_group=False</em><big>)</big><a class="headerlink" href="#rwslib.builders.ItemGroupData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Models the ODM ItemGroupData object.
 Note no name for the ItemGroupData element is required. This is built automatically by the form.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="builders.ItemData">
-<em class="property">class </em><tt class="descclassname">builders.</tt><tt class="descname">ItemData</tt><big>(</big><em>itemoid</em>, <em>value</em>, <em>specify_value=None</em>, <em>transaction_type=None</em>, <em>lock=None</em>, <em>freeze=None</em>, <em>verify=None</em><big>)</big><a class="headerlink" href="#builders.ItemData" title="Permalink to this definition">¶</a></dt>
+<dt id="rwslib.builders.ItemData">
+<em class="property">class </em><tt class="descclassname">rwslib.builders.</tt><tt class="descname">ItemData</tt><big>(</big><em>itemoid</em>, <em>value</em>, <em>specify_value=None</em>, <em>transaction_type=None</em>, <em>lock=None</em>, <em>freeze=None</em>, <em>verify=None</em><big>)</big><a class="headerlink" href="#rwslib.builders.ItemData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Models the ODM ItemData object</p>
+</dd></dl>
+
+<span class="target" id="module-rwslib.rws_requests"></span><dl class="class">
+<dt id="rwslib.rws_requests.StudyDatasetRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.</tt><tt class="descname">StudyDatasetRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>dataset_type='regular'</em>, <em>start=None</em>, <em>rawsuffix=None</em>, <em>formoid=None</em>, <em>versionitem=None</em>, <em>codelistsuffix=None</em>, <em>decodesuffix=None</em>, <em>stdsuffix=None</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.StudyDatasetRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the text of the full datasets listing as an ODM string.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.SubjectDatasetRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.</tt><tt class="descname">SubjectDatasetRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>subjectkey</em>, <em>dataset_type='regular'</em>, <em>start=None</em>, <em>rawsuffix=None</em>, <em>formoid=None</em>, <em>versionitem=None</em>, <em>codelistsuffix=None</em>, <em>decodesuffix=None</em>, <em>stdsuffix=None</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.SubjectDatasetRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the text of the full datasets for a version as an ODM string.
+By supplying formoid, will be filtered to just that formoid data</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.VersionDatasetRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.</tt><tt class="descname">VersionDatasetRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>version_oid</em>, <em>dataset_type='regular'</em>, <em>start=None</em>, <em>rawsuffix=None</em>, <em>formoid=None</em>, <em>versionitem=None</em>, <em>codelistsuffix=None</em>, <em>decodesuffix=None</em>, <em>stdsuffix=None</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.VersionDatasetRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the text of the full datasets for a version as an ODM string.
+By supplying formoid, will be filtered to just that formoid data</p>
+</dd></dl>
+
+<span class="target" id="module-rwslib.rwsobjects"></span><dl class="class">
+<dt id="rwslib.rwsobjects.ODMDoc">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">ODMDoc</tt><big>(</big><em>xml</em><big>)</big><a class="headerlink" href="#rwslib.rwsobjects.ODMDoc" title="Permalink to this definition">¶</a></dt>
+<dd><p>A base ODM document</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.RWSResponse">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">RWSResponse</tt><big>(</big><em>xml</em><big>)</big><a class="headerlink" href="#rwslib.rwsobjects.RWSResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses messages of the form:</p>
+<div class="highlight-python"><pre>&lt;Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+    InboundODMFileOID=""
+    IsTransactionSuccessful="1"
+    SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords=""&gt;
+&lt;/Response&gt;</pre>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.RWSException">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">RWSException</tt><big>(</big><em>msg</em>, <em>rws_error</em><big>)</big><a class="headerlink" href="#rwslib.rwsobjects.RWSException" title="Permalink to this definition">¶</a></dt>
+<dd><p>RWS Exception. Usual to attach the error response object</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.RWSError">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">RWSError</tt><big>(</big><em>xml</em><big>)</big><a class="headerlink" href="#rwslib.rwsobjects.RWSError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extends ODMDoc, inheriting attributes like filetype, creationdatetime etc.</p>
+<p>Parses XML of the form:</p>
+<div class="highlight-python"><pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
+     FileType="Snapshot"
+     CreationDateTime="2013-04-08T10:28:49.578-00:00"
+     FileOID="4d13722a-ceb6-4419-a917-b6ad5d0bc30e"
+     ODMVersion="1.3"
+     mdsol:ErrorDescription="Incorrect login and password combination. [RWS00008]"
+     xmlns="http://www.cdisc.org/ns/odm/v1.3" /&gt;</pre>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.RWSErrorResponse">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">RWSErrorResponse</tt><big>(</big><em>xml</em><big>)</big><a class="headerlink" href="#rwslib.rwsobjects.RWSErrorResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses messages of the form:</p>
+<div class="highlight-python"><pre>&lt;Response
+    ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
+    InboundODMFileOID="Not Supplied"
+    IsTransactionSuccessful="0"
+    ReasonCode="RWS00092"
+    ErrorClientResponseMessage="CRF version not found"&gt;
+&lt;/Response&gt;</pre>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.RWSPostResponse">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">RWSPostResponse</tt><big>(</big><em>xml</em><big>)</big><a class="headerlink" href="#rwslib.rwsobjects.RWSPostResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses responses from PostODMClinicalData messages with the format:</p>
+<div class="highlight-python"><pre>&lt;Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+          InboundODMFileOID=""
+          IsTransactionSuccessful="1"
+          SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords=""
+          SubjectNumberInStudy="1103" SubjectNumberInStudySite="55"&gt;
+&lt;/Response&gt;</pre>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.RWSStudies">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">RWSStudies</tt><big>(</big><em>xml</em><big>)</big><a class="headerlink" href="#rwslib.rwsobjects.RWSStudies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a list of studies. Extends the list class and adds a couple of extra properties:</p>
+<div class="highlight-python"><pre>&lt;ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
+     CreationDateTime="2013-04-08T10:02:17.781-00:00"
+     ODMVersion="1.3"&gt;
+     &lt;Study OID="Fixitol(Dev)"&gt;
+        &lt;GlobalVariables&gt;
+              &lt;StudyName&gt;Fixitol (Dev)&lt;/StudyName&gt;
+              &lt;StudyDescription/&gt;
+              &lt;ProtocolName&gt;Fixitol&lt;/ProtocolName&gt;
+        &lt;/GlobalVariables&gt;
+     &lt;/Study&gt;
+     &lt;Study OID="IANTEST(Prod)"&gt;
+        &lt;GlobalVariables&gt;
+              &lt;StudyName&gt;IANTEST&lt;/StudyName&gt;
+              &lt;StudyDescription/&gt;
+              &lt;ProtocolName&gt;IANTEST&lt;/ProtocolName&gt;
+        &lt;/GlobalVariables&gt;
+     &lt;/Study&gt;
+&lt;/ODM&gt;</pre>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.RWSSubjects">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">RWSSubjects</tt><big>(</big><em>xml</em><big>)</big><a class="headerlink" href="#rwslib.rwsobjects.RWSSubjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a list of subjects:</p>
+<div class="highlight-python"><pre>&lt;ODM FileType="Snapshot"
+     FileOID="770f1758-db33-4ab2-af72-38db863734aa"
+     CreationDateTime="2013-04-08T14:08:06.875-00:00"
+     ODMVersion="1.3"&gt;
+
+     &lt;ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111"&gt;
+        &lt;SubjectData SubjectKey="000001"&gt;
+           &lt;SiteRef LocationOID="BP001"/&gt;
+        &lt;/SubjectData&gt;
+     &lt;/ClinicalData&gt;
+
+     &lt;ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111"&gt;
+         &lt;SubjectData SubjectKey="1111"&gt;
+            &lt;SiteRef LocationOID="335566"/&gt;
+         &lt;/SubjectData&gt;
+     &lt;/ClinicalData&gt;
+&lt;/ODM&gt;</pre>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.RWSSubjectListItem">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">RWSSubjectListItem</tt><a class="headerlink" href="#rwslib.rwsobjects.RWSSubjectListItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses response of Subject List request:</p>
+<div class="highlight-python"><pre>&lt;ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111"&gt;
+ &lt;SubjectData SubjectKey="1111"&gt;
+    &lt;SiteRef LocationOID="335566"/&gt;
+ &lt;/SubjectData&gt;
+&lt;/ClinicalData&gt;</pre>
+</div>
+<p>Optionally ClinicalData may include status:</p>
+<div class="highlight-python"><pre>&lt;SubjectData SubjectKey="1111" mdsol:Overdue="No"
+          mdsol:Touched="Yes"
+          mdsol:Empty="No"
+          mdsol:Incomplete="No"
+          mdsol:NonConformant="No"
+          mdsol:RequiresSecondPass="No"
+          mdsol:RequiresReconciliation="No"
+          mdsol:RequiresVerification="No"
+          mdsol:Verified="No"
+          mdsol:Frozen="No"
+          mdsol:Locked="No"
+          mdsol:RequiresReview="No"
+          mdsol:PendingReview="No"
+          mdsol:Reviewed="No"
+          mdsol:RequiresAnswerQuery="No"
+          mdsol:RequiresPendingCloseQuery="No"
+          mdsol:RequiresCloseQuery="No"
+          mdsol:StickyPlaced="No"
+          mdsol:Signed="No"
+          mdsol:SignatureCurrent="No"
+          mdsol:RequiresTranslation="No"
+          mdsol:RequiresCoding="No"
+          mdsol:RequiresPendingAnswerQuery="No"
+          mdsol:RequiresSignature="No"
+          mdsol:ReadyForFreeze="No"
+          mdsol:ReadyForLock="Yes"&gt;</pre>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.RWSStudyMetadataVersions">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">RWSStudyMetadataVersions</tt><big>(</big><em>xml</em><big>)</big><a class="headerlink" href="#rwslib.rwsobjects.RWSStudyMetadataVersions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses responses from MetaDataVersions request:</p>
+<div class="highlight-python"><pre>&lt;ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"&gt;
+    &lt;Study OID="IANTEST"&gt;
+        &lt;GlobalVariables&gt;
+            &lt;StudyName&gt;IANTEST&lt;/StudyName&gt;
+            &lt;StudyDescription&gt;&lt;/StudyDescription&gt;
+            &lt;ProtocolName&gt;IANTEST&lt;/ProtocolName&gt;
+        &lt;/GlobalVariables&gt;
+        &lt;MetaDataVersion OID="1203" Name="Webservice Outbound" /&gt;
+        &lt;MetaDataVersion OID="1195" Name="JC_Demo_Draft1" /&gt;
+        &lt;MetaDataVersion OID="1165" Name="Initial" /&gt;
+    &lt;/Study&gt;
+&lt;/ODM&gt;</pre>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rwsobjects.MetaDataVersion">
+<em class="property">class </em><tt class="descclassname">rwslib.rwsobjects.</tt><tt class="descname">MetaDataVersion</tt><a class="headerlink" href="#rwslib.rwsobjects.MetaDataVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>&lt;MetaDataVersion OID=&#8221;1203&#8221; Name=&#8221;Webservice Outbound&#8221;/&gt;</p>
+</dd></dl>
+
+<span class="target" id="module-rwslib.rws_requests.biostats_gateway"></span><dl class="class">
+<dt id="rwslib.rws_requests.biostats_gateway.CVMetaDataRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.biostats_gateway.</tt><tt class="descname">CVMetaDataRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>versionitem=None</em>, <em>rawsuffix=None</em>, <em>codelistsuffix=None</em>, <em>decodesuffix=None</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.biostats_gateway.CVMetaDataRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Clinical View Metadata as ODM string</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.biostats_gateway.FormDataRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.biostats_gateway.</tt><tt class="descname">FormDataRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>dataset_type</em>, <em>form_oid</em>, <em>start=None</em>, <em>dataset_format='csv'</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.biostats_gateway.FormDataRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return CV Form Data as CSV or XML</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.biostats_gateway.ProjectMetaDataRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.biostats_gateway.</tt><tt class="descname">ProjectMetaDataRequest</tt><big>(</big><em>project_name</em>, <em>dataset_format='csv'</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.biostats_gateway.ProjectMetaDataRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Metadata for Clinical Views in CSV or XML fornat for a Project</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.biostats_gateway.ViewMetaDataRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.biostats_gateway.</tt><tt class="descname">ViewMetaDataRequest</tt><big>(</big><em>view_name</em>, <em>dataset_format='csv'</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.biostats_gateway.ViewMetaDataRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Metadata for Clinical Views in CSV fornat for a single View</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.biostats_gateway.CommentDataRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.biostats_gateway.</tt><tt class="descname">CommentDataRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>dataset_format='csv'</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.biostats_gateway.CommentDataRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Comments from Rave as CSV or XML</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.biostats_gateway.ProtocolDeviationsRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.biostats_gateway.</tt><tt class="descname">ProtocolDeviationsRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>dataset_format='csv'</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.biostats_gateway.ProtocolDeviationsRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve Protocol Deviation Information from Rave</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.biostats_gateway.DataDictionariesRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.biostats_gateway.</tt><tt class="descname">DataDictionariesRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>dataset_format='csv'</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.biostats_gateway.DataDictionariesRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve Data Dictionaries from Rave</p>
+</dd></dl>
+
+<span class="target" id="module-rwslib.rws_requests.odm_adapter"></span><dl class="class">
+<dt id="rwslib.rws_requests.odm_adapter.AuditRecordsRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.odm_adapter.</tt><tt class="descname">AuditRecordsRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>startid=1</em>, <em>per_page=100</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.odm_adapter.AuditRecordsRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clinical Audit Records Dataset</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.odm_adapter.VersionFoldersRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.odm_adapter.</tt><tt class="descname">VersionFoldersRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.odm_adapter.VersionFoldersRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify all folders in use in study</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.odm_adapter.SitesMetadataRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.odm_adapter.</tt><tt class="descname">SitesMetadataRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.odm_adapter.SitesMetadataRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all sites in a study along with their StudyVersions</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.odm_adapter.UsersRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.odm_adapter.</tt><tt class="descname">UsersRequest</tt><big>(</big><em>project_name</em>, <em>environment_name</em>, <em>location_oid=None</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.odm_adapter.UsersRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of users for study (can be filtered by location)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rwslib.rws_requests.odm_adapter.SignatureDefinitionsRequest">
+<em class="property">class </em><tt class="descclassname">rwslib.rws_requests.odm_adapter.</tt><tt class="descname">SignatureDefinitionsRequest</tt><big>(</big><em>project_name</em><big>)</big><a class="headerlink" href="#rwslib.rws_requests.odm_adapter.SignatureDefinitionsRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return signature definitions for all versions of the study</p>
 </dd></dl>
 
 </div>
@@ -193,7 +424,7 @@ Note no name for the ItemGroupData element is required. This is built automatica
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="using_builders.html" title="Using Builders"
+          <a href="odm_adapter.html" title="ODM Adapter Requests"
              >previous</a> |</li>
         <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
       </ul>

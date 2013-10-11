@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
-    <link rel="next" title="API" href="api.html" />
+    <link rel="next" title="rws_requests" href="rws_requests.html" />
     <link rel="prev" title="Welcome to rwslib’s documentation!" href="index.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="API"
+          <a href="rws_requests.html" title="rws_requests"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to rwslib’s documentation!"
@@ -55,7 +55,10 @@
   <ul>
 <li><a class="reference internal" href="#">Getting started</a><ul>
 <li><a class="reference internal" href="#creating-a-connection-to-rws">Creating a connection to RWS</a></li>
+<li><a class="reference internal" href="#making-an-rws-request">Making an RWS request</a></li>
+<li><a class="reference internal" href="#authentication">Authentication</a></li>
 <li><a class="reference internal" href="#getting-more-information-from-last-result">Getting more information from last_result</a></li>
+<li><a class="reference internal" href="#error-handling">Error Handling</a></li>
 </ul>
 </li>
 </ul>
@@ -64,8 +67,8 @@
   <p class="topless"><a href="index.html"
                         title="previous chapter">Welcome to rwslib&#8217;s documentation!</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="api.html"
-                        title="next chapter">API</a></p>
+  <p class="topless"><a href="rws_requests.html"
+                        title="next chapter">rws_requests</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/getting_started.txt"
@@ -97,65 +100,124 @@
             
   <div class="section" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<p>A quick primer on working with rwslib</p>
+<p>A primer on working with rwslib.</p>
 <div class="section" id="creating-a-connection-to-rws">
 <h2>Creating a connection to RWS<a class="headerlink" href="#creating-a-connection-to-rws" title="Permalink to this headline">¶</a></h2>
 <p>Before you can do any work with rwslib you must create a connection to a Rave instance. This is done
 through the RWSConnection object:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;my_username&#39;</span><span class="p">,</span><span class="s">&#39;my_password&#39;</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="c">#Get the rave version from rws</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
-<span class="go">1.8.0</span>
 </pre></div>
 </div>
 <p>Note that the first parameter to the RWSConnection is the name of the url you wish to connect to. A url
 that does not start with &#8220;http&#8221; is assumed to be the sub-domain of mdsol.com. In the example above &#8220;innovate&#8221;
-is treated as &#8220;<a class="reference external" href="https://innovate.mdsol.com">https://innovate.mdsol.com</a>&#8221;.</p>
-<p>If you wish to override this behaviour, simply supply a base URL that includes http or https at the start of
-the url.</p>
+is treated as <tt class="docutils literal"><span class="pre">https://innovate.mdsol.com.</span></tt></p>
+<p>If you wish to override this behaviour, supply a base URL that includes http or https at the start of
+the url:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;http://192.168.1.99&#39;</span><span class="p">,</span> <span class="s">&#39;my_username&#39;</span><span class="p">,</span><span class="s">&#39;my_password&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>It is important to understand that an RWSConnection is not a persistent connection to Rave, it is simply
 a convenience class for making calls to RWS endpoints.</p>
-<p>Note that most of the methods of RWSConnection require authentication. There are some that do not, version()
-happens to be one of them so this is also valid:</p>
+</div>
+<div class="section" id="making-an-rws-request">
+<h2>Making an RWS request<a class="headerlink" href="#making-an-rws-request" title="Permalink to this headline">¶</a></h2>
+<p>Once you have an RWSConnection, you can use it to send messages to Rave and receive results back.</p>
+<p>rwslib provides a set of request classes. To make a request, create an instance of that request type and pass it to the
+RWSConnection <tt class="docutils literal"><span class="pre">send_request</span></tt> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;my_username&#39;</span><span class="p">,</span><span class="s">&#39;my_password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rws_requests</span> <span class="kn">import</span> <span class="n">VersionRequest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">VersionRequest</span><span class="p">())</span>
+<span class="go">1.8.0</span>
+</pre></div>
+</div>
+<p>The result you get back from send_request will depend on the request type since Request objects have the chance to
+process the text values returned from Rave. <tt class="docutils literal"><span class="pre">VersionRequest()</span></tt> returns a string value but other request types may
+return objects or collections (python lists) of objects.</p>
+<p>All Request classes are descendants of the <tt class="docutils literal"><span class="pre">RWSRequest</span></tt> class. The API is designed this way so that new or custom
+requests can be easily added to the library. This also allows for easier versioning of requests and also subclassing of
+existing request types. For instance, <tt class="docutils literal"><span class="pre">VersionRequest()</span></tt> could be subclassed to return major, minor and patch-level values
+as a tuple of integers rather than as a string. This allows you to make specialized request classes for your integration.</p>
+<p>rwslib provides several sets of syamdard request types arranged into python units:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">rws_requests.py</span></tt> contains the RWSRequest class and standard requests like <tt class="docutils literal"><span class="pre">VersionRequest()</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">rws_cv_requests.py</span></tt> contains requests related to Rave Clinical Views and BioStat Gateway data extracts for Comments and Protocol Violations</li>
+<li><tt class="docutils literal"><span class="pre">odm_adapter_requests.py</span></tt> contains requests related to the ODM Adapter datasets added in Rave 2013.3.0</li>
+</ul>
+</div>
+<div class="section" id="authentication">
+<h2>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h2>
+<p>Most requests require authentication. There are some that do not, <tt class="docutils literal"><span class="pre">VersionRequest()</span></tt> is one of those that does not
+require authentication so this is also valid:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="c">#Get the rave version from rws</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">VersionRequest</span><span class="p">())</span>
 <span class="go">1.8.0</span>
 </pre></div>
 </div>
-<p>Generally you will want to provide credentials to log into Rave.</p>
+<p>Generally you will want to provide credentials to authenticate with Rave.</p>
 </div>
 <div class="section" id="getting-more-information-from-last-result">
 <h2>Getting more information from last_result<a class="headerlink" href="#getting-more-information-from-last-result" title="Permalink to this headline">¶</a></h2>
-<p>Each time you use a method of RWSConnection to make an RWS call and receive results, RWSConnection
-keeps the result of the RWS call in it&#8217;s last_result attribute. This is very useful for debugging
-RWS calls since it allows you to find out what headers were sent, what URL was called etc.</p>
+<p>Each time <tt class="docutils literal"><span class="pre">RWSConnection</span></tt> sends a request and receives results it keeps the result of the RWS call in it&#8217;s
+<tt class="docutils literal"><span class="pre">last_result</span></tt> attribute. This is very useful for debugging RWS calls since it allows you to find out what headers
+were sent, what URL was called etc.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rws_requests</span> <span class="kn">import</span> <span class="n">VersionRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c">#Get the rave version from rws</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c">#Get the rave version from rws</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">VersionRequest</span><span class="p">())</span>
 <span class="go">1.8.0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">last_result</span><span class="o">.</span><span class="n">url</span>
 <span class="go">https://innovate.mdsol.com/RaveWebServices/version</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">last_result</span><span class="o">.</span><span class="n">status_code</span>
 <span class="go">200</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rave</span><span class="o">.</span><span class="n">last_result</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;content-type&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">last_result</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;content-type&#39;</span><span class="p">]</span>
 <span class="go">text/plain; charset=utf-8</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rave</span><span class="o">.</span><span class="n">last_result</span><span class="o">.</span><span class="n">text</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rws</span><span class="o">.</span><span class="n">last_result</span><span class="o">.</span><span class="n">text</span>
 <span class="go">1.8.0</span>
 </pre></div>
 </div>
-<p>last_result is a <a class="reference external" href="http://docs.python-requests.org/">Requests</a> object. Please see that library for more
+<p><tt class="docutils literal"><span class="pre">last_result</span></tt> is a <a class="reference external" href="http://docs.python-requests.org/">Requests</a> object. Please see that library for more
 information on all the properties that can be returned there.</p>
-<p>Having access to last_result means that rwslib never hides it&#8217;s workings from you. rwslib is intended to
+<p>Having access to <tt class="docutils literal"><span class="pre">last_result</span></tt> means that rwslib never hides it&#8217;s workings from you. rwslib is intended to
 be a helper library to get your own integrations up and running, it tries not to hide implementation
 details from you.</p>
+</div>
+<div class="section" id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h2>
+<p>RWS returns a variety of error results depending on the type of request. rwslib packages these error types into</p>
+<p><a class="reference internal" href="classes.html#rwsobjects.RWSException" title="rwsobjects.RWSException"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSException</span></tt></a> exceptions which have an <tt class="docutils literal"><span class="pre">rws_error</span></tt> property. The rws_error property is populated with
+a different object type depending on the error type.</p>
+<p>Where RWS returns an XML error response, rwslib will parse the error and return it in an <a class="reference internal" href="classes.html#rwsobjects.RWSError" title="rwsobjects.RWSError"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSError</span></tt></a> or
+<a class="reference internal" href="classes.html#rwsobjects.RWSErrorResponse" title="rwsobjects.RWSErrorResponse"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSErrorResponse</span></tt></a> object.</p>
+<p><tt class="docutils literal"><span class="pre">RWSError</span></tt> instances have an
+<tt class="docutils literal"><span class="pre">errordescription</span></tt> attribute while <tt class="docutils literal"><span class="pre">RWSErrorResponse</span></tt> have an <tt class="docutils literal"><span class="pre">errordescription</span></tt> and a <tt class="docutils literal"><span class="pre">reasoncode</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">RWSError</span></tt> is used to parse ODM-formatted return messages like:</p>
+<div class="highlight-python"><pre>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
+     FileType="Snapshot"
+     CreationDateTime="2013-04-08T10:28:49.578-00:00"
+     FileOID="4d13722a-ceb6-4419-a917-b6ad5d0bc30e"
+     ODMVersion="1.3"
+     mdsol:ErrorDescription="Incorrect login and password combination. [RWS00008]"
+     xmlns="http://www.cdisc.org/ns/odm/v1.3" /&gt;</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">RWSErrorResponse</span></tt> parses simple XML return messages like:</p>
+<div class="highlight-python"><pre>&lt;Response
+   ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
+   InboundODMFileOID="Not Supplied"
+   IsTransactionSuccessful="0"
+   ReasonCode="RWS00092"
+   ErrorClientResponseMessage="CRF version not found"&gt;
+   &lt;/Response&gt;</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">RWSException</span></tt> also has a standard <tt class="docutils literal"><span class="pre">message</span></tt> attribute which the error description content from the RWS error is
+copied into. The purpose of this scheme is to make rwslib raise a standard exception type that surfaces the error
+message from the source RWS response but which also provides full access to the content of the original RWS error message.</p>
 </div>
 </div>
 
@@ -175,7 +237,7 @@ details from you.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="API"
+          <a href="rws_requests.html" title="rws_requests"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to rwslib’s documentation!"

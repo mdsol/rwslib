@@ -1,7 +1,7 @@
 __author__ = 'isparks'
 
 import unittest
-import rws
+import rwslib
 import httpretty
 
 class VersionTest(unittest.TestCase):
@@ -16,8 +16,8 @@ class VersionTest(unittest.TestCase):
             body="1.0.0")
 
         #Now my test
-        rave = rws.RWSConnection('https://innovate.mdsol.com')
-        v = rave.version()
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        v = rave.send_request(rwslib.rws_requests.VersionRequest())
 
         self.assertEqual(v, '1.0.0')
         self.assertEqual(rave.last_result.status_code,200)

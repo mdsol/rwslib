@@ -30,19 +30,19 @@ def parseXMLString(xml):
         unichr_captured += xml[0]
         xml = xml[1:]
 
-    try:
-        return etree.fromstring(xml.encode('utf-8'))
-    except etree.XMLSyntaxError, e:
-        print e.message
-        print "XML WAS"
-        print xml
+    # try:
+    return etree.fromstring(xml.encode('utf-8'))
+    # except etree.XMLSyntaxError, e:
+    #     print e.message
+    #     print "XML WAS"
+    #     print xml
 
-def xpath(doc, path_elements):
-    """Handle the evil plumbing of xpath elements for lxml / etree"""
-    ns = {"odm": ODM_NS[1:-1],
-          "mdsol": MEDI_NS[1:-1]}
-
-    return doc.xpath('/'.join(["%s:%s" % (prefix, element,) for prefix, element in path_elements ]), namespaces=ns)
+#def xpath(doc, path_elements):
+#    """Handle the evil plumbing of xpath elements for lxml / etree"""
+#    ns = {"odm": ODM_NS[1:-1],
+#          "mdsol": MEDI_NS[1:-1]}
+#
+#    return doc.xpath('/'.join(["%s:%s" % (prefix, element,) for prefix, element in path_elements ]), namespaces=ns)
 
 
 class RWSException(Exception):
@@ -63,7 +63,7 @@ class XMLRepr(object):
 
 
 class ODMDoc(XMLRepr):
-    """All ODM responses have the same wrapper"""
+    """A base ODM document"""
     def __init__(self, xml):
         #Call base class
         XMLRepr.__init__(self, xml)
@@ -79,7 +79,9 @@ class ODMDoc(XMLRepr):
 
 class RWSError(ODMDoc):
     """
-    Extends ODMDoc, inheriting attributes like filetype, creationdatetime etc.
+Extends ODMDoc, inheriting attributes like filetype, creationdatetime etc.
+
+Parses XML of the form::
 
     <?xml version="1.0" encoding="utf-8"?>
     <ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
@@ -98,12 +100,14 @@ class RWSError(ODMDoc):
 
 class RWSErrorResponse(XMLRepr):
     """
- <Response
-    ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
-    InboundODMFileOID="Not Supplied"
-    IsTransactionSuccessful="0"
-    ReasonCode="RWS00092"
-    ErrorClientResponseMessage="CRF version not found">
+Parses messages of the form::
+
+    <Response
+        ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
+        InboundODMFileOID="Not Supplied"
+        IsTransactionSuccessful="0"
+        ReasonCode="RWS00092"
+        ErrorClientResponseMessage="CRF version not found">
     </Response>
     """
     def __init__(self, xml):
@@ -119,10 +123,12 @@ class RWSErrorResponse(XMLRepr):
 
 class RWSResponse(XMLRepr):
     """
+Parses messages of the form::
+
     <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
-              InboundODMFileOID=""
-              IsTransactionSuccessful="1"
-              SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords="">
+        InboundODMFileOID=""
+        IsTransactionSuccessful="1"
+        SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords="">
     </Response>
     """
     def __init__(self, xml):
@@ -140,15 +146,16 @@ class RWSResponse(XMLRepr):
         self.fields_touched = 0
         self.loglines_touched = 0
 
-        success_stats = r_get('SuccessStatistics')
+        success_stats = r_get('SuccessStatistics','')
 
+        #Clinical data post
         if success_stats.startswith('Rave objects touched:'):
             success_stats = success_stats[len('Rave objects touched:')+1:] #Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0
             parts = success_stats.split(';') #[Subjects=0, Folders=0, Forms=0, Fields=0, LogLines=0]
             for part in parts:
                 name, value = part.strip().split('=')
-                if value[-1] == ';':
-                    value = value[:-1]
+                # if value[-1] == ';':
+                #     value = value[:-1]
                 if name == 'Subjects':
                     self.subjects_touched = int(value)
                 elif name == 'Folders':
@@ -162,11 +169,18 @@ class RWSResponse(XMLRepr):
                 else:
                     raise KeyError('Unknown Rave Object %s in response %s' % (name, success_stats,))
 
+        #Metadata post
+        if success_stats == 'N/A':
+            pass
+
+
         self.new_records = r_get("NewRecords")
 
 
 class RWSPostResponse(RWSResponse):
     """
+Parses responses from PostODMClinicalData messages with the format::
+
     <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
               InboundODMFileOID=""
               IsTransactionSuccessful="1"
@@ -184,6 +198,10 @@ class RWSPostResponse(RWSResponse):
 
         sniss = r_get('SubjectNumberInStudySite',None)
         self.subjects_in_study_site = int(sniss) if sniss is not None else None
+
+        #DraftImported only comes from a MetaData Post
+        #In which case successStatistics will be SuccessStatistics="N/A"
+        self.draft_imported = r_get("DraftImported",None)
 
 
 
@@ -211,7 +229,7 @@ class RWSPostErrorResponse(RWSResponse):
 
 
 class RWSStudyListItem(object):
-    """A item in the RWS Study List response"""
+    """An item in the RWS Study List response"""
     def __init__(self):
         self.oid = None
         self.studyname = None
@@ -256,14 +274,17 @@ class RWSStudyListItem(object):
 
 
 
-
-class RWSStudies(list, ODMDoc): #I hate multi-inheritance generally.
+#I hate multi-inheritance generally but since this is inheriting from a built-in like list I feel
+#less bad about it.
+class RWSStudies(list, ODMDoc):
     """
-    Represents a list of studies. Extends the list class and adds a couple of extra properties.
-
+Represents a list of studies. Extends the list class and adds a couple of extra properties::
     <ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
          CreationDateTime="2013-04-08T10:02:17.781-00:00"
-         ODMVersion="1.3">
+         ODMVersion="1.3"
+         xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns="http://www.cdisc.org/ns/odm/v1.3">
          <Study OID="Fixitol(Dev)">
             <GlobalVariables>
                   <StudyName>Fixitol (Dev)</StudyName>
@@ -291,7 +312,7 @@ class RWSStudies(list, ODMDoc): #I hate multi-inheritance generally.
 
 class MetaDataVersion(object):
     """
-    <MetaDataVersion OID="1203" Name="Webservice Outbound"/>
+<MetaDataVersion OID="1203" Name="Webservice Outbound"/>
     """
     def __init__(self):
         self.oid = None
@@ -314,6 +335,8 @@ class MetaDataVersion(object):
 
 class RWSStudyMetadataVersions(list, ODMDoc, RWSStudyListItem):
     """
+Parses responses from MetaDataVersions request::
+
     <ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
         <Study OID="IANTEST">
             <GlobalVariables>
@@ -345,12 +368,71 @@ class RWSStudyMetadataVersions(list, ODMDoc, RWSStudyListItem):
 
 class RWSSubjectListItem(object):
     """
-         <ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111">
-             <SubjectData SubjectKey="1111">
-                <SiteRef LocationOID="335566"/>
-             </SubjectData>
-         </ClinicalData>
+Parses response of Subject List request::
+
+    <ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111">
+     <SubjectData SubjectKey="1111">
+        <SiteRef LocationOID="335566"/>
+     </SubjectData>
+    </ClinicalData>
+
+Optionally ClinicalData may include status::
+
+    <SubjectData SubjectKey="1111" mdsol:Overdue="No"
+              mdsol:Touched="Yes"
+              mdsol:Empty="No"
+              mdsol:Incomplete="No"
+              mdsol:NonConformant="No"
+              mdsol:RequiresSecondPass="No"
+              mdsol:RequiresReconciliation="No"
+              mdsol:RequiresVerification="No"
+              mdsol:Verified="No"
+              mdsol:Frozen="No"
+              mdsol:Locked="No"
+              mdsol:RequiresReview="No"
+              mdsol:PendingReview="No"
+              mdsol:Reviewed="No"
+              mdsol:RequiresAnswerQuery="No"
+              mdsol:RequiresPendingCloseQuery="No"
+              mdsol:RequiresCloseQuery="No"
+              mdsol:StickyPlaced="No"
+              mdsol:Signed="No"
+              mdsol:SignatureCurrent="No"
+              mdsol:RequiresTranslation="No"
+              mdsol:RequiresCoding="No"
+              mdsol:RequiresPendingAnswerQuery="No"
+              mdsol:RequiresSignature="No"
+              mdsol:ReadyForFreeze="No"
+              mdsol:ReadyForLock="Yes">
+
     """
+    STATUS_PROPERTIES = ["Overdue",
+                         "Touched",
+                         "Empty",
+                         "Incomplete",
+                         "NonConformant",
+                         "RequiresSecondPass",
+                         "RequiresReconciliation",
+                         "RequiresVerification",
+                         "Verified",
+                         "Frozen",
+                         "Locked",
+                         "RequiresReview",
+                         "PendingReview",
+                         "Reviewed",
+                         "RequiresAnswerQuery",
+                         "RequiresPendingCloseQuery",
+                         "RequiresCloseQuery",
+                         "StickyPlaced",
+                         "Signed",
+                         "SignatureCurrent",
+                         "RequiresTranslation",
+                         "RequiresCoding",
+                         "RequiresPendingAnswerQuery",
+                         "RequiresSignature",
+                         "ReadyForFreeze",
+                         "ReadyForLock"]
+    
     def __init__(self):
         """The ODM message has a ClinicalData element with a single SubjectData and SiteRef elements
            nested within. I collapse into a single object
@@ -359,6 +441,13 @@ class RWSSubjectListItem(object):
         self.metadataversionoid = None
         self.subjectkey = None
         self.locationoid = None
+
+        self.active = None  #SubjectActive
+        self.deleted = None  #Deleted
+
+        #Optional properties, only if status included
+        for prop in RWSSubjectListItem.STATUS_PROPERTIES:
+            setattr(self, prop.lower(), None)
 
     @classmethod
     def fromElement(cls, elem):
@@ -372,12 +461,23 @@ class RWSSubjectListItem(object):
         self.subjectkey = e_subjectdata.get('SubjectKey')
         e_siteref = e_subjectdata.findall(ODM_NS + 'SiteRef')[0]
         self.locationoid = e_siteref.get('LocationOID')
+
+        decodes = {'yes':True,'no':False,'':None}
+        for prop in RWSSubjectListItem.STATUS_PROPERTIES:
+            val = e_subjectdata.get(MEDI_NS + prop,"").lower()
+            setattr(self, prop.lower(), decodes[val])
+
+        #By default we only get back active and non-deleted subjects
+        self.active = decodes[e_subjectdata.get(MEDI_NS + "SubjectActive","yes").lower()]
+        self.deleted = decodes[e_subjectdata.get(MEDI_NS + "Deleted","no").lower()]
+
+
         return self
 
 
 class RWSSubjects(list, ODMDoc): #I hate multi-inheritance generally.
     """
-    Represents a list of subjects
+Represents a list of subjects::
 
     <ODM FileType="Snapshot"
          FileOID="770f1758-db33-4ab2-af72-38db863734aa"
