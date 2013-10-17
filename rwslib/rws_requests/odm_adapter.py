@@ -3,13 +3,11 @@ Requests related to the ODM Adapter
 
 http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/clinical_data_audits/index.html#odm-adapter
 """
-from . import RWSRequest
+from . import RWSAuthorizedGetRequest
 
 
-class AuditRecordsRequest(RWSRequest):
+class AuditRecordsRequest(RWSAuthorizedGetRequest):
     """Clinical Audit Records Dataset"""
-    requires_authorization = True
-    method = "GET"
 
     def __init__(self, project_name, environment_name, startid=1, per_page=100):
         self.project_name = project_name
@@ -33,10 +31,8 @@ class AuditRecordsRequest(RWSRequest):
         """Return url path list"""
         return self.make_url('datasets', 'ClinicalAuditRecords.odm', **self._querystring())
 
-class VersionFoldersRequest(RWSRequest):
+class VersionFoldersRequest(RWSAuthorizedGetRequest):
     """Identify all folders in use in study"""
-    requires_authorization = True
-    method = "GET"
 
     def __init__(self, project_name, environment_name):
         self.project_name = project_name
@@ -59,10 +55,8 @@ class VersionFoldersRequest(RWSRequest):
         return self.make_url('datasets', self._dataset_name(), **self._querystring())
 
 
-class SitesMetadataRequest(RWSRequest):
+class SitesMetadataRequest(RWSAuthorizedGetRequest):
     """List all sites in a study along with their StudyVersions"""
-    requires_authorization = True
-    method = "GET"
 
     def __init__(self, project_name=None, environment_name=None):
         self.project_name = project_name
@@ -87,11 +81,8 @@ class SitesMetadataRequest(RWSRequest):
         return self.make_url('datasets', 'Sites.odm', **self._querystring())
 
 
-class UsersRequest(RWSRequest):
+class UsersRequest(RWSAuthorizedGetRequest):
     """Return list of users for study (can be filtered by location)"""
-    requires_authorization = True
-    method = "GET"
-
     def __init__(self, project_name, environment_name, location_oid=None):
         self.project_name = project_name
         self.environment_name = environment_name
@@ -113,10 +104,8 @@ class UsersRequest(RWSRequest):
         return self.make_url('datasets', 'Users.odm', **self._querystring())
 
 
-class SignatureDefinitionsRequest(RWSRequest):
+class SignatureDefinitionsRequest(RWSAuthorizedGetRequest):
     """Return signature definitions for all versions of the study"""
-    requires_authorization = True
-    method = "GET"
 
     def __init__(self, project_name):
         self.project_name = project_name

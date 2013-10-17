@@ -23,7 +23,17 @@ class VersionTest(unittest.TestCase):
         self.assertEqual(rave.last_result.status_code,200)
 
 
+class TestMustBeRWSRequestSubclass(unittest.TestCase):
+    """Test that request object passed must be RWSRequest subclass"""
+    def test_basic(self):
+        """Must be rwssubclass or ValueError"""
 
+        def do():
+            rave = rwslib.RWSConnection('test')
+            v = rave.send_request(object())
+
+
+        self.assertRaises(ValueError, do)
 
 
 if __name__ == '__main__':

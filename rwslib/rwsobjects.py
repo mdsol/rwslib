@@ -279,6 +279,7 @@ class RWSStudyListItem(object):
 class RWSStudies(list, ODMDoc):
     """
 Represents a list of studies. Extends the list class and adds a couple of extra properties::
+
     <ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
          CreationDateTime="2013-04-08T10:02:17.781-00:00"
          ODMVersion="1.3"

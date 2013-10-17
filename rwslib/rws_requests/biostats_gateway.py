@@ -5,13 +5,10 @@ http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/01_biostat_adapter.htm
 
 """
 
-from . import RWSRequest, check_dataset_type
+from . import RWSAuthorizedGetRequest, make_url, check_dataset_type
 
-class CVMetaDataRequest(RWSRequest):
+class CVMetaDataRequest(RWSAuthorizedGetRequest):
     """Return Clinical View Metadata as ODM string"""
-    requires_authorization = True
-    method = "GET"
-
     KNOWN_QUERY_OPTIONS = ['versionitem','rawsuffix','codelistsuffix','decodesuffix']
 
     def __init__(self, project_name, environment_name, versionitem=None, rawsuffix=None, codelistsuffix=None, decodesuffix=None):
@@ -57,10 +54,8 @@ def dataset_format_to_extension(ds_format):
 
 
 
-class FormDataRequest(RWSRequest):
+class FormDataRequest(RWSAuthorizedGetRequest):
     """Return CV Form Data as CSV or XML"""
-    requires_authorization = True
-    method = "GET"
 
     def __init__(self, project_name, environment_name, dataset_type, form_oid, start=None, dataset_format="csv"):
         check_dataset_format(dataset_format)
@@ -98,11 +93,8 @@ class FormDataRequest(RWSRequest):
         return self.make_url('studies', self.studyname_environment(), 'datasets', self.dataset_type, self._dataset_name(),  **self._querystring())
 
 
-class MetaDataRequest(RWSRequest):
+class MetaDataRequest(RWSAuthorizedGetRequest):
     """Return Metadata for Clinical Views in CSV or XML fornat"""
-    requires_authorization = True
-    method = "GET"
-
     def __init__(self, dataset_format="csv"):
         check_dataset_format(dataset_format)
         self.dataset_format = dataset_format
@@ -113,10 +105,8 @@ class MetaDataRequest(RWSRequest):
     def url_path(self):
         return self.make_url('datasets', self._dataset_name())
 
-class ProjectMetaDataRequest(RWSRequest):
+class ProjectMetaDataRequest(RWSAuthorizedGetRequest):
     """Return Metadata for Clinical Views in CSV or XML fornat for a Project"""
-    requires_authorization = True
-    method = "GET"
 
     def __init__(self, project_name, dataset_format="csv"):
         check_dataset_format(dataset_format)
@@ -130,10 +120,8 @@ class ProjectMetaDataRequest(RWSRequest):
         return self.make_url('datasets', self._dataset_name(), **{'ProjectName':self.project_name})
 
 
-class ViewMetaDataRequest(RWSRequest):
+class ViewMetaDataRequest(RWSAuthorizedGetRequest):
     """Return Metadata for Clinical Views in CSV fornat for a single View"""
-    requires_authorization = True
-    method = "GET"
 
     def __init__(self,view_name, dataset_format="csv"):
         check_dataset_format(dataset_format)
@@ -147,10 +135,8 @@ class ViewMetaDataRequest(RWSRequest):
     def url_path(self):
         return self.make_url('datasets', self._dataset_name(), **{'ViewName':self.view_name})
 
-class CommentDataRequest(RWSRequest):
+class CommentDataRequest(RWSAuthorizedGetRequest):
     """Return Comments from Rave as CSV or XML"""
-    requires_authorization = True
-    method = "GET"
 
     def __init__(self, project_name, environment_name, dataset_format="csv"):
         check_dataset_format(dataset_format)

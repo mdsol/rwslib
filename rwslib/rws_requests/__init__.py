@@ -20,18 +20,23 @@ def check_dataset_type(dataset_type):
         raise ValueError("Dataset type not 'regular' or 'raw' is %s" % dataset_type)
 
 
+#-------------------------------------------------------------------------------------------------------
+# Utility functions
+#
+def make_url(*args, **kwargs):
+    """Makes a URL from component parts"""
+    base = '/'.join(args)
+    if kwargs:
+        return "%s?%s" % (base, urlencode(kwargs),)
+    else:
+        return base
+
+
 class RWSRequest(object):
     """Base class for all RWS Requests"""
     requires_authorization = False
     method = "GET" #Default
 
-    def make_url(self, *args, **kwargs):
-        """Makes a URL from component parts"""
-        base = '/'.join(args)
-        if kwargs:
-            return "%s?%s" % (base, urlencode(kwargs),)
-        else:
-            return base
 
     def result(self, request):
         """Process a result to create a custom output"""
@@ -46,58 +51,64 @@ class RWSRequest(object):
         """Return additional args here as dict"""
         return {}
 
+    def make_url(self, *args, **kwargs):
+        #Note: Including this in the class as a convenience so that you can get all you need from a RWSObject rather
+        #than having to import make_url as an additional import.
+        return make_url(*args, **kwargs)
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Useful subclasses
+#
+
+class RWSGetRequest(RWSRequest):
+    method = "GET"
+
+class RWSAuthorizedGetRequest(RWSGetRequest):
+    requires_authorization = True
+
+class RWSPostRequest(RWSRequest):
+    method = "POST"
+
+class RWSAuthorizedPostRequest(RWSPostRequest):
+    requires_authorization = True
+
 #---------------------------------------------------------------------------------------------------------------------
 # Implementations. These are all standards that have existed for a long time.
 
-class VersionRequest(RWSRequest):
+class VersionRequest(RWSGetRequest):
     """Get RWS Version number"""
-    requires_authorization = False
-    method = "GET"
-
     def url_path(self):
-        return self.make_url('version')
+        return make_url('version')
 
 
-class BuildVersionRequest(RWSRequest):
+class BuildVersionRequest(RWSGetRequest):
     """Return the RWS build version number"""
-    requires_authorization = False
-    method = "GET"
-
     def url_path(self):
-        return self.make_url('version', 'build')
+        return make_url('version', 'build')
 
 
-class DiagnosticsRequest(RWSRequest):
+class DiagnosticsRequest(RWSGetRequest):
     """Return the RWS build version number"""
-    requires_authorization = False
-    method = "GET"
-
     def url_path(self):
-        return self.make_url('diagnostics')
+        return make_url('diagnostics')
 
 
-class CacheFlushRequest(RWSRequest):
+class CacheFlushRequest(RWSAuthorizedGetRequest):
     """Calls RWS cache-flush"""
-    requires_authorization = True
-    method = "GET"
-
     def url_path(self):
-        return self.make_url('webservice.aspx?CacheFlush')
+        return make_url('webservice.aspx?CacheFlush')
 
     def result(self, request):
         """Return RWSResponse object for success"""
         return RWSResponse(request.text)
 
 
-class ClinicalStudiesRequest(RWSRequest):
+class ClinicalStudiesRequest(RWSAuthorizedGetRequest):
     """Return the list of clinical studies as a RWSStudies object.
        Clinical studies are the studies that you have access to as an EDC user.
     """
-    requires_authorization = True
-    method = "GET"
-
     def url_path(self):
-        return self.make_url('studies')
+        return make_url('studies')
 
     def result(self, request):
         return RWSStudies(request.text)
@@ -106,11 +117,8 @@ class ClinicalStudiesRequest(RWSRequest):
 #----------------------------------------------------------------------------------------------------------------------
 # Base request classes for study versions (could also be used for drafts if ever implemented by RWS)
 
-class VersionRequestBase(RWSRequest):
+class VersionRequestBase(RWSAuthorizedGetRequest):
     """Base class for study and library metadata version requests"""
-    requires_authorization = True
-    method = "GET"
-
     def __init__(self, project_name, oid):
         self.project_name = project_name
         self._oid = None #Oid is a version OID, an integer identifier
@@ -135,46 +143,38 @@ class VersionRequestBase(RWSRequest):
 #-----------------------------------------------------------------------------------------------------------------------
 # Related to Architect Studies and their drafts/versions
 
-class MetadataStudiesRequest(RWSRequest):
+class MetadataStudiesRequest(RWSAuthorizedGetRequest):
     """Return the list of metadata studies as a RWSStudies object.
        metadata_studies are the list of studies that you have access to as an
        Architect user.
     """
-    requires_authorization = True
-    method = "GET"
-
     def url_path(self):
-        return self.make_url('metadata', 'studies')
+        return make_url('metadata', 'studies')
 
     def result(self, request):
         return RWSStudies(request.text)
 
 
-class StudyDraftsRequest(RWSRequest):
+class StudyDraftsRequest(RWSAuthorizedGetRequest):
     """Return the list of study drafts"""
-    requires_authorization = True
-    method = "GET"
-
     def __init__(self, project_name):
         self.project_name = project_name
 
     def url_path(self):
-        return self.make_url('metadata', 'studies', self.project_name, 'drafts')
+        return make_url('metadata', 'studies', self.project_name, 'drafts')
 
     def result(self, request):
         return RWSStudyMetadataVersions(request.text)
 
 
-class StudyVersionsRequest(RWSRequest):
+class StudyVersionsRequest(RWSAuthorizedGetRequest):
     """Return the list of study versions"""
-    requires_authorization = True
-    method = "GET"
 
     def __init__(self, project_name):
         self.project_name = project_name
 
     def url_path(self):
-        return self.make_url('metadata', 'studies', self.project_name, 'versions')
+        return make_url('metadata', 'studies', self.project_name, 'versions')
 
     def result(self, request):
         return RWSStudyMetadataVersions(request.text)
@@ -184,7 +184,7 @@ class StudyVersionRequest(VersionRequestBase):
     """Return a study version as a string"""
 
     def url_path(self):
-        return self.make_url('metadata', 'studies', self.project_name, 'versions', str(self._oid))
+        return make_url('metadata', 'studies', self.project_name, 'versions', str(self._oid))
 
 
 #NOTE: There is no StudyDraftRequest, this is something of an omission since you can list them...
@@ -193,46 +193,37 @@ class StudyVersionRequest(VersionRequestBase):
 #-----------------------------------------------------------------------------------------------------------------------
 # Related to Architect Global Libraries and their drafts/versions
 
-class GlobalLibrariesRequest(RWSRequest):
+class GlobalLibrariesRequest(RWSAuthorizedGetRequest):
     """Return the list of global libraries as a RWSStudies object.
        metadata_libraries are the list of libraries that you have access to as an
        Architect Global Library Volume user
     """
-    requires_authorization = True
-    method = "GET"
-
     def url_path(self):
-        return self.make_url('metadata', 'libraries')
+        return make_url('metadata', 'libraries')
 
     def result(self, request):
         return RWSStudies(request.text)
 
 
-class GlobalLibraryDraftsRequest(RWSRequest):
+class GlobalLibraryDraftsRequest(RWSAuthorizedGetRequest):
     """Return the list of global library drafts"""
-    requires_authorization = True
-    method = "GET"
-
     def __init__(self, project_name):
         self.project_name = project_name
 
     def url_path(self):
-        return self.make_url('metadata', 'libraries', self.project_name, 'drafts')
+        return make_url('metadata', 'libraries', self.project_name, 'drafts')
 
     def result(self, request):
         return RWSStudyMetadataVersions(request.text)
 
 
-class GlobalLibraryVersionsRequest(RWSRequest):
+class GlobalLibraryVersionsRequest(RWSAuthorizedGetRequest):
     """Return the list of global library versions"""
-    requires_authorization = True
-    method = "GET"
-
     def __init__(self, project_name):
         self.project_name = project_name
 
     def url_path(self):
-        return self.make_url('metadata', 'libraries', self.project_name, 'versions')
+        return make_url('metadata', 'libraries', self.project_name, 'versions')
 
     def result(self, request):
         return RWSStudyMetadataVersions(request.text)
@@ -242,13 +233,11 @@ class GlobalLibraryVersionRequest(VersionRequestBase):
     """Return a global library version as a string"""
 
     def url_path(self):
-        return self.make_url('metadata', 'libraries', self.project_name, 'versions', str(self._oid))
+        return make_url('metadata', 'libraries', self.project_name, 'versions', str(self._oid))
 
 
-class PostMetadataRequest(RWSRequest):
+class PostMetadataRequest(RWSAuthorizedPostRequest):
     """Post an ODM data transaction to Rave, get back an RWSResponse object"""
-    requires_authorization = True
-    method = "POST"
 
     def __init__(self, project_name, data, headers={'Content-type': "text/xml"}):
         self.project_name = project_name
@@ -262,7 +251,7 @@ class PostMetadataRequest(RWSRequest):
         return kw
 
     def url_path(self):
-        return self.make_url('metadata', 'studies', self.project_name, 'drafts')
+        return make_url('metadata', 'studies', self.project_name, 'drafts')
 
     def result(self, request):
         return RWSPostResponse(request.text)
@@ -271,12 +260,10 @@ class PostMetadataRequest(RWSRequest):
 #-----------------------------------------------------------------------------------------------------------------------
 # Subject related
 
-class StudySubjectsRequest(RWSRequest):
+class StudySubjectsRequest(RWSAuthorizedGetRequest):
     """
     Return the list of study subjects, defaults to the PROD environment
     """
-    requires_authorization = True
-    method = "GET"
 
     INCLUDE_OPTIONS = ['inactive', 'deleted', 'inactiveAndDeleted']
 
@@ -311,16 +298,14 @@ class StudySubjectsRequest(RWSRequest):
         return "%s(%s)" % (self.project_name, self.environment_name, )
 
     def url_path(self):
-        return self.make_url('studies', self.studyname_environment(), 'subjects', **self._querystring())
+        return make_url('studies', self.studyname_environment(), 'subjects', **self._querystring())
 
     def result(self, request):
         return RWSSubjects(request.text)
 
 
-class PostDataRequest(RWSRequest):
+class PostDataRequest(RWSAuthorizedPostRequest):
     """Post an ODM data transaction to Rave, get back an RWSResponse object"""
-    requires_authorization = True
-    method = "POST"
 
     def __init__(self, data, headers={'Content-type': "text/xml"}):
         self.data = data
@@ -334,7 +319,7 @@ class PostDataRequest(RWSRequest):
 
 
     def url_path(self):
-        return self.make_url("webservice.aspx?PostODMClinicalData")
+        return make_url("webservice.aspx?PostODMClinicalData")
 
     def result(self, request):
         return RWSPostResponse(request.text)
@@ -346,9 +331,7 @@ class PostDataRequest(RWSRequest):
 # ODM Clinical Data Datasets
 
 
-class ODMDatasetBase(RWSRequest):
-    requires_authorization = True
-    method = "GET"
+class ODMDatasetBase(RWSAuthorizedGetRequest):
 
     KNOWN_QUERY_OPTIONS = [ 'versionitem', 'rawsuffix', 'codelistsuffix', 'decodesuffix', 'stdsuffix']
 
@@ -400,7 +383,7 @@ class StudyDatasetRequest(ODMDatasetBase):
         if self.formoid is not None:
             args.append(self.formoid)
 
-        return self.make_url(*args, **self._querystring())
+        return make_url(*args, **self._querystring())
 
 class VersionDatasetRequest(ODMDatasetBase):
     """
@@ -431,7 +414,7 @@ class VersionDatasetRequest(ODMDatasetBase):
         if self.formoid is not None:
             args.append(self.formoid)
 
-        return self.make_url(*args, **self._querystring())
+        return make_url(*args, **self._querystring())
 
 
 class SubjectDatasetRequest(ODMDatasetBase):
@@ -463,6 +446,4 @@ class SubjectDatasetRequest(ODMDatasetBase):
         if self.formoid is not None:
             args.append(self.formoid)
 
-        return self.make_url(*args, **self._querystring())
-
-
+        return make_url(*args, **self._querystring())

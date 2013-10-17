@@ -81,18 +81,33 @@ Example::
 .. _oa_sites_metadata_request:
 .. index:: SitesMetadataRequest
 
-SitesMetadataRequest(project_name, environment_name)
-----------------------------------------------------
+SitesMetadataRequest()
+----------------------
 
 Authorization is required for this request.
 
-Returns an ODM AdminData document which lists all sites for a study and environment along with their metadata versions
-effective dates and other studies that they are linked to. To find the current active metadata version you will need
-to sort the metadata versions for the site by the effective date and take the latest one.
+Returns an ODM AdminData document which lists all sites along with their metadata versions and effective dates.
+Optionally can take a project name and an environment to filter the list only to that study/environment.
+
+To find the current active metadata version for a study/site you will need to sort the metadata versions for the site
+by the effective date and take the latest one.
 
 Calls::
 
-    https://{{ host }}/RaveWebServices/datasets/Sites.odm/?studyoid={project_name}({environment_name})
+    https://{{ host }}/RaveWebServices/datasets/Sites.odm/[?studyoid={project_name}({environment_name})]
+
+
+Options:
+
++--------------------------------+-----------------------------------------------------------------------------------+
+| Option                         | Description                                                                       |
++================================+===================================================================================+
+| project_name={projectname}     | Project to filter the result set to (recommended)                                 |
++--------------------------------+-----------------------------------------------------------------------------------+
+| environment_name={environment} | Environment to filter the result set to                                           |
++--------------------------------+-----------------------------------------------------------------------------------+
+
+If used, the project_name and environmen_namet must both be supplied or an error will result.
 
 Example::
 

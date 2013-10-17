@@ -11,7 +11,7 @@ __copyright__ = 'Copyright 2013 Medidata Solutions Inc'
 import requests
 from urllib import urlencode
 
-from rws_requests import RWSRequest
+from rws_requests import RWSRequest, make_url
 from rwsobjects import RWSException, RWSError, RWSErrorResponse
 
 
@@ -52,15 +52,6 @@ class RWSConnection(object):
         #Keep track of results of last request so users can get if they need.
         self.last_result = None
 
-    def _make_url(self, *args, **kwargs):
-        """Makes a URL from component parts"""
-        base = '/'.join(args)
-        if kwargs:
-            return "%s?%s" % (base, urlencode(kwargs),)
-        else:
-            return base
-
-
 
     def get_auth(self):
         """Get authorization headers"""
@@ -77,7 +68,7 @@ class RWSConnection(object):
             raise ValueError("Request object must be a subclass of RWSRequest")
 
         #Construct a URL from the object and make a call
-        full_url = self._make_url(self.base_url, request_object.url_path())
+        full_url = make_url(self.base_url, request_object.url_path())
         kwargs = {}
         if request_object.requires_authorization:
             kwargs['auth'] = self.get_auth()
@@ -113,7 +104,6 @@ class RWSConnection(object):
 
             if '<h2>HTTP Error 401.0 - Unauthorized</h2>' in r.text:
                 raise RWSException("Unauthorized.", r.text)
-
 
             #There was some problem with your credentials (XML response from RWS)
             error = RWSErrorResponse(r.text)

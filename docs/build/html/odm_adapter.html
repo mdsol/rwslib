@@ -56,7 +56,7 @@
 <li><a class="reference internal" href="#">ODM Adapter Requests</a><ul>
 <li><a class="reference internal" href="#auditrecordsrequest-project-name-environment-name">AuditRecordsRequest(project_name, environment_name)</a></li>
 <li><a class="reference internal" href="#versionfoldersrequest-project-name-environment-name">VersionFoldersRequest(project_name, environment_name)</a></li>
-<li><a class="reference internal" href="#sitesmetadatarequest-project-name-environment-name">SitesMetadataRequest(project_name, environment_name)</a></li>
+<li><a class="reference internal" href="#sitesmetadatarequest">SitesMetadataRequest()</a></li>
 <li><a class="reference internal" href="#usersrequest-project-name-environment-name">UsersRequest(project_name, environment_name)</a></li>
 <li><a class="reference internal" href="#signaturedefinitionsrequest-project-name-environment-name">SignatureDefinitionsRequest(project_name, environment_name)</a></li>
 </ul>
@@ -166,15 +166,37 @@ can only return the primary Matrix (folder structure) of Rave. VersionFoldersReq
 </pre></div>
 </div>
 <span class="target" id="oa-sites-metadata-request"></span></div>
-<div class="section" id="sitesmetadatarequest-project-name-environment-name">
-<span id="index-2"></span><h2>SitesMetadataRequest(project_name, environment_name)<a class="headerlink" href="#sitesmetadatarequest-project-name-environment-name" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="sitesmetadatarequest">
+<span id="index-2"></span><h2>SitesMetadataRequest()<a class="headerlink" href="#sitesmetadatarequest" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this request.</p>
-<p>Returns an ODM AdminData document which lists all sites for a study and environment along with their metadata versions
-effective dates and other studies that they are linked to. To find the current active metadata version you will need
-to sort the metadata versions for the site by the effective date and take the latest one.</p>
+<p>Returns an ODM AdminData document which lists all sites along with their metadata versions and effective dates.
+Optionally can take a project name and an environment to filter the list only to that study/environment.</p>
+<p>To find the current active metadata version for a study/site you will need to sort the metadata versions for the site
+by the effective date and take the latest one.</p>
 <p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/datasets/Sites.odm/?studyoid={project_name}({environment_name})</pre>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/datasets/Sites.odm/[?studyoid={project_name}({environment_name})]</pre>
 </div>
+<p>Options:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>project_name={projectname}</td>
+<td>Project to filter the result set to (recommended)</td>
+</tr>
+<tr class="row-odd"><td>environment_name={environment}</td>
+<td>Environment to filter the result set to</td>
+</tr>
+</tbody>
+</table>
+<p>If used, the project_name and environmen_namet must both be supplied or an error will result.</p>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests.odm_adapter</span> <span class="kn">import</span> <span class="o">*</span>

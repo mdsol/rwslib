@@ -8,6 +8,9 @@ import uuid
 from xml.etree import cElementTree as ET
 from datetime import datetime
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Utilities
+
 def now_to_iso8601():
     """Returns NOW date/time as a UTC date/time formated as iso8601 string"""
     utc_date = datetime.utcnow()
@@ -16,7 +19,6 @@ def now_to_iso8601():
 def dt_to_iso8601(dt):
     """Turn a datetime into an ISO8601 formatted string"""
     return dt.strftime("%Y-%m-%dT%H:%M:%S")
-
 
 def bool_to_yes_no(val):
     """Convert True/False to Yes/No"""
@@ -38,6 +40,8 @@ def indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Classes
 
 class ODMElement(object):
     """Base class for ODM XML element classes"""
@@ -51,19 +55,14 @@ class ODMElement(object):
         raise NotImplementedError('__lshift__ must be overriden in descendant classes.')
 
 
-class ItemData(ODMElement):
-    """Models the ODM ItemData object"""
-    def __init__(self, itemoid, value, specify_value = None, transaction_type = None, lock = None, freeze = None, verify = None):
-        self.itemoid = itemoid
-        self.value = value
+class TransactionalElement(ODMElement):
+    """Models an ODM Element that is allowed a transaction type. Different elements have different
+       allowed transaction types"""
+    ALLOWED_TRANSACTION_TYPES = []
+
+    def __init__(self, transaction_type):
         self._transaction_type = None
         self.transaction_type = transaction_type
-
-        self.specify_value = specify_value
-        self.lock = lock
-        self.freeze = freeze
-        self.verify = verify
-
 
     @property
     def transaction_type(self):
@@ -72,15 +71,29 @@ class ItemData(ODMElement):
     @transaction_type.setter
     def transaction_type(self, value):
         if value is not None:
-            if value.lower() not in ['insert','update','upsert','context','remove']:
-                raise AttributeError('ItemData transaction_type element must be one of Insert, Update, Remove, Upsert or Context not %s' % value)
+            if value.lower() not in self.ALLOWED_TRANSACTION_TYPES:
+                raise AttributeError('ItemData transaction_type element must be one of %s not %s' % (','.join(self.ALLOWED_TRANSACTION_TYPES), value,))
         self._transaction_type = value
 
 
+class ItemData(TransactionalElement):
+    """Models the ODM ItemData object"""
+    ALLOWED_TRANSACTION_TYPES = ['insert','update','upsert','context','remove']
+
+    def __init__(self, itemoid, value, specify_value = None, transaction_type = None, lock = None, freeze = None, verify = None):
+        super(self.__class__, self).__init__(transaction_type)
+        self.itemoid = itemoid
+        self.value = value
+
+        self.specify_value = specify_value
+        self.lock = lock
+        self.freeze = freeze
+        self.verify = verify
+
     def build(self, builder):
         """Build XML by appending to builder
-
-<ItemData ItemOID="MH_DT" Value="06 Jan 2009" TransactionType="Insert">        """
+           <ItemData ItemOID="MH_DT" Value="06 Jan 2009" TransactionType="Insert">
+        """
         params = dict(ItemOID=self.itemoid)
 
         if self.transaction_type is not None:
@@ -94,7 +107,6 @@ class ItemData(ODMElement):
         if self.specify_value is not None:
             params['mdsol:SpecifyValue'] = self.specify_value
 
-
         if self.lock is not None:
             params['mdsol:Lock'] = bool_to_yes_no(self.lock)
 
@@ -104,37 +116,24 @@ class ItemData(ODMElement):
         if self.verify is not None:
             params['mdsol:Verify'] = bool_to_yes_no(self.verify)
 
-
         builder.start("ItemData", params)
-
 
         #Ask children (queries etc not added yet)
         #for item  in self.items.values():
         #   item.build(builder)
         builder.end("ItemData")
 
-class ItemGroupData(ODMElement):
+class ItemGroupData(TransactionalElement):
     """Models the ODM ItemGroupData object.
        Note no name for the ItemGroupData element is required. This is built automatically by the form.
     """
+    ALLOWED_TRANSACTION_TYPES = ['insert','update','upsert','context']
+
     def __init__(self, transaction_type=None, item_group_repeat_key=1, whole_item_group=False):
-        self._transaction_type = None
-        self.transaction_type = transaction_type
+        super(self.__class__, self).__init__(transaction_type)
         self.item_group_repeat_key = item_group_repeat_key
         self.whole_item_group = whole_item_group
         self.items = {}
-
-
-    @property
-    def transaction_type(self):
-        return self._transaction_type
-
-    @transaction_type.setter
-    def transaction_type(self, value):
-        if value is not None:
-            if value.lower() not in ['insert','update','upsert','context']:
-                raise AttributeError('ItemGroupData transaction_type element must be one of Insert, Update, Upsert or Context not %s' % value)
-        self._transaction_type = value
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -146,7 +145,6 @@ class ItemGroupData(ODMElement):
 
         self.items[other.itemoid] = other
         return other
-
 
     def build(self, builder, formname):
         """Build XML by appending to builder
@@ -163,38 +161,24 @@ class ItemGroupData(ODMElement):
 
         builder.start("ItemGroupData", params)
 
-
         #Ask children
         for item  in self.items.values():
            item.build(builder)
         builder.end("ItemGroupData")
 
 
-class FormData(ODMElement):
+class FormData(TransactionalElement):
     """Models the ODM FormData object"""
+    ALLOWED_TRANSACTION_TYPES = ['insert','update','upsert']
+
     def __init__(self, formoid, transaction_type=None, form_repeat_key=None):
+        super(self.__class__, self).__init__(transaction_type)
         self.formoid = formoid
-        self._transaction_type = None
-
-        self.transaction_type = transaction_type
-
         self.form_repeat_key = form_repeat_key
         self.itemgroups = []
 
-    @property
-    def transaction_type(self):
-        return self._transaction_type
-
-    @transaction_type.setter
-    def transaction_type(self, value):
-        if value is not None:
-            if value.lower() not in ['insert','update','upsert']:
-                raise AttributeError('StudyEventData transaction_type element must be one of Insert, Update or Upsert, not %s' % value)
-        self._transaction_type = value
-
     def __lshift__(self, other):
         """Override << operator"""
-
         if not isinstance(other, ItemGroupData):
             raise ValueError("FormData object can only receive ItemGroupData object")
 
@@ -225,27 +209,14 @@ class FormData(ODMElement):
         builder.end("FormData")
 
 
-class StudyEventData(ODMElement):
+class StudyEventData(TransactionalElement):
     """Models the ODM StudyEventData object"""
+    ALLOWED_TRANSACTION_TYPES = ['insert','update','remove','context']
     def __init__(self, study_event_oid, transaction_type="update", study_event_repeat_key=None):
+        super(self.__class__, self).__init__(transaction_type)
         self.study_event_oid = study_event_oid
-        self._transaction_type = None
-        self.transaction_type = transaction_type
         self.study_event_repeat_key = str(study_event_repeat_key)
         self.forms = []
-
-    @property
-    def transaction_type(self):
-        return self._transaction_type
-
-    @transaction_type.setter
-    def transaction_type(self, value):
-        if value is not None:
-            if value.lower() not in ['insert','update','remove','context']:
-                raise AttributeError('StudyEventData transaction_type element must be one of Insert, Update, Remove or Context, not %s' % value)
-        self._transaction_type = value
-
-
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -271,7 +242,6 @@ class StudyEventData(ODMElement):
         if self.study_event_repeat_key is not None:
             params["StudyEventRepeatKey"] = self.study_event_repeat_key
 
-
         builder.start("StudyEventData", params)
 
         #Ask children
@@ -280,27 +250,17 @@ class StudyEventData(ODMElement):
         builder.end("StudyEventData")
 
 
-class SubjectData(ODMElement):
+class SubjectData(TransactionalElement):
     """Models the ODM SubjectData and ODM SiteRef objects"""
+    ALLOWED_TRANSACTION_TYPES = ['insert','update']
     def __init__(self, sitelocationoid, subjectname, transaction_type="update"):
         #TODO:  mdsol:subjectkeytype=SubjectUUID or SubjectName (default)
-        self._transaction_type = None
-        self.transaction_type = transaction_type
+        super(self.__class__, self).__init__(transaction_type)
+
         #If SubjectUUID still need subjectname as mdsol:SubjectName
         self.sitelocationoid = sitelocationoid
         self.subjectname = subjectname
         self.study_events = [] #Can have collection
-
-    @property
-    def transaction_type(self):
-        return self._transaction_type
-
-    @transaction_type.setter
-    def transaction_type(self, value):
-        if value.lower() not in ['insert','update']:
-            raise AttributeError('SubjectData transaction_type element must be one of Insert or Update, not %s' % value)
-        self._transaction_type = value
-
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -348,7 +308,6 @@ class ClinicalData(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-
         params = dict(MetaDataVersionOID = '1',
                       StudyOID = "%s (%s)" % (self.projectname, self.environment,),
                      )
@@ -358,7 +317,6 @@ class ClinicalData(ODMElement):
         if self.subject_data is not None:
             self.subject_data.build(builder)
         builder.end("ClinicalData")
-
 
 class ODM(ODMElement):
     """Models the ODM object"""
@@ -378,14 +336,12 @@ class ODM(ODMElement):
         else:
             self.fileoid = fileoid
 
-
     def __lshift__(self, other):
         """Override << operator"""
         if not isinstance(other, ClinicalData):
             raise ValueError("ODM object can only receive ClinicalData object")
         self.clinical_data = other
         return other
-
 
     def getroot(self):
         """Build XML object, return the root"""
@@ -411,16 +367,8 @@ class ODM(ODMElement):
         self.builder.end("ODM")
         return self.builder.close()
 
-
     def __str__(self):
         doc = self.getroot()
         indent(doc)
         header = '<?xml version="1.0" encoding="utf-8" ?>\n'
         return header + ET.tostring(doc, 'utf-8')
-
-
-
-
-
-
-

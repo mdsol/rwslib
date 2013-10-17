@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
 
     print "All CSV Metadata"
-    all_csv_meta = rave.send_request(MetaDataRequest(dataset_format='xml'))
+    all_csv_meta = rave.send_request(MetaDataRequest(dataset_format='csv'))
     print all_csv_meta
 
     print "SIMPLESTUDY Project Metadata"
