@@ -3,11 +3,11 @@ Requests related to the ODM Adapter
 
 http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/clinical_data_audits/index.html#odm-adapter
 """
-from . import RWSAuthorizedGetRequest
+from . import RWSAuthorizedGetRequest, QueryOptionGetRequest
 
-
-class AuditRecordsRequest(RWSAuthorizedGetRequest):
+class AuditRecordsRequest(QueryOptionGetRequest):
     """Clinical Audit Records Dataset"""
+    KNOWN_QUERY_OPTIONS = ['studyoid','startid','per_page']
 
     def __init__(self, project_name, environment_name, startid=1, per_page=100):
         self.project_name = project_name
@@ -15,37 +15,27 @@ class AuditRecordsRequest(RWSAuthorizedGetRequest):
         self.startid = startid
         self.per_page = per_page
 
-    def studyname_environment(self):
+    @property
+    def studyoid(self):
+        """Create studyoid from project name and environment"""
         return "%s(%s)" % (self.project_name, self.environment_name,)
-
-    def _querystring(self):
-        """Additional keyword arguments"""
-
-        kw = {'studyoid': self.studyname_environment(),
-              'startid': self.startid,
-              'per_page': self.per_page,
-        }
-        return kw
 
     def url_path(self):
         """Return url path list"""
         return self.make_url('datasets', 'ClinicalAuditRecords.odm', **self._querystring())
 
-class VersionFoldersRequest(RWSAuthorizedGetRequest):
+class VersionFoldersRequest(QueryOptionGetRequest):
     """Identify all folders in use in study"""
+    KNOWN_QUERY_OPTIONS = ['studyoid']
 
     def __init__(self, project_name, environment_name):
         self.project_name = project_name
         self.environment_name = environment_name
 
-    def studyname_environment(self):
+    @property
+    def studyoid(self):
+        """Create studyoid from project name and environment"""
         return "%s(%s)" % (self.project_name, self.environment_name,)
-
-    def _querystring(self):
-        """Additional keyword arguments"""
-
-        kw = {'studyoid': self.studyname_environment() }
-        return kw
 
     def _dataset_name(self):
         return 'VersionFolders.odm'
@@ -70,10 +60,15 @@ class SitesMetadataRequest(RWSAuthorizedGetRequest):
             if project_name in [None,'']:
                 raise AttributeError("project_name cannot be empty if environment_name is set")
 
+    @property
+    def studyoid(self):
+        """Create studyoid from project name and environment"""
+        return "%s(%s)" % (self.project_name, self.environment_name,)
+
     def _querystring(self):
         """Additional keyword arguments if filtered to project_name and environment_name"""
         if self.project_name is not None:
-            return {'studyoid': self.studyname_environment() }
+            return {'studyoid': self.studyoid }
         return {}
 
     def url_path(self):
@@ -88,14 +83,16 @@ class UsersRequest(RWSAuthorizedGetRequest):
         self.environment_name = environment_name
         self.location_oid = location_oid
 
-    def studyname_environment(self):
+    @property
+    def studyoid(self):
+        """Create studyoid from project name and environment"""
         return "%s(%s)" % (self.project_name, self.environment_name,)
 
     def _querystring(self):
         """Additional keyword arguments"""
 
-        kw = {'studyoid': self.studyname_environment()}
-        if self.location is not None:
+        kw = {'studyoid': self.studyoid}
+        if self.location_oid is not None:
             kw['locationoid'] = self.location_oid
         return kw
 

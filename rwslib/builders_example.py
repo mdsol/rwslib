@@ -2,6 +2,8 @@ __author__ = 'isparks'
 
 from rwslib.builders import *
 
+from lxml.builder import E
+
 if __name__ == '__main__':
     odm = ODM("test system")
     cd = ClinicalData("Mediflex", "DEV")

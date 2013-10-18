@@ -169,10 +169,7 @@ Parses messages of the form::
                 else:
                     raise KeyError('Unknown Rave Object %s in response %s' % (name, success_stats,))
 
-        #Metadata post
-        if success_stats == 'N/A':
-            pass
-
+        #Node: Metadata post has success_stats == 'N/A'
 
         self.new_records = r_get("NewRecords")
 

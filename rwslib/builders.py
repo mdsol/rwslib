@@ -11,6 +11,7 @@ from datetime import datetime
 #-----------------------------------------------------------------------------------------------------------------------
 # Utilities
 
+
 def now_to_iso8601():
     """Returns NOW date/time as a UTC date/time formated as iso8601 string"""
     utc_date = datetime.utcnow()

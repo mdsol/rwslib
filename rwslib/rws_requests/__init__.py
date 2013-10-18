@@ -72,6 +72,20 @@ class RWSPostRequest(RWSRequest):
 class RWSAuthorizedPostRequest(RWSPostRequest):
     requires_authorization = True
 
+class QueryOptionGetRequest(RWSAuthorizedGetRequest):
+    """Manages requests that have known query string options"""
+    KNOWN_QUERY_OPTIONS = []
+
+    def _querystring(self):
+        """Get additional keyword arguments"""
+
+        kw = {}
+        for key in self.KNOWN_QUERY_OPTIONS:
+            val = getattr(self, key)
+            if val is not None:
+                kw[key] = val
+        return kw
+
 #---------------------------------------------------------------------------------------------------------------------
 # Implementations. These are all standards that have existed for a long time.
 

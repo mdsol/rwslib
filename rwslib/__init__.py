@@ -7,13 +7,11 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright 2013 Medidata Solutions Inc'
 
 
-
 import requests
 from urllib import urlencode
 
 from rws_requests import RWSRequest, make_url
 from rwsobjects import RWSException, RWSError, RWSErrorResponse
-
 
 #-------------------------------------------------------------------------------------------------------
 # Classes
