@@ -15,10 +15,14 @@ Contents:
    :maxdepth: 2
 
    getting_started
-   api
+   rws_requests
    retrieve_clinical_data
    working_architect
    working_metadata
+   post_clinical_data
+   using_builders
+   biostats_gateway
+   odm_adapter
    classes
 
 

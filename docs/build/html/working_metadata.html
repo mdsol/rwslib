@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
-    <link rel="next" title="Class Reference" href="classes.html" />
+    <link rel="next" title="Posting Clinical Data" href="post_clinical_data.html" />
     <link rel="prev" title="Working with Architect Metadata" href="working_architect.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="classes.html" title="Class Reference"
+          <a href="post_clinical_data.html" title="Posting Clinical Data"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="working_architect.html" title="Working with Architect Metadata"
@@ -54,9 +54,10 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Working with Global Library Metadata</a><ul>
-<li><a class="reference internal" href="#library-drafts-projectname">library_drafts(projectname)</a></li>
-<li><a class="reference internal" href="#library-versions-projectname">library_versions(projectname)</a></li>
-<li><a class="reference internal" href="#library-version-projectname-version-oid">library_version(projectname, version_oid)</a></li>
+<li><a class="reference internal" href="#globallibrariesrequest">GlobalLibrariesRequest()</a></li>
+<li><a class="reference internal" href="#globallibrarydraftsrequest-projectname">GlobalLibraryDraftsRequest(projectname)</a></li>
+<li><a class="reference internal" href="#globallibraryversionsrequest-projectname">GlobalLibraryVersionsRequest(projectname)</a></li>
+<li><a class="reference internal" href="#globallibraryversionrequest-projectname-version-oid">GlobalLibraryVersionRequest(projectname, version_oid)</a></li>
 </ul>
 </li>
 </ul>
@@ -65,8 +66,8 @@
   <p class="topless"><a href="working_architect.html"
                         title="previous chapter">Working with Architect Metadata</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="classes.html"
-                        title="next chapter">Class Reference</a></p>
+  <p class="topless"><a href="post_clinical_data.html"
+                        title="next chapter">Posting Clinical Data</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/working_metadata.txt"
@@ -101,66 +102,85 @@
 <p>rwslib provides access to metadata stored in Rave Global Library Volumes. You must provide credentials that
 have access to Global Library Volumes to read this metadata. See <a class="reference internal" href="working_architect.html#architect"><em>Working with Architect Metadata</em></a> for information on working
 with Architect Study Designs.</p>
-<div class="section" id="library-drafts-projectname">
-<h2>library_drafts(projectname)<a class="headerlink" href="#library-drafts-projectname" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="globallibrariesrequest">
+<span id="index-0"></span><h2>GlobalLibrariesRequest()<a class="headerlink" href="#globallibrariesrequest" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
-<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
-study attributes and a list of MetaDataVersion objects representing Rave Architect Global Library Drafts</p>
+<p>Returns a <a class="reference internal" href="classes.html#rwsobjects.RWSStudies" title="rwsobjects.RWSStudies"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudies</span></tt></a> object which inherits from RWSStudy. This has ODM document attributes,
+study attributes and a list of <tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyListItem</span></tt> objects representing Rave Architect Global Library Drafts</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">GlobalLibrariesRequest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gl_studies</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">GlobalLibrariesRequest</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;There are </span><span class="si">%d</span><span class="s"> global libaries&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">gl_studies</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">study</span> <span class="ow">in</span> <span class="n">gl_studies</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="k">print</span> <span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
+<span class="go">There are 1 global libaries</span>
+<span class="go">Mediflex</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="globallibrarydraftsrequest-projectname">
+<span id="index-1"></span><h2>GlobalLibraryDraftsRequest(projectname)<a class="headerlink" href="#globallibrarydraftsrequest-projectname" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Returns a <a class="reference internal" href="classes.html#rwsobjects.RWSStudyMetadataVersions" title="rwsobjects.RWSStudyMetadataVersions"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyMetadataVersions</span></tt></a> object which inherits from RWSStudy. This has ODM document attributes,
+study attributes and a list of <tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyListItem</span></tt> objects representing Rave Architect Global Library Drafts</p>
 <p>Calls:</p>
 <div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries/{{ projectname }}/drafts</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">GlobalLibrariesRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
 
-<span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">library_drafts</span><span class="p">(</span><span class="s">&#39;Rave CDASH&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">GlobalLibraryDraftsRequest</span><span class="p">(</span><span class="s">&#39;Rave CDASH&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">drafts</span><span class="o">.</span><span class="n">fileoid</span>
 <span class="go">be117ac3-e7ea-48fc-8bd8-373eb387703f</span>
-
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">draft</span> <span class="ow">in</span> <span class="n">drafts</span><span class="p">:</span>
 <span class="go">     print &quot;%s - %s&quot; % (draft.name, draft.oid,)</span>
 <span class="go">Rave CDASH 01 - 397</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="library-versions-projectname">
-<h2>library_versions(projectname)<a class="headerlink" href="#library-versions-projectname" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="globallibraryversionsrequest-projectname">
+<span id="index-2"></span><h2>GlobalLibraryVersionsRequest(projectname)<a class="headerlink" href="#globallibraryversionsrequest-projectname" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
-<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
-study attributes and a list of MetaDataVersion objects representing Rave Global Library Versions for
-a library volume.</p>
+<p>Returns a <a class="reference internal" href="classes.html#rwsobjects.RWSStudyMetadataVersions" title="rwsobjects.RWSStudyMetadataVersions"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyMetadataVersions</span></tt></a> object which inherits from RWSStudy. This has ODM document
+attributes, study attributes and a list of <tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyListItem</span></tt> objects representing Rave Architect
+Global Library Versions.</p>
 <p>Calls:</p>
 <div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries/{{ projectname }}/versions</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">GlobalLibraryVersionsRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">library_versions</span><span class="p">(</span><span class="s">&#39;Rave CDASH&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">GlobalLibraryVersionsRequest</span><span class="p">(</span><span class="s">&#39;Rave CDASH&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">fileoid</span>
 <span class="go">50252a80-e233-4d30-9e69-b510e965e44a</span>
-
 <span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
 <span class="go">Rave CDASH</span>
-
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">:</span>
 <span class="gp">... </span>   <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> - </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">version</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="o">.</span><span class="n">oid</span><span class="p">,)</span>
 <span class="go">1.0 - 398</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="library-version-projectname-version-oid">
-<h2>library_version(projectname, version_oid)<a class="headerlink" href="#library-version-projectname-version-oid" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="globallibraryversionrequest-projectname-version-oid">
+<span id="index-3"></span><h2>GlobalLibraryVersionRequest(projectname, version_oid)<a class="headerlink" href="#globallibraryversionrequest-projectname-version-oid" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
-<p>Returns a unicode string of the ODM Metadata for this study version.</p>
+<p>Returns a unicode string of the ODM Metadata for this study version from the global library.</p>
 <p>Calls:</p>
 <div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/libraries/{{ projectname }}/versions/{{ version_oid }}</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">GlobalLibraryVersionRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
-
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">library_version</span><span class="p">(</span><span class="s">&quot;Rave CDASH&quot;</span><span class="p">,</span> <span class="mi">395</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">GlobalLibraryVersionRequest</span><span class="p">(</span><span class="s">&quot;Rave CDASH&quot;</span><span class="p">,</span> <span class="mi">395</span><span class="p">))</span>
 <span class="go">&lt;ODM FileType=&quot;Snapshot&quot; Granularity=&quot;Metadata&quot; CreationDateTime=&quot;2013-06-07T15:36:23.531-00:00&quot; FileOID=&quot;f914dbf8-41fc-492b-bc8f-f4c98e471c38&quot; ODMVersion=&quot;1.3&quot; xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot; xmlns=&quot;http://www.cdisc.org/ns/odm/v1.3&quot;&gt;</span>
 <span class="go">  &lt;Study OID=&quot;Rave CDASH&quot; mdsol:ProjectType=&quot;GlobalLibraryVolume&quot;&gt;</span>
 <span class="go">    &lt;GlobalVariables&gt;</span>
@@ -197,7 +217,7 @@ a library volume.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="classes.html" title="Class Reference"
+          <a href="post_clinical_data.html" title="Posting Clinical Data"
              >next</a> |</li>
         <li class="right" >
           <a href="working_architect.html" title="Working with Architect Metadata"

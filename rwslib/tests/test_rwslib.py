@@ -1,7 +1,7 @@
 __author__ = 'isparks'
 
 import unittest
-import rws
+import rwslib
 import httpretty
 
 class VersionTest(unittest.TestCase):
@@ -16,14 +16,24 @@ class VersionTest(unittest.TestCase):
             body="1.0.0")
 
         #Now my test
-        rave = rws.RWSConnection('https://innovate.mdsol.com')
-        v = rave.version()
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        v = rave.send_request(rwslib.rws_requests.VersionRequest())
 
         self.assertEqual(v, '1.0.0')
         self.assertEqual(rave.last_result.status_code,200)
 
 
+class TestMustBeRWSRequestSubclass(unittest.TestCase):
+    """Test that request object passed must be RWSRequest subclass"""
+    def test_basic(self):
+        """Must be rwssubclass or ValueError"""
 
+        def do():
+            rave = rwslib.RWSConnection('test')
+            v = rave.send_request(object())
+
+
+        self.assertRaises(ValueError, do)
 
 
 if __name__ == '__main__':

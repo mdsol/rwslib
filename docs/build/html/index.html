@@ -95,33 +95,70 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#creating-a-connection-to-rws">Creating a connection to RWS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#making-an-rws-request">Making an RWS request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#authentication">Authentication</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html#getting-more-information-from-last-result">Getting more information from last_result</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#error-handling">Error Handling</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#projectnames-studynames-and-environments">Projectnames, Studynames and Environments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#version">version()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#build-version">build_version()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#flush-cache">flush_cache()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rws_requests.html">rws_requests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rws_requests.html#versionrequest">VersionRequest()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rws_requests.html#buildversionrequest">BuildVersionRequest()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rws_requests.html#diagnosticsrequest">DiagnosticsRequest()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rws_requests.html#cacheflushrequest">CacheFlushRequest()</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="retrieve_clinical_data.html">Retrieving Clinical Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#clinical-studies">clinical_studies()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#study-datasets-projectname">study_datasets(projectname)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#x-mws-cv-last-updated">X-MWS-CV-Last-Updated</a></li>
+<li class="toctree-l1"><a class="reference internal" href="retrieve_clinical_data.html">Working with Clinical Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#projectnames-studynames-and-environments">Projectnames, Studynames and Environments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#clinicalstudiesrequest">ClinicalStudiesRequest()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#studysubjectsrequest-self-project-name-environment-name">StudySubjectsRequest(self, project_name, environment_name)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="retrieve_clinical_data.html#odm-clinical-view-datasets">ODM Clinical View Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#studydatasetrequest-project-name-environment-name">StudyDatasetRequest(project_name, environment_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#subjectdatasetrequest-project-name-environment-name-subjectkey">SubjectDatasetRequest(project_name, environment_name, subjectkey)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#versiondatasetrequest-project-name-environment-name-version-oid">VersionDatasetRequest(project_name, environment_name, version_oid)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="retrieve_clinical_data.html#index-6">X-MWS-CV-Last-Updated</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="working_architect.html">Working with Architect Metadata</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="working_architect.html#metadata-studies">metadata_studies()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="working_architect.html#study-drafts-projectname">study_drafts(projectname)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="working_architect.html#study-versions-projectname">study_versions(projectname)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="working_architect.html#study-version-projectname-version-oid">study_version(projectname, version_oid)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_architect.html#metadatastudiesrequest">MetadataStudiesRequest()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_architect.html#studydraftsrequest-project-name">StudyDraftsRequest(project_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_architect.html#studyversionsrequest-projectname">StudyVersionsRequest(projectname)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_architect.html#studyversionrequest-projectname-oid">StudyVersionRequest(projectname, oid)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_architect.html#postmetadatarequest-projectname-data">PostMetadataRequest(projectname, data)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="working_metadata.html">Working with Global Library Metadata</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="working_metadata.html#library-drafts-projectname">library_drafts(projectname)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="working_metadata.html#library-versions-projectname">library_versions(projectname)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="working_metadata.html#library-version-projectname-version-oid">library_version(projectname, version_oid)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_metadata.html#globallibrariesrequest">GlobalLibrariesRequest()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_metadata.html#globallibrarydraftsrequest-projectname">GlobalLibraryDraftsRequest(projectname)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_metadata.html#globallibraryversionsrequest-projectname">GlobalLibraryVersionsRequest(projectname)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_metadata.html#globallibraryversionrequest-projectname-version-oid">GlobalLibraryVersionRequest(projectname, version_oid)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="post_clinical_data.html">Posting Clinical Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="post_clinical_data.html#postdatarequest-odm-data">PostDataRequest(odm_data)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post_clinical_data.html#using-builders">Using Builders</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="using_builders.html">Using Builders</a></li>
+<li class="toctree-l1"><a class="reference internal" href="biostats_gateway.html">Biostats Gateway Requests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="biostats_gateway.html#cvmetadatarequest-project-name-environment-name">CVMetaDataRequest(project_name, environment_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="biostats_gateway.html#formdatarequest-project-name-environment-name-dataset-type-form-oid">FormDataRequest(project_name, environment_name, dataset_type, form_oid)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="biostats_gateway.html#metadatarequest">MetaDataRequest()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="biostats_gateway.html#projectmetadatarequest-project-name">ProjectMetaDataRequest(project_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="biostats_gateway.html#viewmetadatarequest-view-name">ViewMetaDataRequest(view_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="biostats_gateway.html#commentdatarequest-project-name-environment-name">CommentDataRequest(project_name, environment_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="biostats_gateway.html#protocoldeviationsrequest-project-name-environment-name">ProtocolDeviationsRequest(project_name, environment_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="biostats_gateway.html#datadictionariesrequest-project-name-environment-name">DataDictionariesRequest(project_name, environment_name)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odm_adapter.html">ODM Adapter Requests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odm_adapter.html#auditrecordsrequest-project-name-environment-name">AuditRecordsRequest(project_name, environment_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odm_adapter.html#versionfoldersrequest-project-name-environment-name">VersionFoldersRequest(project_name, environment_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odm_adapter.html#sitesmetadatarequest">SitesMetadataRequest()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odm_adapter.html#usersrequest-project-name-environment-name">UsersRequest(project_name, environment_name)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odm_adapter.html#signaturedefinitionsrequest-project-name-environment-name">SignatureDefinitionsRequest(project_name, environment_name)</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="classes.html">Class Reference</a></li>
