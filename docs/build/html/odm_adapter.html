@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ODM Adapter Requests &mdash; rwslib 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
+    <link rel="next" title="Class Reference" href="classes.html" />
+    <link rel="prev" title="Biostats Gateway Requests" href="biostats_gateway.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="Class Reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="biostats_gateway.html" title="Biostats Gateway Requests"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/mdsol.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ODM Adapter Requests</a><ul>
+<li><a class="reference internal" href="#auditrecordsrequest-project-name-environment-name">AuditRecordsRequest(project_name, environment_name)</a></li>
+<li><a class="reference internal" href="#versionfoldersrequest-project-name-environment-name">VersionFoldersRequest(project_name, environment_name)</a></li>
+<li><a class="reference internal" href="#sitesmetadatarequest">SitesMetadataRequest()</a></li>
+<li><a class="reference internal" href="#usersrequest-project-name-environment-name">UsersRequest(project_name, environment_name)</a></li>
+<li><a class="reference internal" href="#signaturedefinitionsrequest-project-name-environment-name">SignatureDefinitionsRequest(project_name, environment_name)</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="biostats_gateway.html"
+                        title="previous chapter">Biostats Gateway Requests</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="classes.html"
+                        title="next chapter">Class Reference</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/odm_adapter.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="odm-adapter-requests">
+<span id="odm-adapter"></span><h1>ODM Adapter Requests<a class="headerlink" href="#odm-adapter-requests" title="Permalink to this headline">¶</a></h1>
+<p>The ODM Adapter module provides Request implementations for the Rave Web Service ODM Adapter URLs. These include:</p>
+<ul class="simple">
+<li>Clinical Audit Records Dataset</li>
+<li>Version Folders Dataset</li>
+<li>Sites Dataset</li>
+<li>Users Dataset</li>
+<li>Signature Definitions Dataset</li>
+</ul>
+<p>Read more about ODM Adapter in the
+<a class="reference external" href="http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/clinical_data_audits/index.html#odm-adapter">Rave Web Services documentation</a></p>
+<span class="target" id="oa-auditrecords-request"></span><div class="section" id="auditrecordsrequest-project-name-environment-name">
+<span id="index-0"></span><h2>AuditRecordsRequest(project_name, environment_name)<a class="headerlink" href="#auditrecordsrequest-project-name-environment-name" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this request.</p>
+<p>Returns audit data in ODM format. Since the audit trail is a large table which cannot be downloaded in a single request,
+this dataset returns headers that tell you what the next page of data to request is. This allows you to make further
+requests until all data from the dataset has been received.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/datasets/ClinicalAuditRecords.odm/?studyoid={project_name}({environment_name})&amp;startid={startid}&amp;per_page={per_page}</pre>
+</div>
+<p>Options:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>startid=1</td>
+<td>The audit ID to start on. Defaults to 1. The first Audit ID</td>
+</tr>
+<tr class="row-odd"><td>per_page=100</td>
+<td>How many audits to return per request. Default is 100.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests.odm_adapter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">audits</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">AuditRecordsRequest</span><span class="p">(</span><span class="s">&#39;SIMPLESTUDY&#39;</span><span class="p">,</span><span class="s">&#39;TEST&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">last_request</span><span class="o">.</span><span class="n">headers</span> <span class="c">#TO SEE</span>
+<span class="go">WAITING FOR A URL TO TEST THIS ON</span>
+</pre></div>
+</div>
+<span class="target" id="oa-versionfolders-request"></span></div>
+<div class="section" id="versionfoldersrequest-project-name-environment-name">
+<span id="index-1"></span><h2>VersionFoldersRequest(project_name, environment_name)<a class="headerlink" href="#versionfoldersrequest-project-name-environment-name" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this request.</p>
+<p>Returns a dataset in ODM format which represents the folders in-use. This is useful because the standard ODM Metadata
+can only return the primary Matrix (folder structure) of Rave. VersionFoldersRequest provides all possible folders.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/datasets/VersionFolders.odm/?studyoid={project_name}({environment_name})</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests.odm_adapter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">VersionFoldersRequest</span><span class="p">(</span><span class="s">&#39;SIMPLESTUDY&#39;</span><span class="p">,</span><span class="s">&#39;TEST&#39;</span><span class="p">))</span>
+<span class="go">WAITING FOR A URL TO TEST THIS ON</span>
+</pre></div>
+</div>
+<span class="target" id="oa-sites-metadata-request"></span></div>
+<div class="section" id="sitesmetadatarequest">
+<span id="index-2"></span><h2>SitesMetadataRequest()<a class="headerlink" href="#sitesmetadatarequest" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this request.</p>
+<p>Returns an ODM AdminData document which lists all sites along with their metadata versions and effective dates.
+Optionally can take a project name and an environment to filter the list only to that study/environment.</p>
+<p>To find the current active metadata version for a study/site you will need to sort the metadata versions for the site
+by the effective date and take the latest one.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/datasets/Sites.odm/[?studyoid={project_name}({environment_name})]</pre>
+</div>
+<p>Options:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>project_name={projectname}</td>
+<td>Project to filter the result set to (recommended)</td>
+</tr>
+<tr class="row-odd"><td>environment_name={environment}</td>
+<td>Environment to filter the result set to</td>
+</tr>
+</tbody>
+</table>
+<p>If used, the project_name and environmen_namet must both be supplied or an error will result.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests.odm_adapter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">SitesMetadataRequest</span><span class="p">(</span><span class="s">&#39;SIMPLESTUDY&#39;</span><span class="p">,</span><span class="s">&#39;TEST&#39;</span><span class="p">))</span>
+<span class="go">WAITING FOR A URL TO TEST THIS ON</span>
+</pre></div>
+</div>
+<span class="target" id="oa-users-request"></span></div>
+<div class="section" id="usersrequest-project-name-environment-name">
+<span id="index-3"></span><h2>UsersRequest(project_name, environment_name)<a class="headerlink" href="#usersrequest-project-name-environment-name" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this request.</p>
+<p>Returns an ODM AdminData document listing all users associated with a study with optional filtering to a single
+location.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/datasets/Users.odm/?studyoid={project_name}({environment_name})[&amp;locationoid={locationoid}]</pre>
+</div>
+<p>Options:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="28%" />
+<col width="72%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>locationoid</td>
+<td>A site number from Rave that uniquely identifies a site</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests.odm_adapter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">UsersRequest</span><span class="p">(</span><span class="s">&#39;SIMPLESTUDY&#39;</span><span class="p">,</span><span class="s">&#39;TEST&#39;</span><span class="p">))</span>
+<span class="go">WAITING FOR A URL TO TEST THIS ON</span>
+</pre></div>
+</div>
+<span class="target" id="oa-signature-defs-request"></span></div>
+<div class="section" id="signaturedefinitionsrequest-project-name-environment-name">
+<span id="index-4"></span><h2>SignatureDefinitionsRequest(project_name, environment_name)<a class="headerlink" href="#signaturedefinitionsrequest-project-name-environment-name" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this request.</p>
+<p>Returns an ODM AdminData document listing the definition of all signatures for this study. This allows you to match
+signature audits to their definitions and know in what context a signature was being made.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/datasets/Signatures.odm/?studyoid={project_name}({environment_name})</pre>
+</div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests.odm_adapter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">SignatureDefinitionsRequest</span><span class="p">(</span><span class="s">&#39;SIMPLESTUDY&#39;</span><span class="p">,</span><span class="s">&#39;TEST&#39;</span><span class="p">))</span>
+<span class="go">WAITING FOR A URL TO TEST THIS ON</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="Class Reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="biostats_gateway.html" title="Biostats Gateway Requests"
+             >previous</a> |</li>
+        <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Medidata Solutions Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>API &mdash; rwslib 1.0 documentation</title>
+    <title>rws_requests &mdash; rwslib 1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
-    <link rel="next" title="Retrieving Clinical Data" href="retrieve_clinical_data.html" />
+    <link rel="next" title="Working with Clinical Data" href="retrieve_clinical_data.html" />
     <link rel="prev" title="Getting started" href="getting_started.html" /> 
   </head>
   <body>
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="retrieve_clinical_data.html" title="Retrieving Clinical Data"
+          <a href="retrieve_clinical_data.html" title="Working with Clinical Data"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="getting_started.html" title="Getting started"
@@ -53,11 +53,11 @@
             </a></p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">API</a><ul>
-<li><a class="reference internal" href="#projectnames-studynames-and-environments">Projectnames, Studynames and Environments</a></li>
-<li><a class="reference internal" href="#version">version()</a></li>
-<li><a class="reference internal" href="#build-version">build_version()</a></li>
-<li><a class="reference internal" href="#flush-cache">flush_cache()</a></li>
+<li><a class="reference internal" href="#">rws_requests</a><ul>
+<li><a class="reference internal" href="#versionrequest">VersionRequest()</a></li>
+<li><a class="reference internal" href="#buildversionrequest">BuildVersionRequest()</a></li>
+<li><a class="reference internal" href="#diagnosticsrequest">DiagnosticsRequest()</a></li>
+<li><a class="reference internal" href="#cacheflushrequest">CacheFlushRequest()</a></li>
 </ul>
 </li>
 </ul>
@@ -67,10 +67,10 @@
                         title="previous chapter">Getting started</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="retrieve_clinical_data.html"
-                        title="next chapter">Retrieving Clinical Data</a></p>
+                        title="next chapter">Working with Clinical Data</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/api.txt"
+    <li><a href="_sources/rws_requests.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -97,62 +97,84 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="api">
-<h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
-<p>The rwslib API.</p>
-<div class="section" id="projectnames-studynames-and-environments">
-<h2>Projectnames, Studynames and Environments<a class="headerlink" href="#projectnames-studynames-and-environments" title="Permalink to this headline">¶</a></h2>
-<p>rwslib uses some standard definitions for studyname, protocol names and environments. It defines them as:</p>
+  <span class="target" id="rws-requests"></span><div class="section" id="index-0">
+<span id="id1"></span><h1>rws_requests<a class="headerlink" href="#index-0" title="Permalink to this headline">¶</a></h1>
+<p>The rws_requests module contains the core RWSRequest class and a set of Request classes that are standard in all
+versions of Rave Web Services for Rave.</p>
+<p>Also part of this module:</p>
 <ul class="simple">
-<li>Projectname  - The name of the study without environment e.g. the Mediflex in <strong>Mediflex</strong> (Dev)</li>
-<li>Environment  - The environment within the study e.g. the Dev in Mediflex (<strong>Dev</strong>)</li>
-<li>StudyName    - The combination of projectname and environment <strong>Mediflex (Dev)</strong></li>
+<li><a class="reference internal" href="working_architect.html#architect"><em>Working with Architect Metadata</em></a></li>
+<li><a class="reference internal" href="working_metadata.html#glv"><em>Working with Global Library Metadata</em></a></li>
+<li><a class="reference internal" href="retrieve_clinical_data.html#working-clinical-data"><em>Working with Clinical Data</em></a></li>
+<li><a class="reference internal" href="post_clinical_data.html#post-clinical-data"><em>Posting Clinical Data</em></a></li>
 </ul>
-</div>
-<div class="section" id="version">
-<h2>version()<a class="headerlink" href="#version" title="Permalink to this headline">¶</a></h2>
+<p>rws_requests also provides additional requests in sub-modules for additional features:</p>
+<ul class="simple">
+<li><a class="reference internal" href="biostats_gateway.html#biostats-gateway"><em>Biostats Gateway Requests</em></a></li>
+<li><a class="reference internal" href="odm_adapter.html#odm-adapter"><em>ODM Adapter Requests</em></a></li>
+</ul>
+<span class="target" id="version-request"></span><div class="section" id="versionrequest">
+<span id="index-1"></span><h2>VersionRequest()<a class="headerlink" href="#versionrequest" title="Permalink to this headline">¶</a></h2>
 <p>Returns the text result of calling:</p>
-<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/version</pre>
+<div class="highlight-python"><pre>https://{ host }/RaveWebServices/version</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">VersionRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization optional</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">VersionRequest</span><span class="p">())</span>
 <span class="go">1.8.0</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="build-version">
-<h2>build_version()<a class="headerlink" href="#build-version" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="buildversion-request"></span></div>
+<div class="section" id="buildversionrequest">
+<span id="index-2"></span><h2>BuildVersionRequest()<a class="headerlink" href="#buildversionrequest" title="Permalink to this headline">¶</a></h2>
 <p>Returns the text result of calling:</p>
-<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/version/build</pre>
+<div class="highlight-python"><pre>https://{ host }/RaveWebServices/version/build</pre>
 </div>
-<p>Diagnostics returns a 200 response code and the internal build number.</p>
+<p>Returns a 200 response code and the internal build number.</p>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">BuildVersionRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization optional</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">build_version</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">BuildVersionRequest</span><span class="p">())</span>
 <span class="go">5.6.5.12</span>
 </pre></div>
 </div>
+<span class="target" id="diagnostics-request"></span></div>
+<div class="section" id="diagnosticsrequest">
+<span id="index-3"></span><h2>DiagnosticsRequest()<a class="headerlink" href="#diagnosticsrequest" title="Permalink to this headline">¶</a></h2>
+<p>Returns the text result of calling:</p>
+<div class="highlight-python"><pre>https://{ host }/RaveWebServices/version/build</pre>
 </div>
-<div class="section" id="flush-cache">
-<h2>flush_cache()<a class="headerlink" href="#flush-cache" title="Permalink to this headline">¶</a></h2>
+<p>Returns a 200 response code and the text <em>OK</em> if RWS self-checks pass.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">DiagnosticsRequest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization optional</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">DiagnosticsRequest</span><span class="p">())</span>
+<span class="go">OK</span>
+</pre></div>
+</div>
+<span class="target" id="cacheflush-request"></span></div>
+<div class="section" id="cacheflushrequest">
+<span id="index-4"></span><h2>CacheFlushRequest()<a class="headerlink" href="#cacheflushrequest" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method call.</p>
 <p>Returns the text result of calling:</p>
-<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/webservice.aspx?CacheFlush</pre>
+<div class="highlight-python"><pre>https://{ host }/RaveWebServices/webservice.aspx?CacheFlush</pre>
 </div>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">Calling flush_cache unnecessarily causes RWS to re-load objects, causing additional resource utilization that
+<p class="last">Calling CacheFlush unnecessarily causes RWS to re-load objects, causing additional resource utilization that
 could have a detrimental affect on Rave performance.</p>
 </div>
 <p>Flushes the RWS cache. Generally Rave and RWS manage their own caching. You should not need to use this method
-in normal operation. Returns a RWSResponse object with a istransactionsuccessful attribute:</p>
+in normal operation. Returns a  <tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSResponse</span></tt> object with a istransactionsuccessful attribute:</p>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">CacheFlushRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization REQUIRED</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">flush_cache</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">CacheFlushRequest</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">response</span><span class="o">.</span><span class="n">istransactionsucessful</span>
 <span class="go">True</span>
 </pre></div>
@@ -176,7 +198,7 @@ in normal operation. Returns a RWSResponse object with a istransactionsuccessful
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="retrieve_clinical_data.html" title="Retrieving Clinical Data"
+          <a href="retrieve_clinical_data.html" title="Working with Clinical Data"
              >next</a> |</li>
         <li class="right" >
           <a href="getting_started.html" title="Getting started"

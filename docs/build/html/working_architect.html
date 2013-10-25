@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="rwslib 1.0 documentation" href="index.html" />
     <link rel="next" title="Working with Global Library Metadata" href="working_metadata.html" />
-    <link rel="prev" title="Retrieving Clinical Data" href="retrieve_clinical_data.html" /> 
+    <link rel="prev" title="Working with Clinical Data" href="retrieve_clinical_data.html" /> 
   </head>
   <body>
     <div class="related">
@@ -41,7 +41,7 @@
           <a href="working_metadata.html" title="Working with Global Library Metadata"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="retrieve_clinical_data.html" title="Retrieving Clinical Data"
+          <a href="retrieve_clinical_data.html" title="Working with Clinical Data"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
       </ul>
@@ -54,17 +54,18 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Working with Architect Metadata</a><ul>
-<li><a class="reference internal" href="#metadata-studies">metadata_studies()</a></li>
-<li><a class="reference internal" href="#study-drafts-projectname">study_drafts(projectname)</a></li>
-<li><a class="reference internal" href="#study-versions-projectname">study_versions(projectname)</a></li>
-<li><a class="reference internal" href="#study-version-projectname-version-oid">study_version(projectname, version_oid)</a></li>
+<li><a class="reference internal" href="#metadatastudiesrequest">MetadataStudiesRequest()</a></li>
+<li><a class="reference internal" href="#studydraftsrequest-project-name">StudyDraftsRequest(project_name)</a></li>
+<li><a class="reference internal" href="#studyversionsrequest-projectname">StudyVersionsRequest(projectname)</a></li>
+<li><a class="reference internal" href="#studyversionrequest-projectname-oid">StudyVersionRequest(projectname, oid)</a></li>
+<li><a class="reference internal" href="#postmetadatarequest-projectname-data">PostMetadataRequest(projectname, data)</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="retrieve_clinical_data.html"
-                        title="previous chapter">Retrieving Clinical Data</a></p>
+                        title="previous chapter">Working with Clinical Data</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="working_metadata.html"
                         title="next chapter">Working with Global Library Metadata</a></p>
@@ -101,19 +102,20 @@
 <span id="architect"></span><h1>Working with Architect Metadata<a class="headerlink" href="#working-with-architect-metadata" title="Permalink to this headline">¶</a></h1>
 <p>Access to Architect study designs relies on the credentials you supply having access to Rave Architect.
 See <a class="reference internal" href="working_metadata.html#glv"><em>Working with Global Library Metadata</em></a> for details on how to access study Metadata in Global Libraries.</p>
-<div class="section" id="metadata-studies">
-<span id="metdata-studies"></span><span id="index-0"></span><h2>metadata_studies()<a class="headerlink" href="#metadata-studies" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="metadatastudiesrequest">
+<span id="metdata-studies-request"></span><span id="index-0"></span><h2>MetadataStudiesRequest()<a class="headerlink" href="#metadatastudiesrequest" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
-<p>Returns a RWSStudies object which has ODM document attributes and a list of RWSStudy objects. These are
-the studies you have access to as an Architect user. Use <a class="reference internal" href="retrieve_clinical_data.html#clinical-studies"><em>clinical_studies()</em></a> to get a list of studies that
-you an interact with as an EDC user.</p>
+<p>Returns a <a class="reference internal" href="classes.html#rwsobjects.RWSStudies" title="rwsobjects.RWSStudies"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudies</span></tt></a> object which has <a class="reference internal" href="classes.html#rwsobjects.ODMDoc" title="rwsobjects.ODMDoc"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.ODMDoc</span></tt></a> document attributes and a list of
+<tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyListItem</span></tt> objects. These are the studies you have access to as an Architect user.</p>
+<p>Use <a class="reference internal" href="retrieve_clinical_data.html#clinical-studies"><em>ClinicalStudiesRequest()</em></a> to get a list of studies that you an interact with as an EDC user.</p>
 <p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/studies</pre>
+<div class="highlight-python"><pre>https://{ host }/RaveWebServices/metadata/studies</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">MetadataStudiesRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization required</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">metadata_studies</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">MetadataStudiesRequest</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">ODMVersion</span>
 <span class="go">1.3</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">studies</span><span class="o">.</span><span class="n">fileoid</span>
@@ -149,21 +151,21 @@ you an interact with as an EDC user.</p>
 <p>Studies returned in the list from metadata_studies() have an empty environment attribute since they represent
 study designs, they do not have associated environments.</p>
 </div>
-<div class="section" id="study-drafts-projectname">
-<h2>study_drafts(projectname)<a class="headerlink" href="#study-drafts-projectname" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="studydraftsrequest-project-name">
+<span id="study-drafts-requests"></span><span id="index-1"></span><h2>StudyDraftsRequest(project_name)<a class="headerlink" href="#studydraftsrequest-project-name" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
-<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
-study attributes and a list of MetaDataVersion objects representing Rave Architect Drafts.</p>
+<p>Returns a <a class="reference internal" href="classes.html#rwsobjects.RWSStudyMetadataVersions" title="rwsobjects.RWSStudyMetadataVersions"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyMetadataVersions</span></tt></a> object which inherits from <tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyListItem</span></tt>.
+This has ODM document attributes, study attributes and a list of <a class="reference internal" href="classes.html#rwsobjects.MetaDataVersion" title="rwsobjects.MetaDataVersion"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.MetaDataVersion</span></tt></a> objects
+representing Rave Architect Drafts.</p>
 <p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/studies/{{ projectname }}/drafts</pre>
+<div class="highlight-python"><pre>https://{ host }/RaveWebServices/metadata/studies/{ projectname }/drafts</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
-
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">StudyDraftsRequest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>  <span class="c">#Authorization required</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">study_drafts</span><span class="p">(</span><span class="n">projectname</span><span class="p">)</span>
-
+<span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">StudyDraftsRequest</span><span class="p">(</span><span class="n">projectname</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">drafts</span><span class="o">.</span><span class="n">fileoid</span>
 <span class="go">e88d622d-8ddd-476c-8978-ccfe23b26969</span>
 
@@ -177,27 +179,25 @@ study attributes and a list of MetaDataVersion objects representing Rave Archite
 </pre></div>
 </div>
 </div>
-<div class="section" id="study-versions-projectname">
-<h2>study_versions(projectname)<a class="headerlink" href="#study-versions-projectname" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="studyversionsrequest-projectname">
+<span id="index-2"></span><h2>StudyVersionsRequest(projectname)<a class="headerlink" href="#studyversionsrequest-projectname" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
-<p>Returns a RWSStudyMetadataVersions object which inherits from RWSStudy. This has ODM document attributes,
-study attributes and a list of MetaDataVersion objects representing Rave Architect Versions.</p>
+<p>Returns a <a class="reference internal" href="classes.html#rwsobjects.RWSStudyMetadataVersions" title="rwsobjects.RWSStudyMetadataVersions"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyMetadataVersions</span></tt></a> object which inherits from <tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.RWSStudyListItem</span></tt>.
+This has ODM document attributes, study attributes and a list of <a class="reference internal" href="classes.html#rwsobjects.MetaDataVersion" title="rwsobjects.MetaDataVersion"><tt class="xref py py-class docutils literal"><span class="pre">rwsobjects.MetaDataVersion</span></tt></a> objects
+representing Rave Architect Versions</p>
 <p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/studies/{{ projectname }}/versions</pre>
+<div class="highlight-python"><pre>https://{ host }/RaveWebServices/metadata/studies/{ projectname }/versions</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">StudyVersionsRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;https://innovate.mdsol.com&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
-
 <span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">study_versions</span><span class="p">(</span><span class="n">projectname</span><span class="p">)</span>
-
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">StudyVersionsRequest</span><span class="p">(</span><span class="n">projectname</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">fileoid</span>
 <span class="go">66567494-c76a-4b94-afbb-64f5c1b21cbb</span>
-
 <span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">studyname</span>
 <span class="go">Mediflex</span>
-
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">version</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">:</span>
 <span class="gp">... </span>   <span class="k">print</span> <span class="n">version</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="o">.</span><span class="n">oid</span>
 <span class="go">v19 1015</span>
@@ -207,20 +207,21 @@ study attributes and a list of MetaDataVersion objects representing Rave Archite
 </pre></div>
 </div>
 </div>
-<div class="section" id="study-version-projectname-version-oid">
-<h2>study_version(projectname, version_oid)<a class="headerlink" href="#study-version-projectname-version-oid" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="studyversionrequest-projectname-oid">
+<span id="index-3"></span><h2>StudyVersionRequest(projectname, oid)<a class="headerlink" href="#studyversionrequest-projectname-oid" title="Permalink to this headline">¶</a></h2>
 <p>Authorization is required for this method.</p>
 <p>Returns a unicode string of the ODM Metadata for this study version.</p>
 <p>Calls:</p>
-<div class="highlight-python"><pre>https://{{ host }}/RaveWebServices/metadata/studies/{{ projectname }}/versions/{{ version_oid }}</pre>
+<div class="highlight-python"><pre>https://{ host }/RaveWebServices/metadata/studies/{ projectname }/versions/{ oid }</pre>
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">StudyVersionRequest</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;Mediflex&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">version_oid</span> <span class="o">=</span> <span class="mi">1015</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">study_version</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="n">version_oid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">StudyVersionRequest</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="n">version_oid</span><span class="p">))</span>
 <span class="go">&lt;ODM FileType=&quot;Snapshot&quot; Granularity=&quot;Metadata&quot; CreationDateTime=&quot;2013-06-05T08:30:45.900-00:00&quot;</span>
 <span class="go">     FileOID=&quot;012d24dd-d7d8-44fe-997b-b287ae4faf7e&quot; ODMVersion=&quot;1.3&quot;</span>
 <span class="go">     xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot; xmlns=&quot;http://www.cdisc.org/ns/odm/v1.3&quot;&gt;</span>
@@ -239,6 +240,102 @@ does include some XML helper methods that make working with XML that is generate
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">At this time RWS does not provide a way retrieve the ODM for a Draft, only for a Version.</p>
+</div>
+</div>
+<div class="section" id="postmetadatarequest-projectname-data">
+<span id="index-4"></span><h2>PostMetadataRequest(projectname, data)<a class="headerlink" href="#postmetadatarequest-projectname-data" title="Permalink to this headline">¶</a></h2>
+<p>Authorization is required for this method.</p>
+<p>Creates a new study draft (or overwrites an existing one) with a new ODM definition.</p>
+<p>Calls:</p>
+<div class="highlight-python"><pre>POST https://{ host }/RaveWebServices/metadata/studies/{ projectname }/drafts</pre>
+</div>
+<p>Options:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="36%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>headers={&#8216;Content-type&#8217;: &#8220;text/xml&#8221;}</td>
+<td>Set custom headers. May need to provide a Content-type if your RWS
+version is set to accept different standard content-type than default.</td>
+</tr>
+</tbody>
+</table>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib</span> <span class="kn">import</span> <span class="n">RWSConnection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rwslib.rws_requests</span> <span class="kn">import</span> <span class="n">PostMetadataRequest</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">RWSConnection</span><span class="p">(</span><span class="s">&#39;innovate&#39;</span><span class="p">,</span> <span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;password&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">projectname</span> <span class="o">=</span> <span class="s">&#39;TESTSTUDY&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">odm_definition</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;&lt;ODM FileType=&quot;Snapshot&quot; Granularity=&quot;Metadata&quot;</span>
+<span class="gp">... </span><span class="s"> CreationDateTime=&quot;2013-06-18T15:09:54.843-00:00&quot; FileOID=&quot;82370e27-a6a5-41dc-8c07-829e489823df&quot; ODMVersion=&quot;1.3&quot;</span>
+<span class="gp">... </span><span class="s"> xmlns:mdsol=&quot;http://www.mdsol.com/ns/odm/metadata&quot; xmlns=&quot;http://www.cdisc.org/ns/odm/v1.3&quot;&gt;</span>
+<span class="gp">... </span><span class="s"> &lt;Study OID=&quot;TESTSTUDY&quot;&gt;</span>
+<span class="gp">... </span><span class="s">   &lt;GlobalVariables&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;StudyName&gt;TESTSTUDY&lt;/StudyName&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;StudyDescription&gt;&lt;/StudyDescription&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;ProtocolName&gt;TESTSTUDY&lt;/ProtocolName&gt;</span>
+<span class="gp">... </span><span class="s">   &lt;/GlobalVariables&gt;</span>
+<span class="gp">... </span><span class="s">   &lt;BasicDefinitions/&gt;</span>
+<span class="gp">... </span><span class="s">   &lt;MetaDataVersion OID=&quot;1&quot; Name=&quot;TINY STUDY&quot; mdsol:PrimaryFormOID=&quot;ENROL&quot; mdsol:DefaultMatrixOID=&quot;DEFAULT&quot; mdsol:SignaturePrompt=&quot;Sign this please.&quot;&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;Protocol&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;StudyEventRef StudyEventOID=&quot;SCREEN&quot; OrderNumber=&quot;1&quot; Mandatory=&quot;No&quot; /&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/Protocol&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;StudyEventDef OID=&quot;SCREEN&quot; Name=&quot;Screening&quot; Type=&quot;Common&quot; Repeating=&quot;Yes&quot; mdsol:OrderNumber=&quot;1&quot;&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;FormRef FormOID=&quot;VITAL&quot; OrderNumber=&quot;2&quot; Mandatory=&quot;No&quot; /&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/StudyEventDef&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;FormDef OID=&quot;ENROL&quot; Name=&quot;Enrol&quot; Repeating=&quot;No&quot; mdsol:OrderNumber=&quot;1&quot; mdsol:ConfirmationStyle=&quot;None&quot;&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;ItemGroupRef ItemGroupOID=&quot;ENROL&quot; Mandatory=&quot;Yes&quot; /&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/FormDef&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;FormDef OID=&quot;VITAL&quot; Name=&quot;Vitals&quot; Repeating=&quot;No&quot; mdsol:OrderNumber=&quot;2&quot;&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;ItemGroupRef ItemGroupOID=&quot;VITAL&quot; Mandatory=&quot;Yes&quot; /&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/FormDef&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;ItemGroupDef OID=&quot;ENROL&quot; Name=&quot;ENROL&quot; Repeating=&quot;No&quot;&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;ItemRef ItemOID=&quot;SUBID&quot; OrderNumber=&quot;1&quot; Mandatory=&quot;No&quot; /&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;ItemRef ItemOID=&quot;BIRTHDT&quot; OrderNumber=&quot;2&quot; Mandatory=&quot;No&quot; /&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/ItemGroupDef&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;ItemGroupDef OID=&quot;VITAL&quot; Name=&quot;VITAL&quot; Repeating=&quot;No&quot;&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;ItemRef ItemOID=&quot;WEIGHT_KG&quot; OrderNumber=&quot;1&quot; Mandatory=&quot;No&quot; /&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;ItemRef ItemOID=&quot;HEIGHT_CM&quot; OrderNumber=&quot;2&quot; Mandatory=&quot;No&quot; /&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/ItemGroupDef&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;ItemDef OID=&quot;SUBID&quot; Name=&quot;SUBID&quot; DataType=&quot;text&quot; Length=&quot;10&quot; mdsol:ControlType=&quot;Text&quot;&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;Question&gt;</span>
+<span class="gp">... </span><span class="s">         &lt;TranslatedText xml:lang=&quot;en&quot;&gt;Subject ID&lt;/TranslatedText&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;/Question&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/ItemDef&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;ItemDef OID=&quot;BIRTHDT&quot; Name=&quot;BIRTHDT&quot; DataType=&quot;date&quot; mdsol:DateTimeFormat=&quot;yyyy MMM dd&quot; mdsol:ControlType=&quot;DateTime&quot;&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;Question&gt;</span>
+<span class="gp">... </span><span class="s">         &lt;TranslatedText xml:lang=&quot;en&quot;&gt;Date of Birth&lt;/TranslatedText&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;/Question&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/ItemDef&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;ItemDef OID=&quot;WEIGHT_KG&quot; Name=&quot;WEIGHT_KG&quot; DataType=&quot;float&quot; Length=&quot;4&quot; SignificantDigits=&quot;1&quot; mdsol:ControlType=&quot;Text&quot;&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;Question&gt;</span>
+<span class="gp">... </span><span class="s">         &lt;TranslatedText xml:lang=&quot;en&quot;&gt;Weight&lt;/TranslatedText&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;/Question&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/ItemDef&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;ItemDef OID=&quot;HEIGHT_CM&quot; Name=&quot;HEIGHT_CM&quot; DataType=&quot;float&quot; Length=&quot;4&quot; SignificantDigits=&quot;1&quot; mdsol:ControlType=&quot;Text&quot;&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;Question&gt;</span>
+<span class="gp">... </span><span class="s">         &lt;TranslatedText xml:lang=&quot;en&quot;&gt;Height&lt;/TranslatedText&gt;</span>
+<span class="gp">... </span><span class="s">       &lt;/Question&gt;</span>
+<span class="gp">... </span><span class="s">     &lt;/ItemDef&gt;</span>
+<span class="gp">... </span><span class="s">   &lt;/MetaDataVersion&gt;</span>
+<span class="gp">... </span><span class="s"> &lt;/Study&gt;</span>
+<span class="gp">... </span><span class="s">&lt;/ODM&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">send_request</span><span class="p">(</span><span class="n">PPostMetadataRequest</span><span class="p">(</span><span class="n">projectname</span><span class="p">,</span> <span class="n">odm_definition</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+<span class="go">&lt;Response ReferenceNumber=&quot;5b260cff-e136-4b44-9211-e473fa4d6048&quot;</span>
+<span class="go">          InboundODMFileOID=&quot;82370e27-a6a5-41dc-8c07-829e489823df&quot;</span>
+<span class="go">          IsTransactionSuccessful=&quot;1&quot;</span>
+<span class="go">          SuccessStatistics=&quot;N/A&quot; NewRecords=&quot;&quot; DraftImported=&quot;1&quot;&gt;</span>
+<span class="go">&lt;/Response&gt;</span>
+</pre></div>
 </div>
 </div>
 </div>
@@ -262,7 +359,7 @@ does include some XML helper methods that make working with XML that is generate
           <a href="working_metadata.html" title="Working with Global Library Metadata"
              >next</a> |</li>
         <li class="right" >
-          <a href="retrieve_clinical_data.html" title="Retrieving Clinical Data"
+          <a href="retrieve_clinical_data.html" title="Working with Clinical Data"
              >previous</a> |</li>
         <li><a href="index.html">rwslib 1.0 documentation</a> &raquo;</li> 
       </ul>
