@@ -1,5 +1,14 @@
 __author__ = 'isparks'
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Overview
+#
+# local_cv is a small framework utilizing rwslib that pulls clinical view data from Rave and into a local
+# (to your own machine) database where it can be queried, reported on by SQL tools etc.
+#
+# The library provides a simple SQLLite proof of concept but other SQL engines could be supported by creating
+# new subclasses of BaseDBAdapter to handle the DDL, DML and database population.
+
 from rwslib import RWSConnection
 from rwslib.rws_requests.biostats_gateway import ProjectMetaDataRequest, FormDataRequest
 
@@ -9,6 +18,8 @@ from itertools import groupby
 import sqlite3
 from cStringIO import StringIO
 import logging
+
+
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -31,13 +42,11 @@ class BaseDBAdapter(object):
         """Override in descendant classes to receive information about the DB to be populated"""
         self.datasets = {}
 
-
-    @classmethod
-    def getCSVReader(cls, data):
+    @staticmethod
+    def getCSVReader(data):
         """Take a Rave CSV output ending with a line with just EOF on it and return a DictReader"""
         f = StringIO(data[:-4]) #Remove \nEOF
         return DictReader(f)
-
 
     def processMetaData(self, metadata):
         """Takes a string representing a View metadata CSV extract from RWS, sets dataset dictionary
@@ -45,7 +54,6 @@ class BaseDBAdapter(object):
         """
         self._setDatasets(metadata)
         self._processDDL()
-
 
     def _setDatasets(self, metadata):
         """Extract dataset definitions from CSV metadata"""
@@ -88,7 +96,6 @@ class BaseDBAdapter(object):
         """Create and populate table with values from dataset"""
         raise NotImplementedError("Override _createDML in descendant classes")
 
-
 class SQLLiteDBAdapter(BaseDBAdapter):
     """Variant that makes SQLLite SQL"""
 
@@ -96,7 +103,6 @@ class SQLLiteDBAdapter(BaseDBAdapter):
         """Receives a SQLLiteDB to populate"""
         BaseDBAdapter.__init__(self)
         self.conn = db
-
 
     def _processDDL(self):
         """Generate and process table SQL, SQLLite version"""
@@ -110,7 +116,6 @@ class SQLLiteDBAdapter(BaseDBAdapter):
 
     def _generateDDL(self):
         """Generate DDL statements for SQLLite"""
-
         sql = []
         #Next convert each set of columns into a table structure
         for dataset_name in self.datasets.keys():
@@ -125,7 +130,6 @@ class SQLLiteDBAdapter(BaseDBAdapter):
                 sql_datatype = self.getSQLDataType(col["vartype"],col["varlength"],col["varformat"])
                 col_defs.append("%s %s" % (col["varname"],sql_datatype,))
 
-
             l = ["CREATE TABLE %s " % dataset_name]
             l.append("(")
             l.append(','.join(col_defs))
@@ -136,10 +140,10 @@ class SQLLiteDBAdapter(BaseDBAdapter):
 
         return sql
 
-    def getSQLDataType(self, dtype, dlength, dformat):
+    @staticmethod
+    def getSQLDataType(dtype, dlength, dformat):
         """Return SQLLite data type for a Rave view data type"""
         return dict(num = "NUMERIC", char = "TEXT")[dtype]
-
 
     def _processDML(self, dataset_name, cols, reader):
         """Overridden version of create DML for SQLLite"""
@@ -149,8 +153,6 @@ class SQLLiteDBAdapter(BaseDBAdapter):
         c = self.conn.cursor()
         c.executemany(sql_template, rows)
         self.conn.commit()
-
-
 
     def _generateDML(self, dataset_name, cols, reader):
         """Generates a sql INSERT template and marshals row data into form that meets INSERT statements expectations"""
@@ -180,9 +182,8 @@ class LocalCVBuilder(object):
         self.environment = environment
         self.db_adapter = db_adapter
 
-
-    @classmethod
-    def name_type_from_viewname(cls, viewname):
+    @staticmethod
+    def name_type_from_viewname(viewname):
         """Have format V_<studyname>_<view>[_RAW], return name and view type REGULAR or RAW"""
         vars = viewname.split('_')
         name = vars[2]
@@ -192,13 +193,11 @@ class LocalCVBuilder(object):
             _type = 'REGULAR'
         return name, _type
 
-
     def execute(self):
         """Generate local DB, pulling metadata and data from RWSConnection"""
 
         logging.info('Requesting view metadata for project %s' % self.project_name)
         project_csv_meta = self.rws_connection.send_request(ProjectMetaDataRequest(self.project_name))
-
 
         #Process it into a set of tables
         self.db_adapter.processMetaData(project_csv_meta)
@@ -209,14 +208,11 @@ class LocalCVBuilder(object):
             form_name, _type = self.name_type_from_viewname(dataset_name)
             form_data = self.rws_connection.send_request(FormDataRequest(self.project_name,self.environment,_type,form_name))
 
-
             #Now process the form_data into the db of choice
             logging.info('Populating dataset %s' % dataset_name)
             self.db_adapter.processFormData(form_data, dataset_name)
 
-
         logging.info('Process complete')
-
 
 
 if __name__ == '__main__':
@@ -250,4 +246,3 @@ if __name__ == '__main__':
     lcv.execute()
 
     #Once complete you can do further work with the conn object, run SQL statements etc.
-

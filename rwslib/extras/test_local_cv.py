@@ -3,7 +3,6 @@ import unittest
 
 from rwslib.extras.local_cv import SQLLiteDBAdapter, LocalCVBuilder
 
-
 metadata = """projectname,viewname,ordinal,varname,vartype,varlength,varformat,varlabel
 "SIMPLESTUDY","V_SIMPLESTUDY_ENROL","1","userid","num","8","10.","Internal id for the user"
 "SIMPLESTUDY","V_SIMPLESTUDY_ENROL","2","projectid","num","8","10.","projectid"
@@ -270,13 +269,11 @@ class FakeConn(object):
     def commit(self):
         pass
 
-
 class TestRWSCSVReader(unittest.TestCase):
     def setUp(self):
         fake_db = FakeConn()
         self.tested = SQLLiteDBAdapter(fake_db)
         self.tested._setDatasets(metadata)
-
 
     def test_dataset(self):
         self.assertEqual("V_SIMPLESTUDY_ENROL" in self.tested.datasets, True)
@@ -303,18 +300,13 @@ class TestRWSCSVReader(unittest.TestCase):
         """Test generation of insert statements"""
         self.tested.processFormData(enrol_data, 'V_SIMPLESTUDY_ENROL')
 
-        #print self.tested.conn.cursor.sql
-
         first_line = self.tested.conn.cursor.sql[0][0]
         first_statement = first_line[0]
         first_values = first_line[1]
 
-
-
         #Check sql construction
         self.assertEqual(first_statement.startswith('INSERT INTO V_SIMPLESTUDY_ENROL (userid,projectid,project'), True)
         self.assertEqual('SUBID,BIRTHDT,BIRTHDT_RAW,BIRTHDT_INT,BIRTHDT_YYYY,BIRTHDT_MM,BIRTHDT_DD)' in first_statement, True)
-
 
         #Check values
         self.assertEqual('457',first_values[0]) #First value
