@@ -318,8 +318,8 @@ class TestSQLDataType(unittest.TestCase):
 
         sqlite_db = None
         tested = SQLLiteDBAdapter(sqlite_db)
-        self.assertEqual(tested.getSQLDataType("num","8","datetime22.3"), "NUMERIC")
-        self.assertEqual(tested.getSQLDataType("char","11","$11."), "TEXT")
+        self.assertEqual(tested.getSQLDataType("num"), "NUMERIC")
+        self.assertEqual(tested.getSQLDataType("char"), "TEXT")
 
 class TestNameTypeFromViewname(unittest.TestCase):
     def test_name_type_from_viewname(self):
@@ -329,6 +329,7 @@ class TestNameTypeFromViewname(unittest.TestCase):
         self.assertEqual(LocalCVBuilder.name_type_from_viewname("V_SIMPLESTUDY_ENROL_RAW")[1],"RAW")
         self.assertEqual(LocalCVBuilder.name_type_from_viewname("V_SIMPLESTUDY_Lab")[0],"Lab")
         self.assertEqual(LocalCVBuilder.name_type_from_viewname("V_SIMPLESTUDY_Lab")[1],"REGULAR")
+        self.assertEqual(LocalCVBuilder.name_type_from_viewname("V_SIMPLESTUDY_Lab_")[1],"REGULAR")
 
 if __name__ == '__main__':
     unittest.main()

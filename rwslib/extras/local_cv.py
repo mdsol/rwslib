@@ -13,14 +13,14 @@ from rwslib import RWSConnection
 from rwslib.rws_requests.biostats_gateway import ProjectMetaDataRequest, FormDataRequest
 
 import os
-from csv import DictReader
+import csv
 from itertools import groupby
 import sqlite3
 from cStringIO import StringIO
 import logging
+import re
 
-
-
+VIEW_REX = re.compile('''V_(?P<study>[^\W_]+)_(?P<view>[^\W_]+)(_(?P<type>[^\W_]+))?''')
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Classes
@@ -43,10 +43,10 @@ class BaseDBAdapter(object):
         self.datasets = {}
 
     @staticmethod
-    def getCSVReader(data):
+    def getCSVReader(data, reader_type = csv.DictReader):
         """Take a Rave CSV output ending with a line with just EOF on it and return a DictReader"""
         f = StringIO(data[:-4]) #Remove \nEOF
-        return DictReader(f)
+        return reader_type(f)
 
     def processMetaData(self, metadata):
         """Takes a string representing a View metadata CSV extract from RWS, sets dataset dictionary
@@ -61,11 +61,7 @@ class BaseDBAdapter(object):
         cols = list(self.getCSVReader(metadata))
 
         #sort the cols by view name and ordinal (they come sorted, but lets be sure)
-        def sort_func(r1, r2):
-            val1 = r1["viewname"], int(r1["ordinal"])
-            val2 = r2["viewname"], int(r2["ordinal"])
-            return cmp(val1,val2)
-        cols.sort(sort_func)
+        cols.sort(key=lambda x: [x['viewname'], int(x['ordinal'])])
 
         #Now group them by their viewname
         for key, grp in groupby(cols, key=lambda x: x["viewname"]):
@@ -73,15 +69,17 @@ class BaseDBAdapter(object):
 
     def _processDDL(self):
         """Generate table SQL, override for each database variant"""
-        raise NotImplementedError("Override makeTableSQL in descendant classes")
+        raise NotImplementedError("Override _processDDL in descendant classes")
 
     def processFormData(self, data, dataset_name):
         """Take a string of form data as CSV and convert to insert statements, return template and data values"""
 
         #Get the cols for this dataset
         cols = self.datasets[dataset_name]
-        reader =  self.getCSVReader(data)
-        fieldnames = reader.fieldnames
+        reader =  self.getCSVReader(data, reader_type=csv.reader)
+
+        #Get fieldnames from first line of reader, what is left is set of rows
+        fieldnames = reader.next()
 
         #Check columns
         for col in cols:
@@ -94,7 +92,7 @@ class BaseDBAdapter(object):
 
     def _processDML(self, dataset_name, cols, reader):
         """Create and populate table with values from dataset"""
-        raise NotImplementedError("Override _createDML in descendant classes")
+        raise NotImplementedError("Override _processDML in descendant classes")
 
 class SQLLiteDBAdapter(BaseDBAdapter):
     """Variant that makes SQLLite SQL"""
@@ -127,50 +125,36 @@ class SQLLiteDBAdapter(BaseDBAdapter):
             cols = self.datasets[dataset_name]
             col_defs = []
             for col in cols:
-                sql_datatype = self.getSQLDataType(col["vartype"],col["varlength"],col["varformat"])
+                sql_datatype = self.getSQLDataType(col["vartype"])
                 col_defs.append("%s %s" % (col["varname"],sql_datatype,))
 
-            l = ["CREATE TABLE %s " % dataset_name]
-            l.append("(")
-            l.append(','.join(col_defs))
-            l.append(")")
-
-            stmt = ''.join(l)
+            stmt = 'CREATE TABLE %s (%s)' % (dataset_name, ','.join(col_defs))
             sql.append(stmt)
 
         return sql
 
     @staticmethod
-    def getSQLDataType(dtype, dlength, dformat):
+    def getSQLDataType(dtype):
         """Return SQLLite data type for a Rave view data type"""
         return dict(num = "NUMERIC", char = "TEXT")[dtype]
 
     def _processDML(self, dataset_name, cols, reader):
         """Overridden version of create DML for SQLLite"""
-        sql_template, rows = self._generateDML(dataset_name, cols, reader)
+        sql_template = self._generateInsertStatement(dataset_name, cols)
 
-        #Now insert in batch
+        #Now insert in batch, reader is a list of rows to insert at this point
         c = self.conn.cursor()
-        c.executemany(sql_template, rows)
+        c.executemany(sql_template, reader)
         self.conn.commit()
 
-    def _generateDML(self, dataset_name, cols, reader):
-        """Generates a sql INSERT template and marshals row data into form that meets INSERT statements expectations"""
+    def _generateInsertStatement(self, dataset_name, cols):
+        """Generates a sql INSERT template"""
         col_names = [col["varname"] for col in cols]
 
         #Generate question mark placeholders
-        qm = []
-        for _ in col_names:
-            qm.append('?')
-        qms = ','.join(qm)
+        qms = ','.join(['?' for x in col_names])
 
-        sql_template = 'INSERT INTO %s (%s) values (%s)' % (dataset_name, ','.join(col_names), qms)
-
-        rows = []
-        for row in reader:
-            rows.append(tuple([row[name] for name in col_names]))
-
-        return sql_template, rows
+        return 'INSERT INTO %s (%s) values (%s)' % (dataset_name, ','.join(col_names), qms)
 
 class LocalCVBuilder(object):
     """
@@ -185,13 +169,10 @@ class LocalCVBuilder(object):
     @staticmethod
     def name_type_from_viewname(viewname):
         """Have format V_<studyname>_<view>[_RAW], return name and view type REGULAR or RAW"""
-        vars = viewname.split('_')
-        name = vars[2]
-        if len(vars) == 4:
-            _type = vars[3]
-        else:
-            _type = 'REGULAR'
-        return name, _type
+        matched = VIEW_REX.match(viewname)
+        return matched.group('view'), matched.group('type') or 'REGULAR'
+        #vars = viewname.split('_')
+        #return vars[2],  vars[3] if len(vars) == 4 else "REGULAR"
 
     def execute(self):
         """Generate local DB, pulling metadata and data from RWSConnection"""
