@@ -72,14 +72,14 @@ class TransactionalElement(ODMElement):
     @transaction_type.setter
     def transaction_type(self, value):
         if value is not None:
-            if value.lower() not in self.ALLOWED_TRANSACTION_TYPES:
-                raise AttributeError('ItemData transaction_type element must be one of %s not %s' % (','.join(self.ALLOWED_TRANSACTION_TYPES), value,))
+            if value not in self.ALLOWED_TRANSACTION_TYPES:
+                raise AttributeError('%s transaction_type element must be one of %s not %s' % (self.__class__.__name__,','.join(self.ALLOWED_TRANSACTION_TYPES), value,))
         self._transaction_type = value
 
 
 class ItemData(TransactionalElement):
     """Models the ODM ItemData object"""
-    ALLOWED_TRANSACTION_TYPES = ['insert','update','upsert','context','remove']
+    ALLOWED_TRANSACTION_TYPES = ['Insert','Update','Upsert','Context','Remove']
 
     def __init__(self, itemoid, value, specify_value = None, transaction_type = None, lock = None, freeze = None, verify = None):
         super(self.__class__, self).__init__(transaction_type)
@@ -128,9 +128,9 @@ class ItemGroupData(TransactionalElement):
     """Models the ODM ItemGroupData object.
        Note no name for the ItemGroupData element is required. This is built automatically by the form.
     """
-    ALLOWED_TRANSACTION_TYPES = ['insert','update','upsert','context']
+    ALLOWED_TRANSACTION_TYPES = ['Insert','Update','Upsert','Context']
 
-    def __init__(self, transaction_type=None, item_group_repeat_key=1, whole_item_group=False):
+    def __init__(self, transaction_type=None, item_group_repeat_key=None, whole_item_group=False):
         super(self.__class__, self).__init__(transaction_type)
         self.item_group_repeat_key = item_group_repeat_key
         self.whole_item_group = whole_item_group
@@ -170,7 +170,7 @@ class ItemGroupData(TransactionalElement):
 
 class FormData(TransactionalElement):
     """Models the ODM FormData object"""
-    ALLOWED_TRANSACTION_TYPES = ['insert','update','upsert']
+    ALLOWED_TRANSACTION_TYPES = ['Insert','Update']
 
     def __init__(self, formoid, transaction_type=None, form_repeat_key=None):
         super(self.__class__, self).__init__(transaction_type)
@@ -212,8 +212,8 @@ class FormData(TransactionalElement):
 
 class StudyEventData(TransactionalElement):
     """Models the ODM StudyEventData object"""
-    ALLOWED_TRANSACTION_TYPES = ['insert','update','remove','context']
-    def __init__(self, study_event_oid, transaction_type="update", study_event_repeat_key=None):
+    ALLOWED_TRANSACTION_TYPES = ['Insert','Update','Remove','Context']
+    def __init__(self, study_event_oid, transaction_type="Update", study_event_repeat_key=None):
         super(self.__class__, self).__init__(transaction_type)
         self.study_event_oid = study_event_oid
         self.study_event_repeat_key = str(study_event_repeat_key)
@@ -250,18 +250,16 @@ class StudyEventData(TransactionalElement):
             form.build(builder)
         builder.end("StudyEventData")
 
-
 class SubjectData(TransactionalElement):
     """Models the ODM SubjectData and ODM SiteRef objects"""
-    ALLOWED_TRANSACTION_TYPES = ['insert','update']
-    def __init__(self, sitelocationoid, subjectname, transaction_type="update"):
-        #TODO:  mdsol:subjectkeytype=SubjectUUID or SubjectName (default)
+    ALLOWED_TRANSACTION_TYPES = ['Insert','Update','Upsert']
+    def __init__(self, sitelocationoid, subject_key, subject_key_type="SubjectName", transaction_type="Update"):
         super(self.__class__, self).__init__(transaction_type)
-
-        #If SubjectUUID still need subjectname as mdsol:SubjectName
         self.sitelocationoid = sitelocationoid
-        self.subjectname = subjectname
+        self.subject_key = subject_key
+        self.subject_key_type = subject_key_type
         self.study_events = [] #Can have collection
+
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -276,12 +274,14 @@ class SubjectData(TransactionalElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(SubjectKey = self.subjectname)
+        params = dict(SubjectKey = self.subject_key)
+        params['mdsol:SubjectKeyType'] = self.subject_key_type
 
         if self.transaction_type is not None:
             params["TransactionType"] = self.transaction_type
 
         builder.start("SubjectData", params)
+
         builder.start("SiteRef", {'LocationOID': self.sitelocationoid})
         builder.end("SiteRef")
 
