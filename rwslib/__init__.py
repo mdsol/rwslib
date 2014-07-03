@@ -109,7 +109,10 @@ class RWSConnection(object):
 
         #Catch all.
         if r.status_code != 200:
-            error = RWSError(r.text)
+            if r.text.strip().startswith('<Response'):
+                error = RWSErrorResponse(r.text)
+            else:
+                error = RWSError(r.text)
             raise RWSException(error.errordescription, error)
 
         return request_object.result(r)
