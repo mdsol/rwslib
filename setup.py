@@ -3,8 +3,6 @@
 import os
 import sys
 
-import rwslib
-
 try:
     from setuptools import setup
 except ImportError:
@@ -22,7 +20,7 @@ packages = [
 
 setup(
     name='rwslib',
-    version=rwslib.__version__,
+    version='1.0.0',
     description='Rave web services for Python',
     long_description=open('README.md').read(),
     author='Ian Sparks',
