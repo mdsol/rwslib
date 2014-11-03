@@ -1,2 +1,5 @@
 *.pyc
 .idea
+
+# sphinx build folder
+_build
