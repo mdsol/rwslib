@@ -1,5 +1,9 @@
 *.pyc
 .idea
 
+#Distribution folder
+dist/
+rwslib.egg-info/
+
 # sphinx build folder
 docs/build

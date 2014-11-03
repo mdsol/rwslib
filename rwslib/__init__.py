@@ -2,9 +2,9 @@
 
 __title__ = 'rwslib'
 __author__ = 'Ian Sparks (isparks@mdsol.com)'
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 __license__ = 'MIT'
-__copyright__ = 'Copyright 2013 Medidata Solutions Inc'
+__copyright__ = 'Copyright 2014 Medidata Solutions Inc'
 
 
 import requests
