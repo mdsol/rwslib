@@ -1,7 +1,17 @@
 Getting started
 ***************
 
-A primer on working with rwslib.
+Installation
+------------
+
+We strongly recommend working within a virtual environment with
+`Virtualenv <http://virtualenv.readthedocs.org/en/latest/virtualenv.html/>`_.
+
+You can install from github directly with:
+
+    $ pip install git+https://github.com/mdsol/rwslib.git
+
+This form will also install all required dependencies. Note that on Windows, lxml requires a binary installation.
 
 Creating a connection to RWS
 ----------------------------
