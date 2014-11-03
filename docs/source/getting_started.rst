@@ -1,7 +1,25 @@
 Getting started
 ***************
 
-A primer on working with rwslib.
+Note that for any API calls that require authentication (anything useful) you will need access to a Rave environment.
+Medidata runs a program for integration access to this system, *Developer Central*.
+`Apply for access <https://www.mdsol.com/en/who-we-are/clients-partners/developer-central/>`_
+
+Installation
+------------
+
+We strongly recommend working within a virtual environment with
+`Virtualenv <http://virtualenv.readthedocs.org/en/latest/virtualenv.html/>`_.
+
+Install with pip:
+
+    $ pip install rwslib
+
+Or directly from github with:
+
+    $ pip install git+https://github.com/mdsol/rwslib.git
+
+This will also install all required dependencies. Note that on Windows, lxml requires a binary installation.
 
 Creating a connection to RWS
 ----------------------------

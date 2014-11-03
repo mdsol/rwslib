@@ -22,7 +22,7 @@ setup(
     name='rwslib',
     version='1.0.0',
     description='Rave web services for Python',
-    long_description=open('README.md').read(),
+    long_description='A client library to the Medidata Rave Web Services (RWS). See http://rwslib.readthedocs.org/en/latest/',
     author='Ian Sparks',
     author_email='isparks@mdsol.com',
     packages=packages,
