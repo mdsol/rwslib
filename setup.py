@@ -20,13 +20,13 @@ packages = [
 
 setup(
     name='rwslib',
-    version='1.0.0',
+    version='1.0.1',
     description='Rave web services for Python',
-    long_description='A client library to the Medidata Rave Web Services (RWS). See http://rwslib.readthedocs.org/en/latest/',
+    long_description=open('README.md').read(),
     author='Ian Sparks',
     author_email='isparks@mdsol.com',
     packages=packages,
-    package_data={'': ['LICENSE.txt'],},
+    package_data={'': ['LICENSE.txt','README.md'],},
     package_dir={'rwslib': 'rwslib'},
     include_package_data=True,
     install_requires=['requests','lxml','httpretty'],
