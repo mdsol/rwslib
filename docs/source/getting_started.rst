@@ -11,11 +11,11 @@ Installation
 We strongly recommend working within a virtual environment with
 `Virtualenv <http://virtualenv.readthedocs.org/en/latest/virtualenv.html/>`_.
 
-Install with pip:
+Install with pip::
 
     $ pip install rwslib
 
-Or directly from github with:
+Or directly from github with::
 
     $ pip install git+https://github.com/mdsol/rwslib.git
 
@@ -52,7 +52,7 @@ RWSConnection ``send_request`` method::
 
     >>> from rwslib import RWSConnection
     >>> rws = RWSConnection('innovate', 'my_username','my_password')
-    >>> from rws_requests import VersionRequest
+    >>> from rwslib.rws_requests import VersionRequest
     >>> rws.send_request(VersionRequest())
     1.8.0
 
@@ -79,6 +79,7 @@ Most requests require authentication. There are some that do not, ``VersionReque
 require authentication so this is also valid::
 
     >>> from rwslib import RWSConnection
+    >>> from rwslib.rws_requests import VersionRequest
     >>> rws = RWSConnection('https://innovate.mdsol.com')
 
     >>> #Get the rave version from rws
@@ -95,7 +96,7 @@ Each time ``RWSConnection`` sends a request and receives results it keeps the re
 were sent, what URL was called etc.
 
     >>> from rwslib import RWSConnection
-    >>> from rws_requests import VersionRequest
+    >>> from rwslib.rws_requests import VersionRequest
     >>> rws = RWSConnection('innovate')
     >>> #Get the rave version from rws
     >>> rws.send_request(VersionRequest())
