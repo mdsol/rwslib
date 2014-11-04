@@ -2,7 +2,7 @@
 
 __title__ = 'rwslib'
 __author__ = 'Ian Sparks (isparks@mdsol.com)'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2014 Medidata Solutions Inc'
 
