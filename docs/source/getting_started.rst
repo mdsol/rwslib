@@ -117,6 +117,21 @@ Having access to ``last_result`` means that rwslib never hides it's workings fro
 be a helper library to get your own integrations up and running, it tries not to hide implementation
 details from you.
 
+Getting the elapsed time of the request
+---------------------------------------
+
+Each time ``RWSConnection`` sends a request and receives results it keeps the elapsed time, in seconds, of the RWS call
+in it's ``request_time`` attribute.
+
+    >>> from rwslib import RWSConnection
+    >>> from rwslib.rws_requests import VersionRequest
+    >>> rws = RWSConnection('innovate')
+    >>> #Get the rave version from rws
+    >>> rws.send_request(VersionRequest())
+    1.8.0
+    >>> #Get the elapsed time in seconds to process the previous request
+    >>> rws.request_time
+    0.760736942291
 
 Error Handling
 --------------

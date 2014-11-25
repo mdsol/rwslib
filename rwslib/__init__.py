@@ -13,6 +13,8 @@ from urllib import urlencode
 from rws_requests import RWSRequest, make_url
 from rwsobjects import RWSException, RWSError, RWSErrorResponse
 
+import time
+
 #-------------------------------------------------------------------------------------------------------
 # Classes
 #
@@ -50,6 +52,9 @@ class RWSConnection(object):
         #Keep track of results of last request so users can get if they need.
         self.last_result = None
 
+        #Time taken to process last request
+        self.request_time = None
+
 
     def get_auth(self):
         """Get authorization headers"""
@@ -78,7 +83,9 @@ class RWSConnection(object):
         action = {"GET": requests.get,
                   "POST": requests.post}[request_object.method]
 
+        start_time = time.time()
         r = action(full_url, **kwargs)
+        self.request_time = time.time() - start_time
         self.last_result = r
 
         if r.status_code in [400, 404]:

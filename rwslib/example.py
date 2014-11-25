@@ -29,6 +29,7 @@ if __name__ == '__main__':
     print len(studies)
     print rave.last_result.url
     print rave.last_result.text
+    print rave.request_time
 
     print "Metadata studies request"
     m_studies = rave.send_request(MetadataStudiesRequest())
