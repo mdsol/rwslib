@@ -36,5 +36,23 @@ class TestMustBeRWSRequestSubclass(unittest.TestCase):
         self.assertRaises(ValueError, do)
 
 
+class RequestTime(unittest.TestCase):
+    """Test for the last request time property"""
+    @httpretty.activate
+    def test_request_time(self):
+        """A simple test, patching the get request so that it does not hit a website"""
+
+        httpretty.register_uri(
+            httpretty.GET, "https://innovate.mdsol.com/RaveWebServices/version",
+            status=200,
+            body="1.0.0")
+
+        #Now my test
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        v = rave.send_request(rwslib.rws_requests.VersionRequest())
+        request_time = rave.request_time
+        self.assertIs(type(request_time),float)
+
+
 if __name__ == '__main__':
     unittest.main()
