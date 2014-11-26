@@ -26,7 +26,7 @@ class AuthorizationException(Exception):
 class RWSConnection(object):
     """A connection to RWS"""
 
-    def __init__(self, domain, username=None, password=None, timeout=None):
+    def __init__(self, domain, username=None, password=None):
         """Create a connection to Rave
 
           If the domain does not start with http then it is assumed to be the name of the medidata
@@ -55,8 +55,7 @@ class RWSConnection(object):
         #Time taken to process last request
         self.request_time = None
 
-        #Timeout, in seconds
-        self.timeout = timeout
+
 
 
     def get_auth(self):
@@ -64,11 +63,12 @@ class RWSConnection(object):
         return (self.username, self.password,)
 
 
-    def send_request(self, request_object):
+    def send_request(self, request_object, timeout=None):
         """Send request to RWS endpoint. The request object passed provides the URL endpoint and the HTTP method.
            Takes the text response from RWS and allows the request object to modify it for return. This allows the request
            object to return text, an XML document object, a CSV file or anything else that can be generated from the text
            response from RWS.
+           A timeout, in seconds, can be optionally passed into send_request.
         """
         if not isinstance(request_object, RWSRequest):
             raise ValueError("Request object must be a subclass of RWSRequest")
@@ -78,7 +78,7 @@ class RWSConnection(object):
         kwargs = {}
         if request_object.requires_authorization:
             kwargs['auth'] = self.get_auth()
-            kwargs['timeout'] = self.timeout
+            kwargs['timeout'] = timeout
             kwargs.update(request_object.args())
 
 

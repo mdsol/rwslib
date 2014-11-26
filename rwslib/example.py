@@ -16,7 +16,7 @@ if __name__ == '__main__':
     #            }
 
     acc = accounts['innovate']
-    rave = RWSConnection('innovate', acc['username'], acc['password'],timeout=3600)
+    rave = RWSConnection('innovate', acc['username'], acc['password'])
 
     print rave.send_request(VersionRequest())
     print rave.send_request(BuildVersionRequest())
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
 
     print "Clinical studies request"
-    studies = rave.send_request(ClinicalStudiesRequest())
+    studies = rave.send_request(ClinicalStudiesRequest(),timeout=60)
     print len(studies)
     print rave.last_result.url
     print rave.last_result.text

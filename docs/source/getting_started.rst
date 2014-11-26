@@ -92,11 +92,13 @@ Generally you will want to provide credentials to authenticate with Rave.
 Timeouts
 --------
 
-By default an RWSConnection will not timeout.   A timeout limit, in seconds, can be set on the RWSConnection,
+By default rwslib will not timeout.   A timeout limit, in seconds, can be set on send_request,
 after which a Timeout exception will be thrown:
 
     >>> from rwslib import RWSConnection
-    >>> rws = RWSConnection('innovate', 'my_username','my_password',timeout=3600)
+    >>> rws = RWSConnection('innovate', 'my_username','my_password')
+    >>> #Get the rave version from rws
+    >>> rws.send_request(VersionRequest(),timeout=1)
 
 In practice the timeout should be set to a value greater than any expected valid response time,
 which will vary depending upon the request types and volumes of data sent or received.
