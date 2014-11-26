@@ -26,7 +26,7 @@ class AuthorizationException(Exception):
 class RWSConnection(object):
     """A connection to RWS"""
 
-    def __init__(self, domain, username=None, password=None):
+    def __init__(self, domain, username=None, password=None, timeout=None):
         """Create a connection to Rave
 
           If the domain does not start with http then it is assumed to be the name of the medidata
@@ -55,6 +55,9 @@ class RWSConnection(object):
         #Time taken to process last request
         self.request_time = None
 
+        #Timeout, in seconds
+        self.timeout = timeout
+
 
     def get_auth(self):
         """Get authorization headers"""
@@ -75,6 +78,7 @@ class RWSConnection(object):
         kwargs = {}
         if request_object.requires_authorization:
             kwargs['auth'] = self.get_auth()
+            kwargs['timeout'] = self.timeout
             kwargs.update(request_object.args())
 
 
