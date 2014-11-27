@@ -56,16 +56,19 @@ class RWSConnection(object):
         self.request_time = None
 
 
+
+
     def get_auth(self):
         """Get authorization headers"""
         return (self.username, self.password,)
 
 
-    def send_request(self, request_object):
+    def send_request(self, request_object, timeout=None):
         """Send request to RWS endpoint. The request object passed provides the URL endpoint and the HTTP method.
            Takes the text response from RWS and allows the request object to modify it for return. This allows the request
            object to return text, an XML document object, a CSV file or anything else that can be generated from the text
            response from RWS.
+           A timeout, in seconds, can be optionally passed into send_request.
         """
         if not isinstance(request_object, RWSRequest):
             raise ValueError("Request object must be a subclass of RWSRequest")
@@ -75,6 +78,7 @@ class RWSConnection(object):
         kwargs = {}
         if request_object.requires_authorization:
             kwargs['auth'] = self.get_auth()
+            kwargs['timeout'] = timeout
             kwargs.update(request_object.args())
 
 

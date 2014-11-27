@@ -3,6 +3,7 @@ __author__ = 'isparks'
 import unittest
 import rwslib
 import httpretty
+import requests
 
 class VersionTest(unittest.TestCase):
     """Test for the version method"""
@@ -52,6 +53,20 @@ class RequestTime(unittest.TestCase):
         v = rave.send_request(rwslib.rws_requests.VersionRequest())
         request_time = rave.request_time
         self.assertIs(type(request_time),float)
+
+class Timeout(unittest.TestCase):
+
+    def test_timeout(self):
+        """Test against an external website to verify timeout (mocking doesn't help as far as I can work out)"""
+
+        #Test that unauthorised request times out
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        with self.assertRaises(requests.exceptions.Timeout):
+            rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(),timeout=0.0001)
+
+        #Raise timeout and check no timeout occurs.  An exception will be raised because the request is unauthorised
+        with self.assertRaises(rwslib.RWSException):
+            rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(),timeout=3600)
 
 
 if __name__ == '__main__':
