@@ -5,4 +5,5 @@ Authors
 
 - Ian Sparks <isparks@mdsol.com>
 - Geoff Low <glow@mdsol.com>
+- Andrew Newbigging <anewbigging@mdsol.com>
 

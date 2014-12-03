@@ -106,6 +106,20 @@ which will vary depending upon the request types and volumes of data sent or rec
 This timeout setting only applies to rwslib and does not alter timeouts in RWS itself or any other component in the
 network such as load balancers, etc.
 
+Retries
+-------
+
+By default rwslib will make a request only once. You can adjust the number of retries by setting the retries
+parameter to send_request:
+
+
+    >>> from rwslib import RWSConnection
+    >>> rws = RWSConnection('innovate', 'my_username','my_password')
+    >>> #Get the rave version from rws
+    >>> rws.send_request(VersionRequest(),retries=3)
+
+Note that you should be very careful with retries when a request makes changes to data (e.g. POST requests) since
+in some situations errors can be returned by Rave and the request may still succeed.
 
 
 Getting more information from last_result

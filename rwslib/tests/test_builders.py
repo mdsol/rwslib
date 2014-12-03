@@ -139,15 +139,14 @@ class TestItemGroupData(unittest.TestCase):
     def test_builders_basic(self):
         doc = obj_to_doc(self.tested,"TESTFORM")
         self.assertEquals(doc.attrib["ItemGroupOID"],"TESTFORM")
-        self.assertEquals(doc.attrib["ItemGroupRepeatKey"],"1")
         self.assertEquals(len(doc),2)
         self.assertEquals(doc.tag,"ItemGroupData")
 
     def test_transaction_type(self):
         """Test transaction type inserted if set"""
-        self.tested.transaction_type = 'context'
+        self.tested.transaction_type = 'Context'
         doc = obj_to_doc(self.tested,"TESTFORM")
-        self.assertEquals(doc.attrib["TransactionType"],"context")
+        self.assertEquals(doc.attrib["TransactionType"],"Context")
 
     def test_whole_item_group(self):
         """mdsol:Submission should be wholeitemgroup or SpecifiedItemsOnly"""
@@ -214,7 +213,7 @@ class TestFormData(unittest.TestCase):
 
     def test_transaction_type(self):
         """Test transaction type inserted if set"""
-        self.tested.transaction_type = 'update'
+        self.tested.transaction_type = 'Update'
         doc = obj_to_doc(self.tested)
         self.assertEquals(doc.attrib["TransactionType"],self.tested.transaction_type)
 
@@ -255,7 +254,7 @@ class TestStudyEventData(unittest.TestCase):
 
     def test_transaction_type(self):
         """Test transaction type inserted if set"""
-        self.tested.transaction_type = 'update'
+        self.tested.transaction_type = 'Update'
         doc = obj_to_doc(self.tested)
         self.assertEquals(doc.attrib["TransactionType"],self.tested.transaction_type)
 
@@ -318,14 +317,14 @@ class TestSubjectData(unittest.TestCase):
     def test_basic(self):
         """Test there are 3 children"""
         self.assertEquals("SITE1", self.tested.sitelocationoid)
-        self.assertEquals("SUBJECT1", self.tested.subjectname)
+        self.assertEquals("SUBJECT1", self.tested.subject_key)
         #Default transaction type
-        self.assertEquals("update", self.tested.transaction_type)
+        self.assertEquals("Update", self.tested.transaction_type)
 
     def test_invalid_transaction_type_direct_assign(self):
         """Test transaction type will not allow you to set to invalid choice"""
         def do():
-            self.tested.transaction_type = 'upsert'
+            self.tested.transaction_type = 'UpDateSert'
         self.assertRaises(AttributeError,do)
 
     def test_children(self):
@@ -343,7 +342,7 @@ class TestSubjectData(unittest.TestCase):
         """XML produced"""
         doc = obj_to_doc(self.tested)
         #Test default transaction tyoe
-        self.assertEquals(doc.attrib["TransactionType"],"update")
+        self.assertEquals(doc.attrib["TransactionType"],"Update")
         self.assertEquals(doc.tag,"SubjectData")
 
 

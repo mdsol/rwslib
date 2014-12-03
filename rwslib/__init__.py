@@ -2,7 +2,7 @@
 
 __title__ = 'rwslib'
 __author__ = 'Ian Sparks (isparks@mdsol.com)'
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2014 Medidata Solutions Inc'
 
@@ -56,14 +56,11 @@ class RWSConnection(object):
         self.request_time = None
 
 
-
-
     def get_auth(self):
         """Get authorization headers"""
         return (self.username, self.password,)
 
-
-    def send_request(self, request_object, timeout=None):
+    def send_request(self, request_object, timeout=None, retries=1, **kwargs):
         """Send request to RWS endpoint. The request object passed provides the URL endpoint and the HTTP method.
            Takes the text response from RWS and allows the request object to modify it for return. This allows the request
            object to return text, an XML document object, a CSV file or anything else that can be generated from the text
@@ -75,7 +72,6 @@ class RWSConnection(object):
 
         #Construct a URL from the object and make a call
         full_url = make_url(self.base_url, request_object.url_path())
-        kwargs = {}
         if request_object.requires_authorization:
             kwargs['auth'] = self.get_auth()
             kwargs['timeout'] = timeout
@@ -84,13 +80,22 @@ class RWSConnection(object):
 
         #Explicit use of requests library here. Could alter in future to inject library to use in case
         #requests not available.
-        action = {"GET": requests.get,
-                  "POST": requests.post}[request_object.method]
+
+        # Get a session that allows us to customize HTTP requests
+        session = requests.Session()
+
+        # Mount a custom adapter that retries failed connections for HTTP and HTTPS requests.
+        for scheme in ["http://","https://"]:
+            session.mount(scheme, requests.adapters.HTTPAdapter(max_retries=retries))
+
+
+        action = {"GET": session.get,
+                  "POST": session.post}[request_object.method]
 
         start_time = time.time()
         r = action(full_url, **kwargs)
         self.request_time = time.time() - start_time
-        self.last_result = r
+        self.last_result = r #see also r.elapsed for timedelta object.
 
         if r.status_code in [400, 404]:
             #Is it a RWS response?
@@ -102,6 +107,9 @@ class RWSConnection(object):
             else:
                 error = RWSError(r.text)
             raise RWSException(error.errordescription, error)
+
+        elif r.status_code == 500:
+            raise RWSException("Server Error (500)", r.text)
 
         elif r.status_code == 401:
             #Either you didn't supply auth header and it was required OR your credentials were wrong

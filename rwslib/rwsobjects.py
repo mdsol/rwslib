@@ -26,6 +26,8 @@ def parseXMLString(xml):
 
     #Remove BOM if it exists (different requests seem to have different BOMs)
     unichr_captured = ''
+    if not xml.strip():
+        return ''
     while xml[0] != u'<':
         unichr_captured += xml[0]
         xml = xml[1:]
