@@ -29,7 +29,7 @@ class ODMAdapter(object):
 
         return None
 
-    def run(self, start_id=0, max_pages=-1, per_page=1000):
+    def run(self, start_id=0, max_pages=-1, per_page=1000, **kwargs):
         page = 0
         self.start_id = start_id
         while max_pages == -1 or (page < max_pages):
@@ -37,7 +37,7 @@ class ODMAdapter(object):
             req = AuditRecordsRequest(self.study,self.environment, startid=self.start_id, per_page=per_page)
             try:
                 #Get the ODM data
-                odm = self.rws_connection.send_request(req)
+                odm = self.rws_connection.send_request(req, **kwargs)
                 #Send it for parsing
                 parse(odm, self.eventer)
                 page += 1
