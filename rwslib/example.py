@@ -18,7 +18,7 @@ if __name__ == '__main__':
     acc = accounts['innovate']
     rave = RWSConnection('innovate', acc['username'], acc['password'])
 
-    print rave.send_request(VersionRequest())
+    print rave.send_request(VersionRequest(), retries=3)
     print rave.send_request(BuildVersionRequest())
     print rave.send_request(DiagnosticsRequest())
     print rave.send_request(CacheFlushRequest()).istransactionsuccessful
