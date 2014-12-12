@@ -38,13 +38,14 @@ class ODMAdapter(object):
             try:
                 #Get the ODM data
                 odm = self.rws_connection.send_request(req, **kwargs)
+                #Check if we were passed the next startid
+                #Need to do this immediately because subsequent parsing might include other calls to RWS
+                self.start_id = self.get_next_start_id()
                 #Send it for parsing
                 parse(odm, self.eventer)
                 page += 1
             except Exception, e:
                 logging.error(e.message)
 
-            #Check if we were passed the next startid
-            self.start_id = self.get_next_start_id()
             if not self.start_id:
                 break
