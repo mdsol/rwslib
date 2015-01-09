@@ -76,7 +76,11 @@ class Event(ContextContainer):
 
 
 class Form(ContextContainer):
-    pass
+    def __init__(self, oid, repeat_key, transaction_type, datapage_name):
+        self.oid = oid
+        self.repeat_key = repeat_key
+        self.transaction_type = transaction_type
+        self.datapage_name = datapage_name
 
 
 class ItemGroup(ContextContainer):

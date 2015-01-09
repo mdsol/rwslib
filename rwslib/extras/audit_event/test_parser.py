@@ -2,7 +2,7 @@
 __author__ = 'isparks'
 
 import unittest
-import parser
+from rwslib.extras.audit_event import parser
 import datetime
 
 
@@ -190,8 +190,8 @@ class ParserTestCase(ParserTestCaseBase):
         self.assertEqual("Insert",sc.comment.transaction_type)
 
 
-    def test_object_name_changed(self):
-        """ObjectNameChanged subcategory is for changes of Instance names"""
+    def test_instance_name_changed(self):
+        """ObjectNameChanged subcategory for changes of Instance names"""
         self.parse("""<?xml version="1.0" encoding="UTF-8"?>
 <ODM xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" ODMVersion="1.3" FileType="Transactional" FileOID="4d690eda-4f08-48d1-af26-3bab40f6118f" CreationDateTime="2014-11-04T16:37:05">
   <ClinicalData StudyOID="MEDICILLIN-RD7(DEMO)" MetaDataVersionOID="5" mdsol:AuditSubCategoryName="ObjectNameChanged">
@@ -216,6 +216,35 @@ class ParserTestCase(ParserTestCaseBase):
         self.assertEqual("UNSCHEDULED[1]",sc.event.repeat_key)
         self.assertEqual("Unscheduled Visit 22 Aug 2013",sc.event.instance_name)
         self.assertIsNone(sc.event.instance_overdue)
+
+
+    def test_datapage_name_changed(self):
+        """ObjectNameChanged subcategory for changes of datapage names"""
+        self.parse("""<?xml version="1.0" encoding="UTF-8"?>
+<ODM xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" ODMVersion="1.3" FileType="Transactional" FileOID="4d690eda-4f08-48d1-af26-3bab40f6118f" CreationDateTime="2014-11-04T16:37:05">
+  <ClinicalData StudyOID="MEDICILLIN-RD7(DEMO)" MetaDataVersionOID="5" mdsol:AuditSubCategoryName="ObjectNameChanged">
+    <SubjectData SubjectKey="038f41bb-47bf-4776-8190-aaf442246f51" mdsol:SubjectKeyType="SubjectUUID" mdsol:SubjectName="10001001">
+      <SiteRef LocationOID="1000" />
+      <StudyEventData StudyEventOID="UNSCHEDULED" StudyEventRepeatKey="UNSCHEDULED[1]">
+        <FormData FormOID="VS" FormRepeatKey="1" TransactionType="Upsert" mdsol:DataPageName="Vital signs">
+            <AuditRecord>
+              <UserRef UserOID="systemuser" />
+              <LocationRef LocationOID="1000" />
+              <DateTimeStamp>2013-08-26T21:09:25</DateTimeStamp>
+              <ReasonForChange />
+              <SourceID>47976</SourceID>
+            </AuditRecord>
+        </FormData>
+      </StudyEventData>
+    </SubjectData>
+  </ClinicalData></ODM>""")
+
+        sc = self.context
+
+        self.assertEqual("ObjectNameChanged",sc.subcategory)
+        self.assertEqual("Upsert",sc.form.transaction_type)
+        self.assertEqual(1,sc.form.repeat_key)
+        self.assertEqual("Vital signs",sc.form.datapage_name)
 
 
     def test_instance_overdue(self):
