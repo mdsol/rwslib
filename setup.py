@@ -31,6 +31,7 @@ setup(
     install_requires=['requests','lxml','httpretty'],
     license=open('LICENSE.txt').read(),
     zip_safe=False,
+    test_suite='rwslib.tests.all_tests',
     classifiers=(
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
