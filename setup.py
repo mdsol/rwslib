@@ -2,6 +2,7 @@
 
 import os
 import sys
+import re
 
 try:
     from setuptools import setup
@@ -17,14 +18,17 @@ packages = [
     'rwslib.rws_requests',
 ]
 
+rwsinit = open('rwslib/__init__.py').read()
+author = re.search("__author__ = '([^']+)'", rwsinit).group(1)
+version = re.search("__version__ = '([^']+)'", rwsinit).group(1)
 
 setup(
     name='rwslib',
-    version='1.0.2',
+    version=version,
     description='Rave web services for Python',
     long_description=open('README.md').read(),
-    author='Ian Sparks',
-    author_email='isparks@mdsol.com',
+    author=author,
+    author_email="isparks@mdsol.com",
     packages=packages,
     package_dir={'rwslib': 'rwslib'},
     include_package_data=True,
