@@ -2,9 +2,9 @@
 
 __title__ = 'rwslib'
 __author__ = 'Ian Sparks (isparks@mdsol.com)'
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 __license__ = 'MIT'
-__copyright__ = 'Copyright 2014 Medidata Solutions Inc'
+__copyright__ = 'Copyright 2015 Medidata Solutions Inc'
 
 
 import requests
@@ -122,8 +122,11 @@ class RWSConnection(object):
             if '<h2>HTTP Error 401.0 - Unauthorized</h2>' in r.text:
                 raise RWSException("Unauthorized.", r.text)
 
-            #There was some problem with your credentials (XML response from RWS)
-            error = RWSErrorResponse(r.text)
+            if r.headers.get('content-type') == "text/xml" and "ODM" in r.text:
+                error = RWSError(r.text)
+            else:
+                #There was some problem with your credentials (XML response from RWS)
+                error = RWSErrorResponse(r.text)
             raise RWSException(error.errordescription, error)
 
         #Catch all.
