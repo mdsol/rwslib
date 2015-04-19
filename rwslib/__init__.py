@@ -2,7 +2,7 @@
 
 __title__ = 'rwslib'
 __author__ = 'Ian Sparks (isparks@mdsol.com)'
-__version__ = '1.0.4'
+__version__ = '1.0.5'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Medidata Solutions Inc'
 
@@ -134,7 +134,12 @@ class RWSConnection(object):
             if r.text.strip().startswith('<Response'):
                 error = RWSErrorResponse(r.text)
             else:
-                error = RWSError(r.text)
+                if "<" in r.text:
+                    # only try and raise a RWSError if it looks like XML
+                    error = RWSError(r.text)
+                else:
+                    # other, better to be safe than blow up
+                    error = RWSErrorResponse(r.text)
             raise RWSException(error.errordescription, error)
 
         return request_object.result(r)
