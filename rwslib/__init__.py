@@ -129,17 +129,21 @@ class RWSConnection(object):
                 error = RWSErrorResponse(r.text)
             raise RWSException(error.errordescription, error)
 
-        #Catch all.
+        # Catch all.
         if r.status_code != 200:
-            if r.text.strip().startswith('<Response'):
-                error = RWSErrorResponse(r.text)
-            else:
-                if "<" in r.text:
-                    # only try and raise a RWSError if it looks like XML
+            if "<" in r.text:
+                # XML like
+                if r.text.strip().startswith('<Response'):
+                    error = RWSErrorResponse(r.text)
+                elif 'ODM' in r.text:
                     error = RWSError(r.text)
                 else:
-                    # other, better to be safe than blow up
-                    error = RWSErrorResponse(r.text)
+                    # IIS error page as an example
+                    raise RWSException("Unexpected Status Code ({0.status_code})".format(r), r.text)
+            else:
+                # not XML like, better to be safe than blow up
+                # example response: 'HTTP 503 Service Temporarily Unavailable'
+                raise RWSException("Unexpected Status Code ({0.status_code})".format(r), r.text)
             raise RWSException(error.errordescription, error)
 
         return request_object.result(r)
