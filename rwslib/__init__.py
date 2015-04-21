@@ -2,7 +2,7 @@
 
 __title__ = 'rwslib'
 __author__ = 'Ian Sparks (isparks@mdsol.com)'
-__version__ = '1.0.4'
+__version__ = '1.0.5'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Medidata Solutions Inc'
 
@@ -129,12 +129,21 @@ class RWSConnection(object):
                 error = RWSErrorResponse(r.text)
             raise RWSException(error.errordescription, error)
 
-        #Catch all.
+        # Catch all.
         if r.status_code != 200:
-            if r.text.strip().startswith('<Response'):
-                error = RWSErrorResponse(r.text)
+            if "<" in r.text:
+                # XML like
+                if r.text.strip().startswith('<Response'):
+                    error = RWSErrorResponse(r.text)
+                elif 'ODM' in r.text:
+                    error = RWSError(r.text)
+                else:
+                    # IIS error page as an example
+                    raise RWSException("Unexpected Status Code ({0.status_code})".format(r), r.text)
             else:
-                error = RWSError(r.text)
+                # not XML like, better to be safe than blow up
+                # example response: 'HTTP 503 Service Temporarily Unavailable'
+                raise RWSException("Unexpected Status Code ({0.status_code})".format(r), r.text)
             raise RWSException(error.errordescription, error)
 
         return request_object.result(r)
