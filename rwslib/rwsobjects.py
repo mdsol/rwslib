@@ -405,6 +405,15 @@ Optionally ClinicalData may include status::
               mdsol:ReadyForFreeze="No"
               mdsol:ReadyForLock="Yes">
 
+The SubjectKey can be either a Subject ID or a UUID depending on the value of SubjectKeyType::
+
+    <ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111">
+     <SubjectData SubjectKey="EC82F1AB-D463-4930-841D-36FC865E63B2" mdsol:SubjectName="1" mdsol:SubjectKeyType="SubjectUUID">
+        <SiteRef LocationOID="335566"/>
+     </SubjectData>
+    </ClinicalData>
+
+
     """
     STATUS_PROPERTIES = ["Overdue",
                          "Touched",
@@ -431,7 +440,9 @@ Optionally ClinicalData may include status::
                          "RequiresPendingAnswerQuery",
                          "RequiresSignature",
                          "ReadyForFreeze",
-                         "ReadyForLock"]
+                         "ReadyForLock",
+                         "SubjectKeyType",
+                         "SubjectName"]
     
     def __init__(self):
         """The ODM message has a ClinicalData element with a single SubjectData and SiteRef elements
@@ -440,6 +451,7 @@ Optionally ClinicalData may include status::
         self.studyoid = None
         self.metadataversionoid = None
         self.subjectkey = None
+        self.subjectkeytype = None
         self.locationoid = None
 
         self.active = None  #SubjectActive
@@ -448,6 +460,21 @@ Optionally ClinicalData may include status::
         #Optional properties, only if status included
         for prop in RWSSubjectListItem.STATUS_PROPERTIES:
             setattr(self, prop.lower(), None)
+
+    @property
+    def subject_name(self):
+        """
+        Get the subject name consistently - if the SubjectKeyType is SubjectUUID
+         then the subject name lives in the mdsol:SubjectName attribute
+
+        :return: The Subject ID for the subject
+        :rtype
+        """
+        if self.subjectkeytype and self.subjectkeytype == "SubjectUUID".lower():
+            # if the SubjectKeyType is "SubjectUUID", then return the SubjectName
+            return self.subjectname
+        else:
+            return self.subjectkey
 
     @classmethod
     def fromElement(cls, elem):
@@ -464,8 +491,8 @@ Optionally ClinicalData may include status::
 
         decodes = {'yes':True,'no':False,'':None}
         for prop in RWSSubjectListItem.STATUS_PROPERTIES:
-            val = e_subjectdata.get(MEDI_NS + prop,"").lower()
-            setattr(self, prop.lower(), decodes[val])
+            val = e_subjectdata.get(MEDI_NS + prop, "").lower()
+            setattr(self, prop.lower(), decodes.get(val, val))
 
         #By default we only get back active and non-deleted subjects
         self.active = decodes[e_subjectdata.get(MEDI_NS + "SubjectActive","yes").lower()]
