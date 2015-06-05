@@ -71,14 +71,17 @@ Authorization is required for this method.
 Retrieves a :class:`rwsobjects.RWSSubjects` object which is a list of :class:`rwsobjects.RWSSubjectListItem` objects,
 each representing key information about a subject. This does not include clinical data for a subject.
 
-+--------------------------------+-----------------------------------------------------------------------------------+
-| Option                         | Description                                                                       |
-+================================+===================================================================================+
-| status={ True | False}         | If True, extracts status information at the subject level. Default = False        |
-+--------------------------------+-----------------------------------------------------------------------------------+
-| include={inactive|deleted|     | Include inactive subjects, deleted subjects or both? By default these             |
-|           inactiveAndDeleted}  | subjects are omitted.                                                             |
-+--------------------------------+-----------------------------------------------------------------------------------+
++-----------------------------------------------+-----------------------------------------------------------------------------------+
+| Option                                        | Description                                                                       |
++===============================================+===================================================================================+
+| status={True|False}                           | If True, extracts status information at the subject level. Default = False        |
++-----------------------------------------------+-----------------------------------------------------------------------------------+
+| include={inactive|deleted|inactiveAndDeleted} | Include inactive subjects, deleted subjects or both? By default these subjects are|
+|                                               | omitted.                                                                          |
++-----------------------------------------------+-----------------------------------------------------------------------------------+
+| subject_key_type={SubjectName|SubjectUUID}    | Request that the Subject Name is in the SubjectKey field (_SubjectName_) or in the|
+|                                               | mdsol:SubjectName field (with the Subject UUID in the SubjectKey field).            |
++-----------------------------------------------+-----------------------------------------------------------------------------------+
 
 Calls::
 
@@ -131,6 +134,26 @@ Example::
       </ClinicalData>
       <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
       ...
+    >>> subject_list = rave.send_request(StudySubjectsRequest("SIMPLESTUDY", "PROD", subject_key_type="SubjectUUID")
+    >>> str(subject_list)
+    <ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="1af945c7-8334-4eb8-b7a9-735fb5c7db03" CreationDateTime="2013-09-10T09:28:21.145-00:00" ODMVersion="1.3">
+      <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+        <SubjectData SubjectKey="0C1F5F71-B136-4C95-8199-1397F4262B31" mdsol:SubjectKeyType="SubjectUUID" mdsol:SubjectName="1">
+          <SiteRef LocationOID="TESTSITE"/>
+        </SubjectData>
+      </ClinicalData>
+      <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+        <SubjectData SubjectKey="91F686CE-37A0-4A9D-BC3B-CFFC3C609ECC" mdsol:SubjectKeyType="SubjectUUID" mdsol:SubjectName="10">
+          <SiteRef LocationOID="TESTSITE"/>
+        </SubjectData>
+      </ClinicalData>
+      <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+      ...
+    >>> for subject in subject_list:
+    ...     print "Name: %s (%s)" % (subject.subject_name, subject.subjectkey)
+    Name: 1 (0C1F5F71-B136-4C95-8199-1397F4262B31)
+    Name: 10 (91F686CE-37A0-4A9D-BC3B-CFFC3C609ECC)
+    ...
 
 
 
