@@ -80,7 +80,7 @@ each representing key information about a subject. This does not include clinica
 |                                               | omitted.                                                                          |
 +-----------------------------------------------+-----------------------------------------------------------------------------------+
 | subject_key_type={SubjectName|SubjectUUID}    | Request that the Subject Name is in the SubjectKey field (_SubjectName_) or in the|
-|                                               | mdsol:SubjectName field (with the Subject UUID in the SubjectKey field).            |
+|                                               | mdsol:SubjectName field (with the Subject UUID in the SubjectKey field).          |
 +-----------------------------------------------+-----------------------------------------------------------------------------------+
 
 Calls::
