@@ -113,6 +113,9 @@ class TestRWSSubjects(unittest.TestCase):
     """Test RWSSubjects"""
 
     def test_parse(self):
+        """
+        Parse a simple response
+        """
         text = """<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
   <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
     <SubjectData SubjectKey="1" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="No" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
@@ -140,6 +143,79 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(None, subjects[1].overdue) #Example where status was not asked for.
         self.assertEqual(True, subjects[2].incomplete)
         self.assertEqual(text,str(subjects))
+
+    def test_parse_no_uuid(self):
+        """
+        subject_name works when there is no SubjectKeyType
+        """
+        text = """<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
+  <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+    <SubjectData SubjectKey="1" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="No" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
+      <SiteRef LocationOID="TESTSITE"/>
+    </SubjectData>
+  </ClinicalData>
+  <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+    <SubjectData SubjectKey="2">
+      <SiteRef LocationOID="TESTSITE"/>
+    </SubjectData>
+  </ClinicalData>
+  <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+    <SubjectData SubjectKey="3" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="Yes" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
+      <SiteRef LocationOID="TESTSITE"/>
+    </SubjectData>
+  </ClinicalData>
+</ODM>""".decode('utf-8')
+
+        subjects = rwsobjects.RWSSubjects(text)
+
+        self.assertEqual("0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a", subjects.fileoid)
+        self.assertEqual(3, len(subjects))
+        self.assertEqual(True, subjects[0].touched)
+        self.assertEqual(False, subjects[0].overdue)
+        self.assertEqual(None, subjects[1].overdue) #Example where status was not asked for.
+        self.assertEqual(True, subjects[2].incomplete)
+        self.assertEqual(text,str(subjects))
+        self.assertEqual("1", subjects[0].subject_name)
+        self.assertEqual("2", subjects[1].subject_name)
+        self.assertEqual("3", subjects[2].subject_name)
+
+    def test_parse_out_subject_key_where_uuid(self):
+        """
+        when there is a SubjectKeyType='SubjectUUID' then we return Subject ID consistently
+        """
+        text = """<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
+  <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+    <SubjectData SubjectKey="0A663F39" mdsol:SubjectName="1" mdsol:SubjectKeyType="SubjectUUID" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="No" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
+      <SiteRef LocationOID="TESTSITE"/>
+    </SubjectData>
+  </ClinicalData>
+  <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+    <SubjectData SubjectKey="0076F9FE" mdsol:SubjectName="2" mdsol:SubjectKeyType="SubjectUUID">
+      <SiteRef LocationOID="TESTSITE"/>
+    </SubjectData>
+  </ClinicalData>
+  <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+    <SubjectData SubjectKey="B8CFE69E" mdsol:SubjectName="3" mdsol:SubjectKeyType="SubjectUUID" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="Yes" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
+      <SiteRef LocationOID="TESTSITE"/>
+    </SubjectData>
+  </ClinicalData>
+</ODM>""".decode('utf-8')
+
+        subjects = rwsobjects.RWSSubjects(text)
+
+        self.assertEqual("0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a", subjects.fileoid)
+        self.assertEqual(3, len(subjects))
+        self.assertEqual(True, subjects[0].touched)
+        self.assertEqual(False, subjects[0].overdue)
+        self.assertEqual(None, subjects[1].overdue) #Example where status was not asked for.
+        self.assertEqual(True, subjects[2].incomplete)
+        self.assertEqual(text, str(subjects))
+        self.assertEqual("1", subjects[0].subject_name)
+        self.assertEqual("2", subjects[1].subject_name)
+        self.assertEqual("3", subjects[2].subject_name)
+        self.assertEqual("0A663F39", subjects[0].subjectkey)
+        self.assertEqual("0076F9FE", subjects[1].subjectkey)
+        self.assertEqual("B8CFE69E", subjects[2].subjectkey)
 
 class TestMetaDataVersions(unittest.TestCase):
     """Test MetaDataVersions"""

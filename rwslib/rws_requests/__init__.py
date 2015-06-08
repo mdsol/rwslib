@@ -278,10 +278,10 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
     """
     Return the list of study subjects, defaults to the PROD environment
     """
-
+    SUBJECT_KEY_TYPES = ["SubjectName", "SubjectUUID"]
     INCLUDE_OPTIONS = ['inactive', 'deleted', 'inactiveAndDeleted']
 
-    def __init__(self, project_name, environment_name, status=False, include=None):
+    def __init__(self, project_name, environment_name, status=False, include=None, subject_key_type='SubjectName'):
         """
         If status == True then ?status=all
         if include then include parameter is also added to query string
@@ -291,6 +291,10 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
         self.environment_name = environment_name
         self.status = status
         self.include = None
+        self.subject_key_type = subject_key_type
+        # make sure the value for SubjectKeyType makes sense.
+        if self.subject_key_type not in self.SUBJECT_KEY_TYPES:
+            raise ValueError("SubjectKeyType {} is not a valid value".format(self.subject_key_type))
 
         if include is not None:
             if include not in self.INCLUDE_OPTIONS:
@@ -306,6 +310,8 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
 
         if self.include is not None:
             kw['include'] = self.include
+        if self.subject_key_type != 'SubjectName':
+            kw['subjectKeyType'] = self.subject_key_type
         return kw
 
     def studyname_environment(self):
