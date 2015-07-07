@@ -1,3 +1,5 @@
 lxml
 requests
 httpretty
+tox
+six
