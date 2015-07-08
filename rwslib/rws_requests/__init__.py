@@ -46,7 +46,7 @@ class RWSRequest(object):
 
     def url_path(self):
         """Return url path list"""
-        raise NotImplementedError("Override url_path in descendants of RWSRequest")
+        raise NotImplementedError("Override url_path in descendants of RWSRequest") # pragma: no cover
 
     def args(self):
         """Return additional args here as dict"""
