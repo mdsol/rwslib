@@ -8,10 +8,9 @@ __copyright__ = 'Copyright 2015 Medidata Solutions Inc'
 
 
 import requests
-from urllib import urlencode
 
-from rws_requests import RWSRequest, make_url
-from rwsobjects import RWSException, RWSError, RWSErrorResponse
+from .rws_requests import RWSRequest, make_url
+from .rwsobjects import RWSException, RWSError, RWSErrorResponse
 
 import time
 
@@ -122,10 +121,14 @@ class RWSConnection(object):
             if '<h2>HTTP Error 401.0 - Unauthorized</h2>' in r.text:
                 raise RWSException("Unauthorized.", r.text)
 
-            if r.headers.get('content-type') == "text/xml" and "ODM" in r.text:
-                error = RWSError(r.text)
+            if r.headers.get('content-type') == "text/xml":
+                # XML response
+                if r.text.startswith('<Response'):
+                    error = RWSErrorResponse(r.text)
+                elif "ODM" in r.text:
+                    error = RWSError(r.text)
             else:
-                #There was some problem with your credentials (XML response from RWS)
+                # There was some problem with your credentials (XML response from RWS)
                 error = RWSErrorResponse(r.text)
             raise RWSException(error.errordescription, error)
 
