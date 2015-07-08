@@ -222,6 +222,170 @@ class TestErrorResponse(unittest.TestCase):
             v = rave.send_request(rwslib.rws_requests.VersionRequest())
         self.assertEqual('Incorrect login and password combination. [RWS00008]', exc.exception.message)
 
+    @httpretty.activate
+    def test_401_error_error_response_no_header(self):
+        """Parse the IIS Response Error structure"""
+
+        text = u"Authorization Header not provided"
+
+        httpretty.register_uri(
+            httpretty.POST, "https://innovate.mdsol.com/RaveWebServices/webservice.aspx?PostODMClinicalData",
+            status=401,
+            body=text)
+
+        #Now my test
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        with self.assertRaises(rwslib.AuthorizationException) as exc:
+            v = rave.send_request(rwslib.rws_requests.PostDataRequest("<ODM/>"))
+        self.assertEqual(text, exc.exception.message)
+
+    @httpretty.activate
+    def test_401_error_error_response_unauthorized(self):
+        """Parse the IIS Response Error structure"""
+
+        text = u"<h2>HTTP Error 401.0 - Unauthorized</h2>"
+
+        httpretty.register_uri(
+            httpretty.POST, "https://innovate.mdsol.com/RaveWebServices/webservice.aspx?PostODMClinicalData",
+            status=401,
+            body=text)
+
+        #Now my test
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        with self.assertRaises(rwslib.RWSException) as exc:
+            v = rave.send_request(rwslib.rws_requests.PostDataRequest("<ODM/>"))
+        self.assertEqual("Unauthorized.", exc.exception.message)
+
+    @httpretty.activate
+    def test_401_error_error_response_unauthorized_but_wonky(self):
+        """Parse the IIS Response Error structure"""
+
+        text = u"""<Response
+            ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
+            InboundODMFileOID="Not Supplied"
+            IsTransactionSuccessful="0"
+            ReasonCode="RWS00092"
+            ErrorClientResponseMessage="You shall not pass">
+            </Response>
+        """
+
+        httpretty.register_uri(
+            httpretty.POST, "https://innovate.mdsol.com/RaveWebServices/webservice.aspx?PostODMClinicalData",
+            status=401,
+            body=text,
+            content_type="text/xml")
+
+        #Now my test
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        with self.assertRaises(rwslib.RWSException) as exc:
+            v = rave.send_request(rwslib.rws_requests.PostDataRequest("<ODM/>"))
+        self.assertEqual("You shall not pass", exc.exception.message)\
+
+    @httpretty.activate
+    def test_401_error_error_response_unauthorized_without_content_type(self):
+        """Parse the IIS Response Error structure"""
+
+        text = u"""<Response
+            ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
+            InboundODMFileOID="Not Supplied"
+            IsTransactionSuccessful="0"
+            ReasonCode="RWS00092"
+            ErrorClientResponseMessage="You shall not pass">
+            </Response>
+        """
+
+        httpretty.register_uri(
+            httpretty.POST, "https://innovate.mdsol.com/RaveWebServices/webservice.aspx?PostODMClinicalData",
+            status=401,
+            body=text)
+
+        #Now my test
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        with self.assertRaises(rwslib.RWSException) as exc:
+            v = rave.send_request(rwslib.rws_requests.PostDataRequest("<ODM/>"))
+        self.assertEqual("You shall not pass", exc.exception.message)
+
+    @httpretty.activate
+    def test_405_error_error_response_response_object(self):
+        """Parse the IIS Response Error structure"""
+
+        text = u"""<Response
+            ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
+            InboundODMFileOID="Not Supplied"
+            IsTransactionSuccessful="0"
+            ReasonCode="RWS00092"
+            ErrorClientResponseMessage="You shall not pass">
+            </Response>
+        """
+
+        httpretty.register_uri(
+            httpretty.POST, "https://innovate.mdsol.com/RaveWebServices/webservice.aspx?PostODMClinicalData",
+            status=405,
+            body=text)
+
+        #Now my test
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        with self.assertRaises(rwslib.RWSException) as exc:
+            v = rave.send_request(rwslib.rws_requests.PostDataRequest("<ODM/>"))
+        self.assertEqual("You shall not pass", exc.exception.message)
+
+    @httpretty.activate
+    def test_405_error_ODM_error(self):
+        """Parse a 405 error represented as an ODM"""
+        # NOTE: this is not a real response, 405's are handled by IIS and not
+        #  put through the ODM wringer
+        text = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
+         FileType="Snapshot"
+         CreationDateTime="2013-04-08T10:28:49.578-00:00"
+         FileOID="4d13722a-ceb6-4419-a917-b6ad5d0bc30e"
+         ODMVersion="1.3"
+         mdsol:ErrorDescription="Incorrect login and password combination. [RWS00008]"
+         xmlns="http://www.cdisc.org/ns/odm/v1.3" />
+
+        """.decode('utf-8')
+
+        httpretty.register_uri(
+            httpretty.GET, "https://innovate.mdsol.com/RaveWebServices/version",
+            status=405,
+            body=text)
+
+        #Now my test
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        with self.assertRaises(rwslib.RWSException) as exc:
+            v = rave.send_request(rwslib.rws_requests.VersionRequest())
+        self.assertEqual('Incorrect login and password combination. [RWS00008]', exc.exception.message)
+
+    @httpretty.activate
+    def test_405_error_iis_error(self):
+        """Test we handle the IIS error page"""
+
+        text = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>OOPS! Error Occurred. Sorry about this.</title>
+        </head>
+        <body>
+            <h2>OOPS! Error Occurred</h2>
+        </body>
+        </html>
+        """.decode('utf-8')
+
+        httpretty.register_uri(
+            httpretty.GET, "https://innovate.mdsol.com/RaveWebServices/version",
+            status=405,
+            body=text)
+
+        #Now my test
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        with self.assertRaises(rwslib.RWSException) as exc:
+            v = rave.send_request(rwslib.rws_requests.VersionRequest())
+        self.assertEqual('Unexpected Status Code (405)', exc.exception.message)
+
+
 
 class Timeout(unittest.TestCase):
 

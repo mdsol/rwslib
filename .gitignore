@@ -7,3 +7,6 @@ rwslib.egg-info/
 
 # sphinx build folder
 docs/build
+
+# coverage
+htmlcov

@@ -16,6 +16,10 @@ class TestParse(unittest.TestCase):
         text = text.decode('utf-8')
         self.assertEqual("ODM",rwsobjects.parseXMLString(text).tag)
 
+    def test_parse_empty_string(self):
+        text = u""""""
+        self.assertEqual("",rwsobjects.parseXMLString(text))
+
 
 class TestParseEnvironment(unittest.TestCase):
     """Test for extraction of environment"""
