@@ -245,7 +245,7 @@ class RWSStudyListItem(object):
     def fromElement(cls, elem):
         """Read properties from an XML Element
 
-         <Study OID="Fixitol(Dev) mdsol:ProjectType="GlobalLibraryVolume">
+         <Study OID="Fixitol(Dev)" mdsol:ProjectType="GlobalLibraryVolume">
             <GlobalVariables>
                   <StudyName>Fixitol (Dev)</StudyName>
                   <StudyDescription/>
