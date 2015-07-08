@@ -32,7 +32,7 @@ setup(
     packages=packages,
     package_dir={'rwslib': 'rwslib'},
     include_package_data=True,
-    install_requires=['requests','lxml','httpretty'],
+    install_requires=['requests', 'lxml', 'httpretty', 'six'],
     license=open('LICENSE.txt').read(),
     zip_safe=False,
     test_suite='rwslib.tests.all_tests',
@@ -43,5 +43,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: Implementation :: PyPy',
     ),
 )
