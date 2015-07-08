@@ -272,6 +272,31 @@ class TestErrorResponse(unittest.TestCase):
         httpretty.register_uri(
             httpretty.POST, "https://innovate.mdsol.com/RaveWebServices/webservice.aspx?PostODMClinicalData",
             status=401,
+            body=text,
+            content_type="text/xml")
+
+        #Now my test
+        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+        with self.assertRaises(rwslib.RWSException) as exc:
+            v = rave.send_request(rwslib.rws_requests.PostDataRequest("<ODM/>"))
+        self.assertEqual("You shall not pass", exc.exception.message)\
+
+    @httpretty.activate
+    def test_401_error_error_response_unauthorized_without_content_type(self):
+        """Parse the IIS Response Error structure"""
+
+        text = u"""<Response
+            ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
+            InboundODMFileOID="Not Supplied"
+            IsTransactionSuccessful="0"
+            ReasonCode="RWS00092"
+            ErrorClientResponseMessage="You shall not pass">
+            </Response>
+        """
+
+        httpretty.register_uri(
+            httpretty.POST, "https://innovate.mdsol.com/RaveWebServices/webservice.aspx?PostODMClinicalData",
+            status=401,
             body=text)
 
         #Now my test
