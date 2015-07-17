@@ -18,6 +18,7 @@ if __name__ == '__main__':
     rave = RWSConnection('innovate', acc['username'], acc['password'])
 
     print(rave.send_request(VersionRequest(), retries=3))
+
     print(rave.send_request(BuildVersionRequest()))
     print(rave.send_request(DiagnosticsRequest()))
     print(rave.send_request(CacheFlushRequest()).istransactionsuccessful)
@@ -184,7 +185,7 @@ if __name__ == '__main__':
 
     cv_metadata_odm = rave.send_request(CVMetaDataRequest('SIMPLESTUDY', 'TEST', rawsuffix='RAW'))
     print("CV Metadata")
-    print cv_metadata_odm
+    print(cv_metadata_odm)
 
     print("CSV Data for VITAL")
     vital_csv_data = rave.send_request(FormDataRequest('SIMPLESTUDY', 'TEST', 'REGULAR', 'VITAL', dataset_format="csv"))
