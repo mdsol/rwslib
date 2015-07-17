@@ -64,19 +64,19 @@ class TestSitesMetadataRequest(unittest.TestCase):
         with self.assertRaises(AttributeError) as exc:
             t = self.create_request_object(environment_name=None)
         self.assertEqual("environment_name cannot be empty if project_name is set",
-                         exc.exception.message)
+                         str(exc.exception))
         with self.assertRaises(AttributeError) as exc:
             t = self.create_request_object(environment_name='')
         self.assertEqual("environment_name cannot be empty if project_name is set",
-                         exc.exception.message)
+                         str(exc.exception))
         with self.assertRaises(AttributeError) as exc:
             t = self.create_request_object(project_name=None)
         self.assertEqual("project_name cannot be empty if environment_name is set",
-                         exc.exception.message)
+                         str(exc.exception))
         with self.assertRaises(AttributeError) as exc:
             t = self.create_request_object(project_name='')
         self.assertEqual("project_name cannot be empty if environment_name is set",
-                         exc.exception.message)
+                         str(exc.exception))
 
 
 class TestVersionFoldersRequest(unittest.TestCase):

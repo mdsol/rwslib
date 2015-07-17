@@ -29,7 +29,7 @@ class TestCheckDatasetFormat(unittest.TestCase):
             self.assertEqual("dataset_format is expected to be one of "
                              "%s. '%s' is not valid" % (', '.join(DATASET_FORMATS.keys()),
                                                         nonsense),
-                             exc.exception.message)
+                             str(exc.exception))
 
 
 class TestDatasetFormatToExtension(unittest.TestCase):
@@ -47,7 +47,7 @@ class TestDatasetFormatToExtension(unittest.TestCase):
             self.assertEqual("dataset_format is expected to be one of "
                              "%s. '%s' is not valid" % (', '.join(DATASET_FORMATS.keys()),
                                                         nonsense),
-                             exc.exception.message)
+                             str(exc.exception))
 
 
 class TestCVMetaDataRequest(unittest.TestCase):

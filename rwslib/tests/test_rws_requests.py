@@ -3,7 +3,11 @@
 __author__ = 'glow'
 
 import unittest
-import mock
+try:
+    import mock
+except ImportError:
+    from unittest import mock
+
 import requests
 from rwslib.rwsobjects import RWSPostResponse, RWSSubjects, RWSSubjectListItem, \
     RWSStudyMetadataVersions, RWSStudies, RWSResponse
@@ -27,7 +31,7 @@ class TestStudySubjectsRequest(unittest.TestCase):
         with self.assertRaises(ValueError) as err:
             request = StudySubjectsRequest(self.project_name, self.environment,
                                            subject_key_type="AnApple")
-        self.assertEqual(err.exception.message, "SubjectKeyType AnApple is not a valid value")
+        self.assertEqual(str(err.exception), "SubjectKeyType AnApple is not a valid value")
         request = StudySubjectsRequest(self.project_name, self.environment,
                                        subject_key_type="SubjectName")
         self.assertEqual(self.project_name, request.project_name)
@@ -70,7 +74,7 @@ class TestStudySubjectsRequest(unittest.TestCase):
                                            include="kitchen_sink")
         self.assertEqual(
             "If provided, included must be one of inactive,deleted,inactiveAndDeleted",
-            err.exception.message)
+            str(err.exception))
 
     def test_maps_response(self):
         """We map the response to a RWSSubjects instance"""
@@ -117,7 +121,7 @@ class TestCheckDatasetType(unittest.TestCase):
             with self.assertRaises(ValueError) as exc:
                 check_dataset_type(dataset_type)
             self.assertEqual("Dataset type not 'regular' or 'raw' is %s" % dataset_type,
-                             exc.exception.message)
+                             str(exc.exception))
 
 
 class TestSubjectDatasetRequest(unittest.TestCase):
@@ -168,7 +172,7 @@ class TestSubjectDatasetRequest(unittest.TestCase):
         with self.assertRaises(ValueError) as exc:
             t = self.create_request_object(dataset_type="pineapple")
         self.assertEqual("Dataset type not 'regular' or 'raw' is pineapple",
-                         exc.exception.message)
+                         str(exc.exception))
 
 
 class TestVersionDatasetRequest(unittest.TestCase):
@@ -219,7 +223,7 @@ class TestVersionDatasetRequest(unittest.TestCase):
         with self.assertRaises(ValueError) as exc:
             t = self.create_request_object(dataset_type="pineapple")
         self.assertEqual("Dataset type not 'regular' or 'raw' is pineapple",
-                         exc.exception.message)
+                        str(exc.exception))
 
 
 class TestStudyDatasetRequest(unittest.TestCase):
@@ -276,7 +280,7 @@ class TestStudyDatasetRequest(unittest.TestCase):
         with self.assertRaises(ValueError) as exc:
             t = self.create_request_object(dataset_type="pineapple")
         self.assertEqual("Dataset type not 'regular' or 'raw' is pineapple",
-                         exc.exception.message)
+                         str(exc.exception))
 
 class TestPostDataRequest(unittest.TestCase):
     def test_post_data_request_response(self):
@@ -331,7 +335,7 @@ class TestGlobalLibraryVersionRequest(unittest.TestCase):
         """We get the correct URL for GlobalLibraryVersionRequest"""
         with self.assertRaises(ValueError) as exc:
             t = self.create_request_object(oid='Study1234')
-        self.assertEqual('oid must be an integer', exc.exception.message)
+        self.assertEqual('oid must be an integer', str(exc.exception))
 
 class TestGlobalLibraryVersionsRequest(unittest.TestCase):
     def create_request_object(self, project_name="Fixitol(Dev)"):

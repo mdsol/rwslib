@@ -16,9 +16,13 @@ import os
 import csv
 from itertools import groupby
 import sqlite3
-from cStringIO import StringIO
 import logging
 import re
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 VIEW_REX = re.compile('''V_(?P<study>[^\W_]+)_(?P<view>[^\W_]+)(_(?P<type>[^\W_]+))?''')
 
@@ -79,7 +83,7 @@ class BaseDBAdapter(object):
         reader =  self.getCSVReader(data, reader_type=csv.reader)
 
         #Get fieldnames from first line of reader, what is left is set of rows
-        fieldnames = reader.next()
+        fieldnames = next(reader)
 
         #Check columns
         for col in cols:
@@ -116,7 +120,8 @@ class SQLLiteDBAdapter(BaseDBAdapter):
         """Generate DDL statements for SQLLite"""
         sql = []
         #Next convert each set of columns into a table structure
-        for dataset_name in self.datasets.keys():
+        dataset_names = sorted(self.datasets.keys())
+        for dataset_name in dataset_names:
 
             #SQL to drop the table if it already exists
             sql.append('''drop table if exists %s;''' % dataset_name)

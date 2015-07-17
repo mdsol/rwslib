@@ -288,7 +288,6 @@ class TestRWSCSVReader(unittest.TestCase):
     def test_table_gen(self):
         "test generating tables"
         sql = self.tested._generateDDL()
-
         self.assertEqual(sql[0],'drop table if exists V_SIMPLESTUDY_ENROL;')
         self.assertEqual(sql[1][:34],u'CREATE TABLE V_SIMPLESTUDY_ENROL (')
         self.assertEqual(True, 'userid NUMERIC' in sql[1])

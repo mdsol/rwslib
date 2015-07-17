@@ -178,7 +178,7 @@ class TestFormData(unittest.TestCase):
 
     def test_children(self):
         """Test there are 3 children"""
-        self.assertEquals(3, len(self.tested.itemgroups))
+        self.assertEqual(3, len(self.tested.itemgroups))
 
 
     def test_invalid_transaction_type(self):
@@ -203,13 +203,11 @@ class TestFormData(unittest.TestCase):
             self.tested << igd
         self.assertRaises(ValueError,do)
 
-
     def test_builders_basic(self):
         doc = obj_to_doc(self.tested)
         self.assertEquals(doc.attrib["FormOID"],"TESTFORM_A")
         self.assertEquals(len(doc),3)
         self.assertEquals(doc.tag,"FormData")
-
 
     def test_transaction_type(self):
         """Test transaction type inserted if set"""

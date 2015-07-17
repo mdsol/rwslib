@@ -24,7 +24,7 @@ def getEnvironmentFromNameAndProtocol(studyname, protocolname):
 def parseXMLString(xml):
     """Parse XML string, return root"""
 
-    #Remove BOM if it exists (different requests seem to have different BOMs)
+    # Remove BOM if it exists (different requests seem to have different BOMs)
     unichr_captured = ''
     if not xml.strip():
         return ''
@@ -35,9 +35,9 @@ def parseXMLString(xml):
     # try:
     return etree.fromstring(xml.encode('utf-8'))
     # except etree.XMLSyntaxError, e:
-    #     print e.message
-    #     print "XML WAS"
-    #     print xml
+    #     print(e.message)
+    #     print("XML WAS")
+    #     print(xml)#20
 
 #def xpath(doc, path_elements):
 #    """Handle the evil plumbing of xpath elements for lxml / etree"""
@@ -60,7 +60,7 @@ class XMLRepr(object):
 
     def __str__(self):
         """String representation of same"""
-        return etree.tostring(self.root)
+        return etree.tostring(self.root, encoding='utf-8').decode('utf-8')
 
 
 

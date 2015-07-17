@@ -42,6 +42,6 @@ if __name__ == '__main__':
     )
 
     root = odm.getroot()
-    print str(odm)
+    print(str(odm))
 
 

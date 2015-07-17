@@ -3,7 +3,19 @@ __author__ = 'isparks'
 
 from lxml import etree
 import datetime
-from context import *
+from .context import *
+
+# Python 3
+try:
+    long(1)
+except NameError:
+    long = int
+
+try:
+    basestring
+except NameError:
+    #  3
+    basestring = (str,bytes)
 
 # Constants
 ODM_NS = '{http://www.cdisc.org/ns/odm/v1.3}'
