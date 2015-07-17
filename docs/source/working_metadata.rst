@@ -29,9 +29,9 @@ Example::
     >>> from rwslib.rws_requests import GlobalLibrariesRequest
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')
     >>> gl_studies = r.send_request(GlobalLibrariesRequest())
-    >>> print "There are %d global libaries" % len(gl_studies)
+    >>> print("There are %d global libaries" % len(gl_studies))
     >>> for study in gl_studies:
-    ...    print study.studyname
+    ...    print(study.studyname)
     There are 1 global libaries
     Mediflex
 
@@ -59,10 +59,10 @@ Example::
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')
 
     >>> drafts = r.send_request(GlobalLibraryDraftsRequest('Rave CDASH'))
-    >>> print drafts.fileoid
+    >>> print(drafts.fileoid)
     be117ac3-e7ea-48fc-8bd8-373eb387703f
     >>> for draft in drafts:
-         print "%s - %s" % (draft.name, draft.oid,)
+         print("%s - %s" % (draft.name, draft.oid,))
     Rave CDASH 01 - 397
 
 
@@ -94,7 +94,7 @@ Example::
     >>> versions.study.studyname
     Rave CDASH
     >>> for version in versions:
-    ...    print "%s - %s" % (version.name, version.oid,)
+    ...    print("%s - %s" % (version.name, version.oid,))
     1.0 - 398
 
 

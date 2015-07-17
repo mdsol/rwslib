@@ -56,7 +56,7 @@ Example::
     >>> from rwslib.rws_requests.biostats_gateway import *
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')  #Authorization required
     >>> cv_metadata_odm = r.send_request(CVMetaDataRequest('SIMPLESTUDY', 'TEST', rawsuffix='RAW'))
-    >>> print cv_metadata_odm
+    >>> print(cv_metadata_odm)
     <?xml version="1.0" encoding="utf-8"?><ODM FileType="Snapshot" Granularity="Metadata"
           CreationDateTime="2013-10-07T13:39:33.334-00:00"
           FileOID="0299d82e-8b76-4363-bd3e-2e6985999ce4" ODMVersion="1.3"
@@ -140,7 +140,7 @@ Example::
     >>> from rwslib.rws_requests.biostats_gateway import FormDataRequest
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')  #Authorization required
     >>> vital_csv_data = r.send_request(FormDataRequest('SIMPLESTUDY', 'TEST', 'REGULAR', 'VITAL', dataset_format="csv"))
-    >>> print vital_csv_data
+    >>> print(vital_csv_data)
     userid,projectid,project,studyid,environmentName,subjectId,StudySiteId,Subject,siteid,Site,SiteNumber,SiteGroup,instanceId,InstanceName,InstanceRepeatNumber,folderid,Folder,FolderName,FolderSeq,TargetDays,DataPageId,DataPageName,PageRepeatNumber,RecordDate,RecordId,recordposition,RecordActive,SaveTs,MinCreated,MaxUpdated,VDAT,VDAT_RAW,VDAT_INT,VDAT_YYYY,VDAT_MM,VDAT_DD,WEIGHT_KG,WEIGHT_KG_RAW,HEIGHT_CM,HEIGHT_CM_RAW
     "457","85","SIMPLESTUDY","95","TEST","32112","143","1","120","TESTSITE","TESTSITE","World","192310","Screening","0","5791","SCREEN","Screening","1.0","","662502","Vitals","0","","1346659","0","1","2013-06-24T09:52:52","2013-06-24T09:52:10","2013-06-24T09:52:10","2013-02-01T00:00:00","2013 Feb 01","2013-02-01T00:00:00","2013","2","1","132.0","132","174.5","174.5"
     "457","85","SIMPLESTUDY","95","TEST","32113","143","2","120","TESTSITE","TESTSITE","World","192311","Screening","0","5791","SCREEN","Screening","1.0","","662504","Vitals","0","","1346661","0","1","2013-06-24T09:52:52","2013-06-24T09:52:11","2013-06-24T09:52:11","2013-02-09T00:00:00","2013 Feb 09","2013-02-09T00:00:00","2013","2","9","82.5","82.5","173.0","173"
@@ -191,7 +191,7 @@ Example::
     >>> from rwslib.rws_requests.biostats_gateway import MetaDataRequest
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')  #Authorization required
     >>> all_csv_meta = rave.send_request(MetaDataRequest(dataset_format='xml'))
-    >>> print all_csv_meta
+    >>> print(all_csv_meta)
     <?xml version="1.0" encoding="UTF-8"?>
     <datasets>
         <dataset>
@@ -273,7 +273,7 @@ Example::
     >>> from rwslib.rws_requests.biostats_gateway import MetaDataRequest
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')  #Authorization required
     >>> simplestudy_csv_meta = r.send_request(ProjectMetaDataRequest('SIMPLESTUDY'))
-    >>> print simplestudy_csv_meta
+    >>> print(simplestudy_csv_meta)
     projectname,viewname,ordinal,varname,vartype,varlength,varformat,varlabel
     "SIMPLESTUDY","V_SIMPLESTUDY_ENROL","1","userid","num","8","10.","Internal id for the user"
     "SIMPLESTUDY","V_SIMPLESTUDY_ENROL","2","projectid","num","8","10.","projectid"
@@ -345,7 +345,7 @@ Example::
     >>> from rwslib.rws_requests.biostats_gateway import MetaDataRequest
     >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')  #Authorization required
     >>> ss_vital_meta = r.send_request(ViewMetaDataRequest("V_SIMPLESTUDY_VITAL", dataset_format='xml'))
-    >>> print ss_vital_meta
+    >>> print(ss_vital_meta)
     <?xml version="1.0" encoding="UTF-8"?>
     <datasets>
         <dataset>
