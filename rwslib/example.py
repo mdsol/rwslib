@@ -97,12 +97,9 @@ if __name__ == '__main__':
   </ClinicalData>
 </ODM>"""
 
-    # try:
-    #    res = rave.send_request(PostDataRequest(data))
-    # except:
-    #    print(rave.last_result.url)
-    #    raise
-    # print(res)
+    # Post data example
+    res = rave.send_request(PostDataRequest(data))
+    print(res)
 
     data = """<ODM FileType="Snapshot" Granularity="Metadata" CreationDateTime="2013-06-18T15:09:54.843-00:00" FileOID="82370e27-a6a5-41dc-8c07-829e489823df" ODMVersion="1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns="http://www.cdisc.org/ns/odm/v1.3">
   <Study OID="SIMPLESTUDY">
