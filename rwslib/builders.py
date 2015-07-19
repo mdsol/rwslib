@@ -325,13 +325,13 @@ class ODM(ODMElement):
         self.originator = originator #Required
         self.description = description
         self.creationdatetime = creationdatetime
-        #filetype will always be "Transactional"
-        #ODM version will always be 1.3
-        #Granularity="SingleSubject"
-        #AsOfDateTime always OMITTED (it's optional)
+        # filetype will always be "Transactional"
+        # ODM version will always be 1.3
+        # Granularity="SingleSubject"
+        # AsOfDateTime always OMITTED (it's optional)
         self.clinical_data = None
 
-        #Create unique fileoid if none given
+        # Create unique fileoid if none given
         if fileoid is None:
             self.fileoid = str(uuid.uuid4())
         else:
@@ -346,7 +346,7 @@ class ODM(ODMElement):
 
     def getroot(self):
         """Build XML object, return the root"""
-        self.builder = ET.TreeBuilder()
+        builder = ET.TreeBuilder()
 
         params = dict(ODMVersion = "1.3",
                       FileType= "Transactional",
@@ -360,16 +360,16 @@ class ODM(ODMElement):
 
         if self.description:
             params['Description'] = self.description
-        self.builder.start("ODM", params)
+        builder.start("ODM", params)
         #Ask the children
         if self.clinical_data is not None:
-            self.clinical_data.build(self.builder)
+            self.clinical_data.build(builder)
 
-        self.builder.end("ODM")
-        return self.builder.close()
+        builder.end("ODM")
+        return builder.close()
 
     def __str__(self):
         doc = self.getroot()
         indent(doc)
         header = '<?xml version="1.0" encoding="utf-8" ?>\n'
-        return header + ET.tostring(doc, 'utf-8')
+        return header + ET.tostring(doc, encoding='utf-8').decode('utf-8')

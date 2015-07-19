@@ -55,7 +55,7 @@ This ODM file can be created using builders with this python code::
     >>> root = odm.getroot()
     >>>
     >>> #Print a string representation of the ODM document
-    >>> print str(odm)
+    >>> print(str(odm))
     <?xml version="1.0" encoding="utf-8" ?>
     <ODM CreationDateTime="2013-06-17T18:49:28" FileOID="45b854a7-e170-4ff6-8ce5-f511d72688cb"
          FileType="Transactional" ODMVersion="1.3" Originator="test system"
@@ -109,7 +109,7 @@ following example creates the same document as above::
     >>> root = odm.getroot()
     >>>
     >>> #Print a string representation of the ODM document
-    >>> print str(odm)
+    >>> print(str(odm))
     <?xml version="1.0" encoding="utf-8" ?>
     <ODM CreationDateTime="2013-06-17T18:49:28" FileOID="45b854a7-e170-4ff6-8ce5-f511d72688cb"
          FileType="Transactional" ODMVersion="1.3" Originator="test system"

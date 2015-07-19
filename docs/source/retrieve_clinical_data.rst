@@ -49,10 +49,10 @@ Example::
     >>> len(studies)
     1
     >>> for study in studies:
-    ...    print "OID",study.oid
-    ...    print "Name",study.studyname
-    ...    print "protocolname",study.protocolname
-    ...    print "IsProd?",study.isProd()
+    ...    print("OID",study.oid)
+    ...    print("Name",study.studyname)
+    ...    print("protocolname",study.protocolname)
+    ...    print("IsProd?",study.isProd())
     ...
     OID Mediflex(Dev)
     Name Mediflex (Dev)
