@@ -8,66 +8,57 @@ ODM_NS = '{http://www.cdisc.org/ns/odm/v1.3}'
 
 def getEnvironmentFromNameAndProtocol(studyname, protocolname):
     """Extract environment name using studyname and protocolname to guide"""
-    #StudyName =    "TEST (1) (DEV)"
-    #ProtocolName = "TEST (1)"
-    #Raw Env      =           "(DEV)"
+    # StudyName =    "TEST (1) (DEV)"
+    # ProtocolName = "TEST (1)"
+    # Raw Env      =           "(DEV)"
 
     raw_env = studyname[len(protocolname):].strip()
 
     if '(' in raw_env:
         l_brace_pos = raw_env.rfind('(')
         r_brace_pos = raw_env.rfind(')')
-        return raw_env[l_brace_pos+1:r_brace_pos]
+        return raw_env[l_brace_pos + 1:r_brace_pos]
     else:
         return raw_env
+
 
 def parseXMLString(xml):
     """Parse XML string, return root"""
 
-    #Remove BOM if it exists (different requests seem to have different BOMs)
+    # Remove BOM if it exists (different requests seem to have different BOMs)
     unichr_captured = ''
     if not xml.strip():
         return ''
     while xml[0] != u'<':
         unichr_captured += xml[0]
         xml = xml[1:]
-
-    # try:
     return etree.fromstring(xml.encode('utf-8'))
-    # except etree.XMLSyntaxError, e:
-    #     print e.message
-    #     print "XML WAS"
-    #     print xml
-
-#def xpath(doc, path_elements):
-#    """Handle the evil plumbing of xpath elements for lxml / etree"""
-#    ns = {"odm": ODM_NS[1:-1],
-#          "mdsol": MEDI_NS[1:-1]}
-#
-#    return doc.xpath('/'.join(["%s:%s" % (prefix, element,) for prefix, element in path_elements ]), namespaces=ns)
 
 
 class RWSException(Exception):
     """RWS Exception. Usual to attach the error response object"""
+
     def __init__(self, msg, rws_error):
         Exception.__init__(self, msg)
         self.rws_error = rws_error
 
+
 class XMLRepr(object):
     """Classes that represent objects passed back from RWS as XML"""
+
     def __init__(self, xml):
         self.root = parseXMLString(xml)
 
     def __str__(self):
         """String representation of same"""
-        return etree.tostring(self.root)
-
+        return etree.tostring(self.root, encoding='utf-8').decode('utf-8')
 
 
 class ODMDoc(XMLRepr):
     """A base ODM document"""
+
     def __init__(self, xml):
-        #Call base class
+        # Call base class
         XMLRepr.__init__(self, xml)
         r_get = self.root.get
 
@@ -75,8 +66,7 @@ class ODMDoc(XMLRepr):
         self.creationdatetime = r_get('CreationDateTime')
         self.fileoid = r_get("FileOID")
         self.ODMVersion = r_get("ODMVersion")
-        self.granularity = r_get("Granularity",None)
-
+        self.granularity = r_get("Granularity", None)
 
 
 class RWSError(ODMDoc):
@@ -94,6 +84,7 @@ Parses XML of the form::
          mdsol:ErrorDescription="Incorrect login and password combination. [RWS00008]"
          xmlns="http://www.cdisc.org/ns/odm/v1.3" />
     """
+
     def __init__(self, xml):
         ODMDoc.__init__(self, xml)
         r_get = self.root.get
@@ -112,8 +103,9 @@ Parses messages of the form::
         ErrorClientResponseMessage="CRF version not found">
     </Response>
     """
+
     def __init__(self, xml):
-        #Call base class
+        # Call base class
         XMLRepr.__init__(self, xml)
         r_get = self.root.get
 
@@ -122,6 +114,7 @@ Parses messages of the form::
         self.istransactionsuccessful = r_get('IsTransactionSuccessful') == "1"
         self.reasoncode = r_get("ReasonCode")
         self.errordescription = r_get("ErrorClientResponseMessage")
+
 
 class RWSResponse(XMLRepr):
     """
@@ -133,8 +126,9 @@ Parses messages of the form::
         SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords="">
     </Response>
     """
+
     def __init__(self, xml):
-        #Call base class
+        # Call base class
         XMLRepr.__init__(self, xml)
         r_get = self.root.get
 
@@ -148,12 +142,13 @@ Parses messages of the form::
         self.fields_touched = 0
         self.loglines_touched = 0
 
-        success_stats = r_get('SuccessStatistics','')
+        success_stats = r_get('SuccessStatistics', '')
 
-        #Clinical data post
+        # Clinical data post
         if success_stats.startswith('Rave objects touched:'):
-            success_stats = success_stats[len('Rave objects touched:')+1:] #Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0
-            parts = success_stats.split(';') #[Subjects=0, Folders=0, Forms=0, Fields=0, LogLines=0]
+            success_stats = success_stats[
+                            len('Rave objects touched:') + 1:]  # Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0
+            parts = success_stats.split(';')  # [Subjects=0, Folders=0, Forms=0, Fields=0, LogLines=0]
             for part in parts:
                 name, value = part.strip().split('=')
                 # if value[-1] == ';':
@@ -171,8 +166,7 @@ Parses messages of the form::
                 else:
                     raise KeyError('Unknown Rave Object %s in response %s' % (name, success_stats,))
 
-        #Node: Metadata post has success_stats == 'N/A'
-
+        # Note: Metadata post has success_stats == 'N/A'
         self.new_records = r_get("NewRecords")
 
 
@@ -187,55 +181,55 @@ Parses responses from PostODMClinicalData messages with the format::
               SubjectNumberInStudy="1103" SubjectNumberInStudySite="55">
     </Response>
     """
+
     def __init__(self, xml):
-        #Call base class
+        # Call base class
         RWSResponse.__init__(self, xml)
         r_get = self.root.get
-        #These counts may only come as a result of a Clinical data POST
+        # These counts may only come as a result of a Clinical data POST
         snis = r_get('SubjectNumberInStudy')
         self.subjects_in_study = int(snis) if snis is not None else None
 
         sniss = r_get('SubjectNumberInStudySite')
         self.subjects_in_study_site = int(sniss) if sniss is not None else None
 
-        #DraftImported only comes from a MetaData Post
-        #In which case successStatistics will be SuccessStatistics="N/A"
+        # DraftImported only comes from a MetaData Post
+        # In which case successStatistics will be SuccessStatistics="N/A"
         self.draft_imported = r_get("DraftImported")
 
 
-
 class RWSPostErrorResponse(RWSResponse):
-    """Responses to Clinical data post messages have additional Attributes to normal RWS Response messages"""
-    # <Response
-    #     ReferenceNumber="5b1fa9a3-0cf3-46b6-8304-37c2e3b7d04f"
-    #     InboundODMFileOID="1"
-    #     IsTransactionSuccessful = "0"
-    #     ReasonCode="RWS00024"
-    #     ErrorOriginLocation="/ODM/ClinicalData[1]/SubjectData[1]"
-    #     SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0"
-    #     ErrorClientResponseMessage="Subject already exists.">
-    #     </Response>
+    """Responses to Clinical data post messages have additional Attributes to normal RWS Response messages::
+
+        <Response
+            ReferenceNumber="5b1fa9a3-0cf3-46b6-8304-37c2e3b7d04f"
+            InboundODMFileOID="1"
+            IsTransactionSuccessful = "0"
+            ReasonCode="RWS00024"
+            ErrorOriginLocation="/ODM/ClinicalData[1]/SubjectData[1]"
+            SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0"
+            ErrorClientResponseMessage="Subject already exists.">
+            </Response>
+    """
     def __init__(self, xml):
         RWSResponse.__init__(self, xml)
 
-        #Get additional properties
+        # Get additional properties
         r_get = self.root.get
         self.reason_code = r_get('ReasonCode')
         self.error_origin_location = r_get('ErrorOriginLocation')
         self.error_client_response_message = r_get('ErrorClientResponseMessage')
 
 
-
-
 class RWSStudyListItem(object):
     """An item in the RWS Study List response"""
+
     def __init__(self):
         self.oid = None
         self.studyname = None
         self.protocolname = None
         self.environment = None
         self.projecttype = None
-
 
     def isProd(self):
         """Is production if environment is empty"""
@@ -245,7 +239,7 @@ class RWSStudyListItem(object):
     def fromElement(cls, elem):
         """Read properties from an XML Element
 
-         <Study OID="Fixitol(Dev) mdsol:ProjectType="GlobalLibraryVolume">
+         <Study OID="Fixitol(Dev)" mdsol:ProjectType="GlobalLibraryVolume">
             <GlobalVariables>
                   <StudyName>Fixitol (Dev)</StudyName>
                   <StudyDescription/>
@@ -258,23 +252,20 @@ class RWSStudyListItem(object):
 
         self.oid = elem.get('OID')
 
-        #Not all returned documents have a projecttype (GlobalLibraryVolumes do)
-        self.projecttype =  elem.get(MEDI_NS + "ProjectType", "Project")
+        # Not all returned documents have a projecttype (GlobalLibraryVolumes do)
+        self.projecttype = elem.get(MEDI_NS + "ProjectType", "Project")
 
         e_global_variables = elem.find(ODM_NS + 'GlobalVariables')
         self.studyname = e_global_variables.find(ODM_NS + 'StudyName').text
         self.protocolname = e_global_variables.find(ODM_NS + 'ProtocolName').text
-
-
 
         self.environment = getEnvironmentFromNameAndProtocol(self.studyname, self.protocolname)
 
         return self
 
 
-
-#I hate multi-inheritance generally but since this is inheriting from a built-in like list I feel
-#less bad about it.
+# I hate multi-inheritance generally but since this is inheriting from a built-in like list I feel
+# less bad about it.
 class RWSStudies(list, ODMDoc):
     """
 Represents a list of studies. Extends the list class and adds a couple of extra properties::
@@ -303,7 +294,7 @@ Represents a list of studies. Extends the list class and adds a couple of extra 
     """
 
     def __init__(self, xml):
-        #Get basic properties
+        # Get basic properties
         ODMDoc.__init__(self, xml)
 
         for estudy in self.root.findall(ODM_NS + 'Study'):
@@ -314,6 +305,7 @@ class MetaDataVersion(object):
     """
 <MetaDataVersion OID="1203" Name="Webservice Outbound"/>
     """
+
     def __init__(self):
         self.oid = None
         self.name = None
@@ -330,7 +322,6 @@ class MetaDataVersion(object):
         self.oid = elem.get('OID')
         self.name = elem.get('Name')
         return self
-
 
 
 class RWSStudyMetadataVersions(list, ODMDoc, RWSStudyListItem):
@@ -350,17 +341,17 @@ Parses responses from MetaDataVersions request::
         </Study>
     </ODM>
     """
+
     def __init__(self, xml):
-        #Get basic properties
+        # Get basic properties
         ODMDoc.__init__(self, xml)
 
-        root = self.root #from ODMDoc
+        root = self.root  # from ODMDoc
 
         e_study = root.find(ODM_NS + 'Study')
 
-        #Quick way to grab the elements here, nasty though
+        # Quick way to grab the elements here, nasty though
         self.study = RWSStudyListItem.fromElement(e_study)
-
 
         for e_version in e_study.findall(ODM_NS + 'MetaDataVersion'):
             self.append(MetaDataVersion.fromElement(e_version))
@@ -443,7 +434,7 @@ The SubjectKey can be either a Subject ID or a UUID depending on the value of Su
                          "ReadyForLock",
                          "SubjectKeyType",
                          "SubjectName"]
-    
+
     def __init__(self):
         """The ODM message has a ClinicalData element with a single SubjectData and SiteRef elements
            nested within. I collapse into a single object
@@ -454,10 +445,10 @@ The SubjectKey can be either a Subject ID or a UUID depending on the value of Su
         self.subjectkeytype = None
         self.locationoid = None
 
-        self.active = None  #SubjectActive
-        self.deleted = None  #Deleted
+        self.active = None  # SubjectActive
+        self.deleted = None  # Deleted
 
-        #Optional properties, only if status included
+        # Optional properties, only if status included
         for prop in RWSSubjectListItem.STATUS_PROPERTIES:
             setattr(self, prop.lower(), None)
 
@@ -489,20 +480,19 @@ The SubjectKey can be either a Subject ID or a UUID depending on the value of Su
         e_siteref = e_subjectdata.findall(ODM_NS + 'SiteRef')[0]
         self.locationoid = e_siteref.get('LocationOID')
 
-        decodes = {'yes':True,'no':False,'':None}
+        decodes = {'yes': True, 'no': False, '': None}
         for prop in RWSSubjectListItem.STATUS_PROPERTIES:
             val = e_subjectdata.get(MEDI_NS + prop, "").lower()
             setattr(self, prop.lower(), decodes.get(val, val))
 
-        #By default we only get back active and non-deleted subjects
-        self.active = decodes[e_subjectdata.get(MEDI_NS + "SubjectActive","yes").lower()]
-        self.deleted = decodes[e_subjectdata.get(MEDI_NS + "Deleted","no").lower()]
-
+        # By default we only get back active and non-deleted subjects
+        self.active = decodes[e_subjectdata.get(MEDI_NS + "SubjectActive", "yes").lower()]
+        self.deleted = decodes[e_subjectdata.get(MEDI_NS + "Deleted", "no").lower()]
 
         return self
 
 
-class RWSSubjects(list, ODMDoc): #I hate multi-inheritance generally.
+class RWSSubjects(list, ODMDoc):  # I hate multi-inheritance generally.
     """
 Represents a list of subjects::
 
@@ -526,12 +516,10 @@ Represents a list of subjects::
     """
 
     def __init__(self, xml):
-        #Get basic properties
+        # Get basic properties
         ODMDoc.__init__(self, xml)
 
-        root = self.root #from ODMDoc
+        root = self.root  # from ODMDoc
 
         for e_clindata in root.findall(ODM_NS + 'ClinicalData'):
             self.append(RWSSubjectListItem.fromElement(e_clindata))
-
-

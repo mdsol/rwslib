@@ -8,19 +8,21 @@ TODO: Note that might want to make the Request objects responsible for deciding 
 
 """
 
-from rwslib.rwsobjects import RWSResponse, RWSStudies, RWSStudyMetadataVersions, RWSSubjects, RWSPostResponse
-from urllib import urlencode
+from rwslib.rwsobjects import RWSResponse, RWSStudies, RWSStudyMetadataVersions, RWSSubjects, \
+    RWSPostResponse
+from six.moves.urllib_parse import urlencode
 
-#-----------------------------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------------------------------------------------
 # Function utilities I don't want to muddy class heirarchy with
 
 def check_dataset_type(dataset_type):
     """Datasets may only be regular or raw"""
-    if dataset_type.lower() not in ['regular','raw']:
+    if dataset_type.lower() not in ['regular', 'raw']:
         raise ValueError("Dataset type not 'regular' or 'raw' is %s" % dataset_type)
 
 
-#-------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------
 # Utility functions
 #
 def make_url(*args, **kwargs):
@@ -35,42 +37,46 @@ def make_url(*args, **kwargs):
 class RWSRequest(object):
     """Base class for all RWS Requests"""
     requires_authorization = False
-    method = "GET" #Default
-
+    method = "GET"  # Default
 
     def result(self, request):
         """Process a result to create a custom output"""
-        #By default return text
+        # By default return text
         return request.text
 
     def url_path(self):
         """Return url path list"""
-        raise NotImplementedError("Override url_path in descendants of RWSRequest")
+        raise NotImplementedError("Override url_path in descendants of RWSRequest") # pragma: no cover
 
     def args(self):
         """Return additional args here as dict"""
         return {}
 
     def make_url(self, *args, **kwargs):
-        #Note: Including this in the class as a convenience so that you can get all you need from a RWSObject rather
-        #than having to import make_url as an additional import.
+        # Note: Including this in the class as a convenience so that you can get all you need from a RWSObject rather
+        # than having to import make_url as an additional import.
         return make_url(*args, **kwargs)
 
-#-----------------------------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------------------------------------------------
 # Useful subclasses
-#
+# -----------------------------------------------------------------------------------------------------------------------
 
 class RWSGetRequest(RWSRequest):
     method = "GET"
 
+
 class RWSAuthorizedGetRequest(RWSGetRequest):
     requires_authorization = True
+
 
 class RWSPostRequest(RWSRequest):
     method = "POST"
 
+
 class RWSAuthorizedPostRequest(RWSPostRequest):
     requires_authorization = True
+
 
 class QueryOptionGetRequest(RWSAuthorizedGetRequest):
     """Manages requests that have known query string options"""
@@ -86,29 +92,35 @@ class QueryOptionGetRequest(RWSAuthorizedGetRequest):
                 kw[key] = val
         return kw
 
-#---------------------------------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------------------------------------
 # Implementations. These are all standards that have existed for a long time.
+# ---------------------------------------------------------------------------------------------------------------------
 
 class VersionRequest(RWSGetRequest):
     """Get RWS Version number"""
+
     def url_path(self):
         return make_url('version')
 
 
 class BuildVersionRequest(RWSGetRequest):
     """Return the RWS build version number"""
+
     def url_path(self):
         return make_url('version', 'build')
 
 
 class DiagnosticsRequest(RWSGetRequest):
     """Return the RWS build version number"""
+
     def url_path(self):
         return make_url('diagnostics')
 
 
 class CacheFlushRequest(RWSAuthorizedGetRequest):
     """Calls RWS cache-flush"""
+
     def url_path(self):
         return make_url('webservice.aspx?CacheFlush')
 
@@ -121,6 +133,7 @@ class ClinicalStudiesRequest(RWSAuthorizedGetRequest):
     """Return the list of clinical studies as a RWSStudies object.
        Clinical studies are the studies that you have access to as an EDC user.
     """
+
     def url_path(self):
         return make_url('studies')
 
@@ -128,14 +141,16 @@ class ClinicalStudiesRequest(RWSAuthorizedGetRequest):
         return RWSStudies(request.text)
 
 
-#----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 # Base request classes for study versions (could also be used for drafts if ever implemented by RWS)
+# ----------------------------------------------------------------------------------------------------------------------
 
 class VersionRequestBase(RWSAuthorizedGetRequest):
     """Base class for study and library metadata version requests"""
+
     def __init__(self, project_name, oid):
         self.project_name = project_name
-        self._oid = None #Oid is a version OID, an integer identifier
+        self._oid = None  # Oid is a version OID, an integer identifier
         self.oid = oid
 
     @property
@@ -154,14 +169,16 @@ class VersionRequestBase(RWSAuthorizedGetRequest):
         return request.text
 
 
-#-----------------------------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------------------------
 # Related to Architect Studies and their drafts/versions
+# -----------------------------------------------------------------------------------------------------------------------
 
 class MetadataStudiesRequest(RWSAuthorizedGetRequest):
     """Return the list of metadata studies as a RWSStudies object.
        metadata_studies are the list of studies that you have access to as an
        Architect user.
     """
+
     def url_path(self):
         return make_url('metadata', 'studies')
 
@@ -171,6 +188,7 @@ class MetadataStudiesRequest(RWSAuthorizedGetRequest):
 
 class StudyDraftsRequest(RWSAuthorizedGetRequest):
     """Return the list of study drafts"""
+
     def __init__(self, project_name):
         self.project_name = project_name
 
@@ -201,17 +219,19 @@ class StudyVersionRequest(VersionRequestBase):
         return make_url('metadata', 'studies', self.project_name, 'versions', str(self._oid))
 
 
-#NOTE: There is no StudyDraftRequest, this is something of an omission since you can list them...
+# NOTE: There is no StudyDraftRequest, this is something of an omission since you can list them...
 
 
-#-----------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
 # Related to Architect Global Libraries and their drafts/versions
+# -------------------------------------------------------------------------------------------------
 
 class GlobalLibrariesRequest(RWSAuthorizedGetRequest):
     """Return the list of global libraries as a RWSStudies object.
        metadata_libraries are the list of libraries that you have access to as an
        Architect Global Library Volume user
     """
+
     def url_path(self):
         return make_url('metadata', 'libraries')
 
@@ -221,6 +241,7 @@ class GlobalLibrariesRequest(RWSAuthorizedGetRequest):
 
 class GlobalLibraryDraftsRequest(RWSAuthorizedGetRequest):
     """Return the list of global library drafts"""
+
     def __init__(self, project_name):
         self.project_name = project_name
 
@@ -233,6 +254,7 @@ class GlobalLibraryDraftsRequest(RWSAuthorizedGetRequest):
 
 class GlobalLibraryVersionsRequest(RWSAuthorizedGetRequest):
     """Return the list of global library versions"""
+
     def __init__(self, project_name):
         self.project_name = project_name
 
@@ -271,8 +293,9 @@ class PostMetadataRequest(RWSAuthorizedPostRequest):
         return RWSPostResponse(request.text)
 
 
-#-----------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
 # Subject related
+# -------------------------------------------------------------------------------------------------
 
 class StudySubjectsRequest(RWSAuthorizedGetRequest):
     """
@@ -281,7 +304,8 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
     SUBJECT_KEY_TYPES = ["SubjectName", "SubjectUUID"]
     INCLUDE_OPTIONS = ['inactive', 'deleted', 'inactiveAndDeleted']
 
-    def __init__(self, project_name, environment_name, status=False, include=None, subject_key_type='SubjectName'):
+    def __init__(self, project_name, environment_name, status=False, include=None,
+                 subject_key_type='SubjectName'):
         """
         If status == True then ?status=all
         if include then include parameter is also added to query string
@@ -294,13 +318,14 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
         self.subject_key_type = subject_key_type
         # make sure the value for SubjectKeyType makes sense.
         if self.subject_key_type not in self.SUBJECT_KEY_TYPES:
-            raise ValueError("SubjectKeyType {} is not a valid value".format(self.subject_key_type))
+            raise ValueError(
+                "SubjectKeyType {} is not a valid value".format(self.subject_key_type))
 
         if include is not None:
             if include not in self.INCLUDE_OPTIONS:
-                raise ValueError('If provided, included must be one of %s' % ','.join(self.INCLUDE_OPTIONS))
+                raise ValueError(
+                    'If provided, included must be one of %s' % ','.join(self.INCLUDE_OPTIONS))
         self.include = include
-
 
     def _querystring(self):
         """Additional keyword arguments"""
@@ -315,7 +340,7 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
         return kw
 
     def studyname_environment(self):
-        return "%s(%s)" % (self.project_name, self.environment_name, )
+        return "%s(%s)" % (self.project_name, self.environment_name,)
 
     def url_path(self):
         return make_url('studies', self.studyname_environment(), 'subjects', **self._querystring())
@@ -337,7 +362,6 @@ class PostDataRequest(RWSAuthorizedPostRequest):
               'headers': self.headers}
         return kw
 
-
     def url_path(self):
         return make_url("webservice.aspx?PostODMClinicalData")
 
@@ -345,21 +369,19 @@ class PostDataRequest(RWSAuthorizedPostRequest):
         return RWSPostResponse(request.text)
 
 
-
-
-#-----------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
 # ODM Clinical Data Datasets
+# -------------------------------------------------------------------------------------------------
 
 
 class ODMDatasetBase(RWSAuthorizedGetRequest):
-
-    KNOWN_QUERY_OPTIONS = [ 'versionitem', 'rawsuffix', 'codelistsuffix', 'decodesuffix', 'stdsuffix']
+    KNOWN_QUERY_OPTIONS = ['versionitem', 'rawsuffix', 'codelistsuffix',
+                           'decodesuffix', 'stdsuffix']
 
     def checkParams(self):
         check_dataset_type(self.dataset_type)
-            #TODO: Check start is an iso8601 data.
-            #https://bitbucket.org/micktwomey/pyiso8601
-
+        # TODO: Check start is an iso8601 date.
+        # https://bitbucket.org/micktwomey/pyiso8601
 
     def _querystring(self):
         """Additional keyword arguments"""
@@ -373,14 +395,14 @@ class ODMDatasetBase(RWSAuthorizedGetRequest):
         return kw
 
     def _studyname_environment(self):
-        return "%s(%s)" % (self.project_name, self.environment_name, )
-
+        return "%s(%s)" % (self.project_name, self.environment_name,)
 
 
 class StudyDatasetRequest(ODMDatasetBase):
     """Return the text of the full datasets listing as an ODM string."""
 
-    def __init__(self, project_name, environment_name, dataset_type='regular', start=None, rawsuffix=None, formoid=None,
+    def __init__(self, project_name, environment_name, dataset_type='regular',
+                 start=None, rawsuffix=None, formoid=None,
                  versionitem=None, codelistsuffix=None, decodesuffix=None, stdsuffix=None):
         self.project_name = project_name
         self.environment_name = environment_name
@@ -397,7 +419,6 @@ class StudyDatasetRequest(ODMDatasetBase):
 
         self.checkParams()
 
-
     def url_path(self):
         args = ['studies', self._studyname_environment(), 'datasets', self.dataset_type]
         if self.formoid is not None:
@@ -405,12 +426,15 @@ class StudyDatasetRequest(ODMDatasetBase):
 
         return make_url(*args, **self._querystring())
 
+
 class VersionDatasetRequest(ODMDatasetBase):
     """
     Return the text of the full datasets for a version as an ODM string.
     By supplying formoid, will be filtered to just that formoid data
     """
-    def __init__(self, project_name, environment_name, version_oid, dataset_type='regular', start=None, rawsuffix=None, formoid=None,
+
+    def __init__(self, project_name, environment_name, version_oid, dataset_type='regular',
+                 start=None, rawsuffix=None, formoid=None,
                  versionitem=None, codelistsuffix=None, decodesuffix=None, stdsuffix=None):
         self.project_name = project_name
         self.environment_name = environment_name
@@ -428,9 +452,10 @@ class VersionDatasetRequest(ODMDatasetBase):
 
         self.checkParams()
 
-
     def url_path(self):
-        args = ['studies', self._studyname_environment(), 'versions', str(self.version_oid), 'datasets', self.dataset_type]
+        args = ['studies', self._studyname_environment(),
+                'versions', str(self.version_oid),
+                'datasets', self.dataset_type]
         if self.formoid is not None:
             args.append(self.formoid)
 
@@ -442,7 +467,11 @@ class SubjectDatasetRequest(ODMDatasetBase):
     Return the text of the full datasets for a version as an ODM string.
     By supplying formoid, will be filtered to just that formoid data
     """
-    def __init__(self, project_name, environment_name, subjectkey, dataset_type='regular', start=None, rawsuffix=None, formoid=None,
+
+    def __init__(self, project_name,
+                 environment_name,
+                 subjectkey,
+                 dataset_type='regular', start=None, rawsuffix=None, formoid=None,
                  versionitem=None, codelistsuffix=None, decodesuffix=None, stdsuffix=None):
         self.project_name = project_name
         self.environment_name = environment_name
@@ -460,9 +489,10 @@ class SubjectDatasetRequest(ODMDatasetBase):
 
         self.checkParams()
 
-
     def url_path(self):
-        args = ['studies', self._studyname_environment(), 'subjects', str(self.subjectkey), 'datasets', self.dataset_type]
+        args = ['studies', self._studyname_environment(),
+                'subjects', str(self.subjectkey),
+                'datasets', self.dataset_type]
         if self.formoid is not None:
             args.append(self.formoid)
 

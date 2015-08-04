@@ -12,15 +12,11 @@ if __name__ == '__main__':
     acc = accounts['innovate']
     rave = RWSConnection('innovate', acc['username'], acc['password'])
 
-    print rave.send_request(VersionRequest())
+    print(rave.send_request(VersionRequest()))
 
-
-    try:
-        audits = rave.send_request(AuditRecordsRequest('Mediflex','Dev',startid=4000000,per_page=10000))
-        print rave.next_link #Get headers, next and last entries?
-    except:
-        raise
+    audits = rave.send_request(AuditRecordsRequest('Mediflex','Dev',startid=4000000,per_page=10000))
+    print rave.next_link #Get headers, next and last entries?
     #print audits
     while rave.next_link <> None:
         rave.next(AuditRecordsRequest('Mediflex','Dev'))
-        print rave.next_link
+        print(rave.next_link)

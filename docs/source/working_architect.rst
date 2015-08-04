@@ -40,12 +40,12 @@ Example::
     >>> len(studies)
     1
     >>> for study in studies:
-    ...    print "------"
-    ...    print "OID",study.oid
-    ...    print "Name",study.studyname
-    ...    print "protocolname",study.protocolname
-    ...    print "IsProd?",study.isProd()
-    ...    print "ProjectType",study.projecttype
+    ...    print("------")
+    ...    print("OID",study.oid)
+    ...    print("Name",study.studyname)
+    ...    print("protocolname",study.protocolname)
+    ...    print("IsProd?",study.isProd())
+    ...    print("ProjectType",study.projecttype)
     ...
     ------
     OID Bill's New Library
@@ -95,7 +95,7 @@ Example::
     Mediflex
 
     >>> for draft in drafts:
-    ...    print draft.name, draft.oid
+    ...    print(draft.name, draft.oid)
     Draft2 1006
     Draft1 126
 
@@ -128,7 +128,7 @@ Example::
     >>> versions.study.studyname
     Mediflex
     >>> for version in versions:
-    ...    print version.name, version.oid
+    ...    print(version.name, version.oid)
     v19 1015
     v18 1007
     v17 999
@@ -263,7 +263,7 @@ Example::
     ... </ODM>
 
     >>> response = r.send_request(PPostMetadataRequest(projectname, odm_definition))
-    >>> print str(response)
+    >>> print(str(response))
     <Response ReferenceNumber="5b260cff-e136-4b44-9211-e473fa4d6048"
               InboundODMFileOID="82370e27-a6a5-41dc-8c07-829e489823df"
               IsTransactionSuccessful="1"

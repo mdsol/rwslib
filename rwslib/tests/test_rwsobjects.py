@@ -1,20 +1,23 @@
+__author__ = 'isparks'
+
 import unittest
 from rwslib import rwsobjects
-import codecs
 
 class TestParse(unittest.TestCase):
 
     def test_parse_with_bom(self):
         """Test parser can throw away BOM"""
-        text = codecs.BOM_UTF8 + """<?xml version="1.0" encoding="utf-8"?><ODM/>"""
-        text = text.decode('utf-8')
+        text = """\xef\xbb\xbf<?xml version="1.0" encoding="utf-8"?><ODM/>"""
         self.assertEqual("ODM",rwsobjects.parseXMLString(text).tag)
 
     def test_parse_without_bom(self):
         """Test parser can throw away BOM"""
         text = """<?xml version="1.0" encoding="utf-8"?><ODM/>"""
-        text = text.decode('utf-8')
         self.assertEqual("ODM",rwsobjects.parseXMLString(text).tag)
+
+    def test_parse_empty_string(self):
+        text = u""""""
+        self.assertEqual("",rwsobjects.parseXMLString(text))
 
 
 class TestParseEnvironment(unittest.TestCase):
@@ -57,7 +60,7 @@ class TestRWSErrorResponse(unittest.TestCase):
     IsTransactionSuccessful="0"
     ReasonCode="RWS00092"
     ErrorClientResponseMessage="CRF version not found">
-    </Response>""".decode('utf-8')
+    </Response>"""
 
         resp = rwsobjects.RWSErrorResponse(text)
 
@@ -78,7 +81,7 @@ class TestRWSError(unittest.TestCase):
          FileOID="4d13722a-ceb6-4419-a917-b6ad5d0bc30e"
          ODMVersion="1.3"
          mdsol:ErrorDescription="Incorrect login and password combination. [RWS00008]"
-         xmlns="http://www.cdisc.org/ns/odm/v1.3" />""".decode('utf-8')
+         xmlns="http://www.cdisc.org/ns/odm/v1.3" />"""
 
         err = rwsobjects.RWSError(text)
 
@@ -97,7 +100,7 @@ class TestRWSResponse(unittest.TestCase):
               InboundODMFileOID=""
               IsTransactionSuccessful="1"
               SuccessStatistics="Rave objects touched: Subjects=1; Folders=2; Forms=3; Fields=4; LogLines=5" NewRecords="">
-    </Response>""".decode('utf-8')
+    </Response>"""
 
         response = rwsobjects.RWSResponse(text)
 
@@ -132,7 +135,7 @@ class TestRWSSubjects(unittest.TestCase):
       <SiteRef LocationOID="TESTSITE"/>
     </SubjectData>
   </ClinicalData>
-</ODM>""".decode('utf-8')
+</ODM>"""
 
         subjects = rwsobjects.RWSSubjects(text)
 
@@ -164,7 +167,7 @@ class TestRWSSubjects(unittest.TestCase):
       <SiteRef LocationOID="TESTSITE"/>
     </SubjectData>
   </ClinicalData>
-</ODM>""".decode('utf-8')
+</ODM>"""
 
         subjects = rwsobjects.RWSSubjects(text)
 
@@ -199,7 +202,7 @@ class TestRWSSubjects(unittest.TestCase):
       <SiteRef LocationOID="TESTSITE"/>
     </SubjectData>
   </ClinicalData>
-</ODM>""".decode('utf-8')
+</ODM>"""
 
         subjects = rwsobjects.RWSSubjects(text)
 
@@ -221,7 +224,7 @@ class TestMetaDataVersions(unittest.TestCase):
     """Test MetaDataVersions"""
 
     def test_parse(self):
-        text = """<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
+        text = u"""<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
         <Study OID="IANTEST">
             <GlobalVariables>
                 <StudyName>IANTEST</StudyName>
@@ -232,7 +235,7 @@ class TestMetaDataVersions(unittest.TestCase):
             <MetaDataVersion OID="1195" Name="Demo_Draft1" />
             <MetaDataVersion OID="1165" Name="Initial" />
         </Study>
-    </ODM>""".decode('utf-8')
+    </ODM>"""
 
         metadata = rwsobjects.RWSStudyMetadataVersions(text)
 
@@ -249,7 +252,7 @@ class TestRWSPostResponse(unittest.TestCase):
               IsTransactionSuccessful="1"
               SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords=""
               SubjectNumberInStudy="1103" SubjectNumberInStudySite="55">
-    </Response>""".decode('utf-8')
+    </Response>"""
 
         parsed = rwsobjects.RWSPostResponse(text)
 
@@ -265,8 +268,7 @@ class TestRWSPostResponse(unittest.TestCase):
               SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Unknown=10; Fields=0; LogLines=0"
               NewRecords=""
               SubjectNumberInStudy="1103" SubjectNumberInStudySite="55">
-    </Response>""".decode('utf-8')
-
+    </Response>"""
 
         def doparse():
             parsed = rwsobjects.RWSPostResponse(text)
@@ -285,7 +287,7 @@ class TestRWSPostErrorResponse(unittest.TestCase):
         SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0"
         ErrorClientResponseMessage="Subject already exists.">
         </Response>
-        """.decode('utf-8')
+        """
 
         parsed = rwsobjects.RWSPostErrorResponse(text)
         self.assertEqual("5b1fa9a3-0cf3-46b6-8304-37c2e3b7d04f5", parsed.referencenumber)
@@ -315,7 +317,7 @@ class TestRWSStudies(unittest.TestCase):
                   <ProtocolName>IANTEST</ProtocolName>
             </GlobalVariables>
          </Study>
-    </ODM>""".decode('utf-8')
+    </ODM>"""
         parsed = rwsobjects.RWSStudies(text)
         self.assertEqual("1.3",parsed.ODMVersion)
         self.assertEqual(2,len(parsed))
@@ -345,7 +347,7 @@ class TestUtils(unittest.TestCase):
                   <ProtocolName>IANTEST</ProtocolName>
             </GlobalVariables>
          </Study>
-    </ODM>""".decode('utf-8')
+    </ODM>"""
         parsed = rwsobjects.RWSStudies(text)
         self.assertEqual("1.3",parsed.ODMVersion)
         self.assertEqual(2,len(parsed))

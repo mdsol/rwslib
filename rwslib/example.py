@@ -1,4 +1,3 @@
-
 from rwslib import RWSConnection
 from rwslib.rws_requests import *
 from rwslib.rws_requests.odm_adapter import *
@@ -8,7 +7,7 @@ if __name__ == '__main__':
 
     from _settings import accounts
 
-    #Accounts is a dict of dicts like
+    # Accounts is a dict of dicts like
     # accounts = {'innovate' : {'username': 'username',
     #                          'password':'password'},
     #             'otherurl' : {'username': 'username',
@@ -18,68 +17,68 @@ if __name__ == '__main__':
     acc = accounts['innovate']
     rave = RWSConnection('innovate', acc['username'], acc['password'])
 
-    print rave.send_request(VersionRequest(), retries=3)
-    print rave.send_request(BuildVersionRequest())
-    print rave.send_request(DiagnosticsRequest())
-    print rave.send_request(CacheFlushRequest()).istransactionsuccessful
+    print(rave.send_request(VersionRequest(), retries=3))
 
+    print(rave.send_request(BuildVersionRequest()))
+    print(rave.send_request(DiagnosticsRequest()))
+    print(rave.send_request(CacheFlushRequest()).istransactionsuccessful)
 
-    print "Clinical studies request"
-    studies = rave.send_request(ClinicalStudiesRequest(),timeout=60)
-    print len(studies)
-    print rave.last_result.url
-    print rave.last_result.text
-    print rave.request_time
+    print("Clinical studies request")
+    studies = rave.send_request(ClinicalStudiesRequest(), timeout=60)
+    print(len(studies))
+    print(rave.last_result.url)
+    print(rave.last_result.text)
+    print(rave.request_time)
 
-    print "Metadata studies request"
+    print("Metadata studies request")
     m_studies = rave.send_request(MetadataStudiesRequest())
-    print len(m_studies)
-    print rave.last_result.text
+    print(len(m_studies))
+    print(rave.last_result.text)
 
-    print "Study %s Drafts" % 'Mediflex'
+    print("Study %s Drafts" % 'Mediflex')
     drafts = rave.send_request(StudyDraftsRequest('Mediflex'))
     for draft in drafts:
-        print draft.oid.ljust(20), draft.name
+        print(draft.oid.ljust(20), draft.name)
 
-    print "Study %s Versions" % 'Mediflex'
+    print("Study %s Versions" % 'Mediflex')
     versions = rave.send_request(StudyVersionsRequest('Mediflex'))
     for version in versions:
-        print version.oid.ljust(20), version.name
+        print(version.oid.ljust(20), version.name)
 
     sv1 = versions[0]
     version_odm = rave.send_request(StudyVersionRequest('Mediflex', sv1.oid))
-    print "Mediflex Study version OID = %s %s" % (str(sv1.oid), version_odm[0:50] + '...',)
+    print("Mediflex Study version OID = %s %s" % (str(sv1.oid), version_odm[0:50] + '...',))
 
     gl_studies = rave.send_request(GlobalLibrariesRequest())
-    print "There are %d global libaries" % len(gl_studies)
+    print("There are %d global libaries" % len(gl_studies))
     for study in gl_studies:
-        print study.studyname
+        print(study.studyname)
     gl_1 = gl_studies[0]
 
     gl_drafts = rave.send_request(GlobalLibraryDraftsRequest(gl_1.studyname))
-    print "There are %d drafts for GlobalLibrary %s" % (len(gl_drafts), gl_1.studyname,)
+    print("There are %d drafts for GlobalLibrary %s" % (len(gl_drafts), gl_1.studyname,))
 
     gl_versions = rave.send_request(GlobalLibraryVersionsRequest(gl_1.studyname))
-    print "There are %d versions for GlobalLibrary %s" % (len(gl_versions), gl_1.studyname,)
+    print("There are %d versions for GlobalLibrary %s" % (len(gl_versions), gl_1.studyname,))
 
     glv1 = gl_versions[0]
     gl1_version_odm = rave.send_request(GlobalLibraryVersionRequest(gl_1.studyname, glv1.oid))
-    print "Global library 1, OID = %s %s" % (str(glv1.oid), gl1_version_odm[0:50] + '...',)
+    print("Global library 1, OID = %s %s" % (str(glv1.oid), gl1_version_odm[0:50] + '...',))
 
     try:
         subs = rave.send_request(StudySubjectsRequest('SimpleStudy', 'PROD', status=True))
-        print rave.last_result.url
+        print(rave.last_result.url)
     except:
-        print rave.last_result.url
+        print(rave.last_result.url)
         raise
-    print "SimpleStudy(PROD) has %d subjects " % len(subs)
+    print("SimpleStudy(PROD) has %d subjects " % len(subs))
 
     try:
         subs = rave.send_request(StudySubjectsRequest('SimpleStudy', 'TEST'))
     except:
-        print rave.last_result.url
+        print(rave.last_result.url)
         raise
-    print "SimpleStudy(TEST) has %d subjects " % len(subs)
+    print("SimpleStudy(TEST) has %d subjects " % len(subs))
 
     data = u"""<?xml version="1.0" encoding="utf-8" ?>
 <ODM CreationDateTime="2013-06-17T17:03:29" FileOID="3b9fea8b-e825-4e5f-bdc8-1464bdd7a664" FileType="Transactional" ODMVersion="1.3" xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
@@ -98,12 +97,9 @@ if __name__ == '__main__':
   </ClinicalData>
 </ODM>"""
 
-    #try:
-    #    res = rave.send_request(PostDataRequest(data))
-    #except:
-    #    print rave.last_result.url
-    #    raise
-    #print res
+    # Post data example
+    res = rave.send_request(PostDataRequest(data))
+    print(res)
 
     data = """<ODM FileType="Snapshot" Granularity="Metadata" CreationDateTime="2013-06-18T15:09:54.843-00:00" FileOID="82370e27-a6a5-41dc-8c07-829e489823df" ODMVersion="1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns="http://www.cdisc.org/ns/odm/v1.3">
   <Study OID="SIMPLESTUDY">
@@ -168,78 +164,71 @@ if __name__ == '__main__':
     try:
         res = rave.send_request(PostMetadataRequest("SIMPLESTUDY", data))
     except:
-        print rave.last_result.url
+        print(rave.last_result.url)
         raise
-    print res
+    print(res)
 
-    print "Study"
+    print("Study")
     study = rave.send_request(StudyDatasetRequest('SIMPLESTUDY', 'TEST', formoid="VITAL"))
-    print study
+    print(study)
 
-    print "Version"
+    print("Version")
     version = rave.send_request(VersionDatasetRequest('SIMPLESTUDY', 'TEST', 1128, formoid="VITAL"))
-    print version
+    print(version)
 
-    print "Subject"
+    print("Subject")
     subject = rave.send_request(SubjectDatasetRequest('SIMPLESTUDY', 'TEST', '1', formoid="VITAL"))
-    print subject
+    print(subject)
 
     cv_metadata_odm = rave.send_request(CVMetaDataRequest('SIMPLESTUDY', 'TEST', rawsuffix='RAW'))
-    print "CV Metadata"
-    print cv_metadata_odm
+    print("CV Metadata")
+    print(cv_metadata_odm)
 
-    print "CSV Data for VITAL"
+    print("CSV Data for VITAL")
     vital_csv_data = rave.send_request(FormDataRequest('SIMPLESTUDY', 'TEST', 'REGULAR', 'VITAL', dataset_format="csv"))
-    print vital_csv_data
+    print(vital_csv_data)
 
-
-    print "All CSV Metadata"
+    print("All CSV Metadata")
     all_csv_meta = rave.send_request(MetaDataRequest(dataset_format='csv'))
-    print all_csv_meta
+    print(all_csv_meta)
 
-    print "SIMPLESTUDY Project Metadata"
+    print("SIMPLESTUDY Project Metadata")
     proj_csv_meta = rave.send_request(ProjectMetaDataRequest('SIMPLESTUDY'))
-    print proj_csv_meta
+    print(proj_csv_meta)
 
-    print "SIMPLESTUDY VITALS View Metadata"
+    print("SIMPLESTUDY VITALS View Metadata")
     view_csv_meta = rave.send_request(ViewMetaDataRequest("V_SIMPLESTUDY_VITAL", dataset_format='xml'))
-    print view_csv_meta
+    print(view_csv_meta)
 
-    print "SIMPLESTUDY(TEST) Comments"
+    print("SIMPLESTUDY(TEST) Comments")
     com_csv = rave.send_request(CommentDataRequest("SIMPLESTUDY", "TEST"))
-    print com_csv
+    print(com_csv)
 
-    print "SIMPLESTUDY(TEST) Deviations"
+    print("SIMPLESTUDY(TEST) Deviations")
     dev_csv = rave.send_request(ProtocolDeviationsRequest("SIMPLESTUDY", "TEST"))
-    print dev_csv
+    print(dev_csv)
 
-    print "CDASH Forms(PROD) Data Dictionaries"
+    print("CDASH Forms(PROD) Data Dictionaries")
     dd_csv = rave.send_request(DataDictionariesRequest("CDASH Forms", "PROD", dataset_format="xml"))
-    print dd_csv
+    print(dd_csv)
 
+    print("First 100 rows of Audits for SIMPLESTUDY TEST")
+    audits = rave.send_request(AuditRecordsRequest('SIMPLESTUDY', 'TEST'))
+    print(rave.last_result.headers)  # Get headers, next and last entries?
+    print(audits)
 
-    print "First 100 rows of Audits for SIMPLESTUDY TEST"
-    try:
-        audits = rave.send_request(AuditRecordsRequest('SIMPLESTUDY','TEST'))
-        print rave.last_result.headers #Get headers, next and last entries?
-    except:
-        raise
-    print audits
+    print("Folder Definitions for SIMPLESTUDY")
+    version_folders = rave.send_request(VersionFoldersRequest('SIMPLESTUDY', 'TEST'))
+    print(version_folders)
 
-
-    print "Folder Definitions for SIMPLESTUDY"
-    version_folders = rave.send_request(VersionFoldersRequest('SIMPLESTUDY','TEST'))
-    print version_folders
-
-    print "Signature Definitions for SIMPLESTUDY"
+    print("Signature Definitions for SIMPLESTUDY")
     sigdefs = rave.send_request(SignatureDefinitionsRequest('SIMPLESTUDY'))
-    print sigdefs
+    print(sigdefs)
 
-    print "Site Definitions for SIMPLESTUDY TEST"
-    sitedefs = rave.send_request(SitesMetadataRequest('SIMPLESTUDY','TEST'))
-    print sitedefs
+    print("Site Definitions for SIMPLESTUDY TEST")
+    sitedefs = rave.send_request(SitesMetadataRequest('SIMPLESTUDY', 'TEST'))
+    print(sitedefs)
 
-    print "Users for sites in SIMPLESTUDY TEST"
-    users = rave.send_request(UsersRequest('SIMPLESTUDY','TEST'))
-    print users
-
+    print("Users for sites in SIMPLESTUDY TEST")
+    users = rave.send_request(UsersRequest('SIMPLESTUDY', 'TEST'))
+    print(users)
