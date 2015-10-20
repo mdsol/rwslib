@@ -469,6 +469,7 @@ class TestSymbols(unittest.TestCase):
         self.assertEquals(doc.tag, "Symbol")
         self.assertEquals(doc.getchildren()[0].tag, "TranslatedText")
 
+
 class TestMeasurementUnits(unittest.TestCase):
     def test_basic(self):
         tested = MeasurementUnit('MU_OID', 'MU_NAME')
@@ -580,6 +581,50 @@ class TestProtocol(unittest.TestCase):
         self.assertEquals(doc.getchildren()[0].tag, "StudyEventRef")
 
 
+class TestFormRef(unittest.TestCase):
+
+    def test_cannot_accept_any_child(self):
+        with self.assertRaises(ValueError):
+            FormRef('OID',1,False) << object()
+
+
+class TestStudyEventDef(unittest.TestCase):
+    def test_cannot_accept_non_formref_child(self):
+        with self.assertRaises(ValueError):
+            StudyEventDef("OID","Name", False, StudyEventDef.SCHEDULED) << object()
+
+    def test_can_accept_formref_child(self):
+        tested = StudyEventDef("OID","Name", False, StudyEventDef.SCHEDULED)(FormRef("FORMOID",1,False))
+        self.assertEqual(1, len(tested.formrefs))
+
+
+    def test_builder(self):
+        tested = StudyEventDef("OID","Name", False,
+                               StudyEventDef.SCHEDULED,
+                               category = "Test Cat",
+                               access_days= 1,
+                               start_win_days = 2,
+                               target_days = 3,
+                               end_win_days = 4,
+                               overdue_days = 5,
+                               close_days = 6
+                               )
+        tested << FormRef("FORMOID",1,False)
+
+        doc = obj_to_doc(tested)
+        self.assertEquals(doc.tag, "StudyEventDef")
+        self.assertEquals("OID", doc.attrib['OID'])
+        self.assertEquals("Name", doc.attrib['Name'])
+        self.assertEquals("Scheduled", doc.attrib['Type'])
+        self.assertEquals("Test Cat", doc.attrib['Category'])
+        self.assertEquals("1", doc.attrib['mdsol:AccessDays'])
+        self.assertEquals("2", doc.attrib['mdsol:StartWinDays'])
+        self.assertEquals("3", doc.attrib['mdsol:TargetDays'])
+        self.assertEquals("4", doc.attrib['mdsol:EndWinDays'])
+        self.assertEquals("5", doc.attrib['mdsol:OverDueDays'])
+        self.assertEquals("6", doc.attrib['mdsol:CloseDays'])
+        self.assertEquals("FormRef", doc.getchildren()[0].tag)
+
 class TestMetaDataVersion(unittest.TestCase):
     """Contains Metadata for study design. Rave only allows one, the spec allows many in an ODM doc"""
 
@@ -592,6 +637,11 @@ class TestMetaDataVersion(unittest.TestCase):
         tested = MetaDataVersion("OID","NAME")(prot)
         self.assertEqual(prot, tested.protocol)
 
+    def test_can_accept_study_eventdef_child(self):
+        sed = StudyEventDef("OID","Name", False, StudyEventDef.SCHEDULED)
+        tested = MetaDataVersion("OID","NAME")(sed)
+        self.assertEqual(sed, tested.study_event_defs[0])
+
     def test_builder(self):
         """XML produced"""
         tested =  MetaDataVersion("OID","NAME", description="A description",
@@ -601,6 +651,8 @@ class TestMetaDataVersion(unittest.TestCase):
                                   delete_existing=True)
 
         tested << Protocol()
+        tested << StudyEventDef("OID","Name", False, StudyEventDef.SCHEDULED)
+
 
         doc = obj_to_doc(tested)
         self.assertEquals(doc.tag, "MetaDataVersion")
@@ -612,6 +664,7 @@ class TestMetaDataVersion(unittest.TestCase):
         self.assertEquals("DM", doc.attrib['mdsol:PrimaryFormOID'])
         self.assertEquals("Yes", doc.attrib['mdsol:DeleteExisting'])
         self.assertEquals("Protocol", doc.getchildren()[0].tag)
+        self.assertEquals("StudyEventDef", doc.getchildren()[1].tag)
 
 
 class TestStudy(unittest.TestCase):

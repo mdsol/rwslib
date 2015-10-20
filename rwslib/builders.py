@@ -550,6 +550,94 @@ class Protocol(ODMElement):
         self.study_event_refs.append(other)
 
 
+class FormRef(ODMElement):
+    def __init__(self,oid, order_number, mandatory):
+        self.oid = oid
+        self.order_number = order_number
+        self.mandatory = mandatory
+
+    def build(self, builder):
+        params = dict(FormOID = self.oid,
+                      OrderNumber = str(self.order_number),
+                      Mandatory = bool_to_yes_no(self.mandatory)
+                      )
+        builder.start('FormRef', params)
+        builder.end('FormRef')
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        raise ValueError("FormRef does not accept any children")
+
+
+
+class StudyEventDef(ODMElement):
+
+    # Event types
+    SCHEDULED = 'Scheduled'
+    UNSCHEDULED = 'Unscheduled'
+    COMMON = 'Common'
+
+    def __init__(self, oid, name, repeating, event_type,
+                 category = None,
+                 access_days= None,
+                 start_win_days = None,
+                 target_days = None,
+                 end_win_days = None,
+                 overdue_days = None,
+                 close_days = None
+                 ):
+        self.oid = oid
+        self.name = name
+        self.repeating = repeating
+        self.event_type = event_type
+        self.category = category
+        self.access_days = access_days
+        self.start_win_days = start_win_days
+        self.target_days = target_days
+        self.end_win_days = end_win_days
+        self.overdue_days = overdue_days
+        self.close_days = close_days
+        self.formrefs = []
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+
+        params = dict(OID=self.oid, Name=self.name, Repeating = bool_to_yes_no(self.repeating),
+                      Type=self.event_type)
+
+        if self.category is not None:
+            params['Category'] = self.category
+
+        if self.access_days is not None:
+            params['mdsol:AccessDays'] = str(self.access_days)
+
+        if self.start_win_days is not None:
+            params['mdsol:StartWinDays'] = str(self.start_win_days)
+
+        if self.target_days is not None:
+            params['mdsol:TargetDays'] = str(self.target_days)
+
+        if self.end_win_days is not None:
+            params['mdsol:EndWinDays'] = str(self.end_win_days)
+
+        if self.overdue_days is not None:
+            params['mdsol:OverDueDays'] = str(self.overdue_days)
+
+        if self.close_days is not None:
+            params['mdsol:CloseDays'] = str(self.close_days)
+
+        builder.start("StudyEventDef", params)
+        for formref in self.formrefs:
+            formref.build(builder)
+        builder.end("StudyEventDef")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, (FormRef,)):
+            raise ValueError('StudyEventDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
+        self.formrefs.append(other)
+
+
 class MetaDataVersion(ODMElement):
     """MetaDataVersion, child of study"""
     def __init__(self, oid, name, description=None,
@@ -565,6 +653,7 @@ class MetaDataVersion(ODMElement):
         self.delete_existing = delete_existing
         self.signature_prompt = signature_prompt
         self.protocol = None
+        self.study_event_defs = []
 
     def build(self, builder):
         """Build XML by appending to builder"""
@@ -589,20 +678,29 @@ class MetaDataVersion(ODMElement):
         builder.start("MetaDataVersion", params)
         if self.protocol:
             self.protocol.build(builder)
+        for event in self.study_event_defs:
+            event.build(builder)
         builder.end("MetaDataVersion")
 
     def __lshift__(self, other):
         """Override << operator"""
 
-        if not isinstance(other, (Protocol,)):
+        if not isinstance(other, (Protocol, StudyEventDef)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
-        self.protocol= other
+
+        if isinstance(other, Protocol):
+            self.protocol = other
+
+        if isinstance(other, StudyEventDef):
+            self.study_event_defs.append(other)
 
 
 class Study(ODMElement):
     """ODM Study Metadata element"""
 
-    PROJECT_TYPES = ["Project","GlobalLibrary Volume"]
+    PROJECT = 'Project'
+    GLOBAL_LIBRARY = 'GlobalLibrary Volume'
+    PROJECT_TYPES = [PROJECT, GLOBAL_LIBRARY]
 
     def __init__(self, oid, project_type=None):
         self.oid = oid

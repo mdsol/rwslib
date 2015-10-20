@@ -19,21 +19,21 @@ def example_clinical_data():
 
     odm << cd << subject_data << sed << fd << igd
 
-    item1 = ItemData("SUBJINIT","AAA")
-    item2 = ItemData("SUBJID",'001')
+    item1 = ItemData("SUBJINIT", "AAA")
+    item2 = ItemData("SUBJID", '001')
 
     igd << item1
     igd << item2
 
 
     odm = ODM("test system")(
-       ClinicalData("Mediflex","DEV")(
-          SubjectData("MDSOL","New Subject", "Insert")(
+       ClinicalData("Mediflex", "DEV")(
+          SubjectData("MDSOL", "New Subject", "Insert")(
              StudyEventData("Subject")(
                 FormData("EN", transaction_type="Update")(
                    ItemGroupData()(
-                      ItemData("SUBJINIT","AAA"),
-                      ItemData("SUBJID",'001')
+                      ItemData("SUBJINIT", "AAA"),
+                      ItemData("SUBJID", '001')
                    )
                 )
              )
@@ -46,7 +46,7 @@ def example_metadata():
     """Example of building a metadata doc"""
     odm = ODM("SYSTEM_NAME")
 
-    study = Study("TESTSTUDY", project_type="Project") #Could also be a global library
+    study = Study("TESTSTUDY", project_type=Study.PROJECT)
 
     # Push study element into odm
     odm << study
@@ -59,11 +59,11 @@ def example_metadata():
 
     # Add some measurement units to the basic definitions. This time using the call () syntax:
     bd(
-        MeasurementUnit("KG","Kilograms")(
-            Symbol()(TranslatedText("en","Kilograms"))
+        MeasurementUnit("KG", "Kilograms")(
+            Symbol()(TranslatedText("en", "Kilograms"))
         ),
-        MeasurementUnit("CM","Centimeters")(
-            Symbol()(TranslatedText("en","Centimeters"))
+        MeasurementUnit("CM", "Centimeters")(
+            Symbol()(TranslatedText("en", "Centimeters"))
         )
     )
 
@@ -78,12 +78,28 @@ def example_metadata():
     # Protocol contains StudyEventRefs
     protocol = Protocol()
     # Add some StudyEventRefs
-    protocol << StudyEventRef("Folder1",1,True)  # Order 1, Mandatory
-    protocol << StudyEventRef("Folder1",2,False) # Order 2, Not Mandatory
+    protocol << StudyEventRef("FLDR1", 1, True)  # Order 1, Mandatory
+    protocol << StudyEventRef("FLDR2", 2, False) # Order 2, Not Mandatory
+    protocol << StudyEventRef("AE", 3, True)
 
     meta << protocol
 
-    # Next we'd start adding forms, etc. Patience !
+    # Add Study Event Defs with some child FormRefs
+    fldr1 = StudyEventDef("FLDR1", "Folder 1", False, StudyEventDef.SCHEDULED)
+
+    fldr1 << FormRef("DM", 1, True)
+    fldr1 << FormRef("VS", 2, True)
+
+    meta << fldr1
+
+    meta << StudyEventDef("FLDR2", "Folder 2", False, StudyEventDef.UNSCHEDULED)(
+        FormRef("VS", 1, True)
+    )
+
+    meta << StudyEventDef("AE", "Adverse Events", False, StudyEventDef.COMMON)(
+        FormRef("AE", 1, False)
+    )
+
 
     return odm
 
