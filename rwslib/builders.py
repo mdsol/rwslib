@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 __author__ = 'isparks'
 """
-builders.py provides convenience classes for building ODM documents for clinical data post messages.
+builders.py provides convenience classes for building ODM documents for clinical data and metadata post messages.
 """
 
 
@@ -17,13 +18,16 @@ def now_to_iso8601():
     utc_date = datetime.utcnow()
     return dt_to_iso8601(utc_date)
 
+
 def dt_to_iso8601(dt):
     """Turn a datetime into an ISO8601 formatted string"""
     return dt.strftime("%Y-%m-%dT%H:%M:%S")
 
+
 def bool_to_yes_no(val):
     """Convert True/False to Yes/No"""
     return 'Yes' if val else 'No'
+
 
 def indent(elem, level=0):
     """Indent a elementree structure"""
@@ -41,6 +45,12 @@ def indent(elem, level=0):
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
 
+
+def make_element(builder, tag, content):
+    """Make an element with this tag and text content"""
+    builder.start(tag)
+    builder.data(content) #Must be UTF-8 encoded
+    builder.end(tag)
 #-----------------------------------------------------------------------------------------------------------------------
 # Classes
 
@@ -339,8 +349,8 @@ class ODM(ODMElement):
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, ClinicalData):
-            raise ValueError("ODM object can only receive ClinicalData object")
+        if not isinstance(other, (ClinicalData,Study,)):
+            raise ValueError("ODM object can only receive ClinicalData or Study object")
         self.clinical_data = other
         return other
 
@@ -373,3 +383,280 @@ class ODM(ODMElement):
         indent(doc)
         header = '<?xml version="1.0" encoding="utf-8" ?>\n'
         return header + ET.tostring(doc, encoding='utf-8').decode('utf-8')
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Metadata Objects
+
+class GlobalVariables(ODMElement):
+    """GlobalVariables Metadata element"""
+    def __init__(self, protocol_name, name=None, description=''):
+        """Name and description are not important. protocol_name maps to the Rave project name"""
+        self.protocol_name = protocol_name
+        self.name = name if name is not None else protocol_name
+        self.description = description
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+        builder.start("GlobalVariables")
+        make_element(builder, 'StudyName',self.name)
+        make_element(builder, 'StudyDescription',self.description)
+        make_element(builder, 'ProtocolName',self.protocol_name)
+        builder.end("GlobalVariables")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        raise ValueError("GlobalVariables does not accept any children")
+
+class TranslatedText(ODMElement):
+    """Represents a language and a translated text for that language"""
+    def __init__(self, lang, text):
+        self.lang = lang
+        self.text = text
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        raise ValueError("TranslatedText does not accept any children")
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+        builder.start("TranslatedText", {'xml:lang':self.lang})
+        builder.data(self.text)
+        builder.end("TranslatedText")
+
+class Symbol(ODMElement):
+    def __init__(self):
+        self.translations = []
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, TranslatedText):
+            raise ValueError("Symbol can only accept TranslatedText objects as children")
+        self.translations.append(other)
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+        builder.start("Symbol")
+        for child in self.translations:
+            child.build(builder)
+        builder.end("Symbol")
+
+
+class MeasurementUnit(ODMElement):
+    """A measurement unit"""
+    def __init__(self,
+                 oid,
+                 name,
+                 unit_dictionary_name=None,
+                 constant_a = 1,
+                 constant_b = 1,
+                 constant_c = 0,
+                 constant_k = 0,
+                 standard_unit=False):
+        self.symbols = []
+        self.oid = oid
+        self.name = name
+        self.unit_dictionary_name = unit_dictionary_name
+        self.constant_a = constant_a
+        self.constant_b = constant_b
+        self.constant_c = constant_c
+        self.constant_k = constant_k
+        self.standard_unit = standard_unit
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+
+        params = dict(OID=self.oid,
+                      Name=self.name)
+
+        if self.unit_dictionary_name:
+            params['mdsol:UnitDictionaryName'] = self.unit_dictionary_name
+
+        for suffix in ['A','B','C','K']:
+            val = getattr(self, 'constant_{0}'.format(suffix.lower()))
+            params['mdsol:Constant{0}'.format(suffix)] = str(val)
+
+        if self.standard_unit:
+            params['mdsol:StandardUnit'] = 'Yes'
+
+
+        builder.start("MeasurementUnit", params)
+        for child in self.symbols:
+            child.build(builder)
+        builder.end("MeasurementUnit")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, Symbol):
+            raise ValueError("MeasurementUnits object can only receive Symbol object")
+        self.symbols.append(other)
+        return other
+
+
+class BasicDefinitions(ODMElement):
+    """Container for Measurement units"""
+    def __init__(self):
+        self.measurement_units = []
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+        builder.start("BasicDefinitions")
+        for child in self.measurement_units:
+            child.build(builder)
+        builder.end("BasicDefinitions")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, MeasurementUnit):
+            raise ValueError("BasicDefinitions object can only receive MeasurementUnit object")
+        self.measurement_units.append(other)
+        return other
+
+
+class StudyEventRef(ODMElement):
+    def __init__(self, oid, order_number, mandatory):
+        self.oid = oid
+        self.order_number = order_number
+        self.mandatory = mandatory
+
+    def __lshift__(self, other):
+        """No children"""
+        raise ValueError("StudyEventRef does not accept any child elements")
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+        params = dict(StudyEventOID = self.oid,
+                      OrderNumber = str(self.order_number),
+                      Mandatory = bool_to_yes_no(self.mandatory))
+        builder.start("StudyEventRef", params)
+        builder.end("StudyEventRef")
+
+
+class Protocol(ODMElement):
+    """Protocol child of MetaDataVersion, holder of StudyEventRefs"""
+    def __init__(self):
+        self.study_event_refs = []
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+        builder.start("Protocol")
+        for child in self.study_event_refs:
+             child.build(builder)
+        builder.end("Protocol")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, (StudyEventRef,)):
+            raise ValueError('Protocol cannot accept a {0} as a child element'.format(other.__class__.__name__))
+        self.study_event_refs.append(other)
+
+
+class MetaDataVersion(ODMElement):
+    """MetaDataVersion, child of study"""
+    def __init__(self, oid, name, description=None,
+                 primary_formoid=None,
+                 default_matrix_oid=None,
+                 delete_existing=False,
+                 signature_prompt=None):
+        self.oid = oid
+        self.name = name
+        self.description = description
+        self.primary_formoid = primary_formoid
+        self.default_matrix_oid = default_matrix_oid
+        self.delete_existing = delete_existing
+        self.signature_prompt = signature_prompt
+        self.protocol = None
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+
+        params = dict(OID=self.oid, Name=self.name)
+
+        if self.description is not None:
+            params['Description'] = self.description
+
+        if self.signature_prompt is not None:
+            params['mdsol:SignaturePrompt'] = self.signature_prompt
+
+        if self.primary_formoid is not None:
+            params['mdsol:PrimaryFormOID'] = self.primary_formoid
+
+        if self.default_matrix_oid is not None:
+            params['mdsol:DefaultMatrixOID'] = self.default_matrix_oid
+
+        params['mdsol:DeleteExisting'] = bool_to_yes_no(self.delete_existing)
+
+
+        builder.start("MetaDataVersion", params)
+        if self.protocol:
+            self.protocol.build(builder)
+        builder.end("MetaDataVersion")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+
+        if not isinstance(other, (Protocol,)):
+            raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
+        self.protocol= other
+
+
+class Study(ODMElement):
+    """ODM Study Metadata element"""
+
+    PROJECT_TYPES = ["Project","GlobalLibrary Volume"]
+
+    def __init__(self, oid, project_type=None):
+        self.oid = oid
+        self.global_variables = None
+        self.basic_definitions = None
+        self.metadata_version = None
+        if project_type is None:
+            self.project_type = "Project"
+        else:
+            if project_type in Study.PROJECT_TYPES:
+                self.project_type = project_type
+            else:
+                raise ValueError('Project type "{0}" not valid. Expected one of {1}'.format(project_type,
+                                 ','.join(Study.PROJECT_TYPES)))
+
+    def __lshift__(self, other):
+        """Override << operator"""
+
+        if not isinstance(other, (GlobalVariables, BasicDefinitions, MetaDataVersion)):
+            raise ValueError('Study cannot accept a {0} as a child element'.format(other.__class__.__name__))
+
+        if isinstance(other, GlobalVariables):
+            if self.global_variables is not None:
+                raise ValueError('GlobalVariables is already set.')
+            self.global_variables = other
+
+        if isinstance(other, BasicDefinitions):
+            if self.basic_definitions is not None:
+                raise ValueError('BasicDefinitions is already set.')
+            self.basic_definitions = other
+
+        if isinstance(other, MetaDataVersion):
+            if self.metadata_version is not None:
+                raise ValueError('A MetaDataVersion is already set and Rave only allows one.')
+            self.metadata_version  = other
+
+
+        return other
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+        params = dict(OID = self.oid)
+        params['mdsol:ProjectType'] = self.project_type
+
+        builder.start("Study", params)
+
+        # Ask children
+        if self.global_variables is not None:
+            self.global_variables.build(builder)
+
+        if self.basic_definitions is not None:
+            self.basic_definitions.build(builder)
+
+        if self.metadata_version is not None:
+            self.metadata_version.build(builder)
+
+        builder.end("Study")
