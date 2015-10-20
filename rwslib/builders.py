@@ -255,14 +255,16 @@ class StudyEventData(TransactionalElement):
 
         builder.start("StudyEventData", params)
 
-        #Ask children
+        # Ask children
         for form in self.forms:
             form.build(builder)
         builder.end("StudyEventData")
 
+
 class SubjectData(TransactionalElement):
     """Models the ODM SubjectData and ODM SiteRef objects"""
     ALLOWED_TRANSACTION_TYPES = ['Insert','Update','Upsert']
+
     def __init__(self, sitelocationoid, subject_key, subject_key_type="SubjectName", transaction_type="Update"):
         super(self.__class__, self).__init__(transaction_type)
         self.sitelocationoid = sitelocationoid
@@ -300,6 +302,7 @@ class SubjectData(TransactionalElement):
             event.build(builder)
         builder.end("SubjectData")
 
+
 class ClinicalData(ODMElement):
     """Models the ODM ClinicalData object"""
     def __init__(self, projectname, environment):
@@ -324,32 +327,34 @@ class ClinicalData(ODMElement):
                      )
 
         builder.start("ClinicalData", params)
-        #Ask children
+        # Ask children
         if self.subject_data is not None:
             self.subject_data.build(builder)
         builder.end("ClinicalData")
 
+
 class ODM(ODMElement):
     """Models the ODM object"""
-    def __init__(self, originator, description="", creationdatetime=now_to_iso8601(), fileoid=None ):
+    FILETYPE_TRANSACTIONAL='Transactional'
+    FILETYPE_SNAPSHOT='Snapshot'
+
+    def __init__(self, originator, description="", creationdatetime=now_to_iso8601(), fileoid=None, filetype=None):
         self.originator = originator #Required
         self.description = description
         self.creationdatetime = creationdatetime
-        # filetype will always be "Transactional"
-        # ODM version will always be 1.3
-        # Granularity="SingleSubject"
-        # AsOfDateTime always OMITTED (it's optional)
+        #filetype will always be "Transactional"
+        #ODM version will always be 1.3
+        #Granularity="SingleSubject"
+        #AsOfDateTime always OMITTED (it's optional)
         self.clinical_data = None
+        self.filetype = ODM.FILETYPE_TRANSACTIONAL if filetype is None else ODM.FILETYPE_SNAPSHOT
 
-        # Create unique fileoid if none given
-        if fileoid is None:
-            self.fileoid = str(uuid.uuid4())
-        else:
-            self.fileoid = fileoid
+        #Create unique fileoid if none given
+        self.fileoid = str(uuid.uuid4()) if fileoid is None else fileoid
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, (ClinicalData,Study,)):
+        if not isinstance(other, (ClinicalData, Study,)):
             raise ValueError("ODM object can only receive ClinicalData or Study object")
         self.clinical_data = other
         return other
@@ -359,17 +364,17 @@ class ODM(ODMElement):
         builder = ET.TreeBuilder()
 
         params = dict(ODMVersion = "1.3",
-                      FileType= "Transactional",
+                      FileType= self.filetype,
                       CreationDateTime = self.creationdatetime,
                       Originator = self.originator,
                       FileOID = self.fileoid,
                       xmlns = "http://www.cdisc.org/ns/odm/v1.3",
                       )
-
         params['xmlns:mdsol'] = "http://www.mdsol.com/ns/odm/metadata"
 
         if self.description:
             params['Description'] = self.description
+
         builder.start("ODM", params)
         #Ask the children
         if self.clinical_data is not None:
@@ -602,7 +607,8 @@ class StudyEventDef(ODMElement):
     def build(self, builder):
         """Build XML by appending to builder"""
 
-        params = dict(OID=self.oid, Name=self.name, Repeating = bool_to_yes_no(self.repeating),
+        params = dict(OID=self.oid, Name=self.name,
+                      Repeating = bool_to_yes_no(self.repeating),
                       Type=self.event_type)
 
         if self.category is not None:
@@ -638,6 +644,124 @@ class StudyEventDef(ODMElement):
         self.formrefs.append(other)
 
 
+class ItemGroupRef(ODMElement):
+    def __init__(self, oid, order_number, mandatory=True):
+        self.oid = oid
+        self.order_number = order_number
+        self.mandatory = mandatory
+
+    def build(self, builder):
+        params = dict(ItemGroupOID = self.oid,
+                      OrderNumber=str(self.order_number),
+                      Mandatory = bool_to_yes_no(self.mandatory),
+                      )
+        builder.start("ItemGroupRef", params)
+        builder.end("ItemGroupRef")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        raise ValueError("ItemGroupRef does not accept any child elements.")
+
+class MdsolHelpText(ODMElement):
+    """Help element for FormDefs and Questions"""
+    def __init__(self, lang, content):
+        self.lang = lang
+        self.content = content
+
+    def build(self, builder):
+        builder.start('mdsol:HelpText', {'xml:lang' : self.lang})
+        builder.data(self.content)
+        builder.end('mdsol:HelpText')
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        raise ValueError("mdsol:HelpText does not accept any child elements.")
+
+
+class FormDef(ODMElement):
+    LOG_PORTRAIT = 'Portrait'
+    LOG_LANDSCAPE = 'Landscape'
+
+    DDE_MUSTNOT = 'MustNotDDE'
+    DDE_MAY = 'MayDDE'
+    DDE_MUST = 'MustDDE'
+
+    NOLINK = 'NoLink'
+    LINK_NEXT = 'LinkNext'
+    LINK_CUSTOM = 'LinkCustom'
+
+    def __init__(self, oid, name,
+                 repeating=False,
+                 order_number=None,
+                 active=True,
+                 template=False,
+                 signature_required=False,
+                 log_direction=LOG_PORTRAIT,
+                 double_data_entry=DDE_MUSTNOT,
+                 confirmation_style=NOLINK,
+                 link_study_event_oid=None,
+                 link_form_oid=None
+                 ):
+        self.oid = oid
+        self.name = name
+        self.order_number = order_number
+        self.repeating = repeating #Not actually used by Rave.
+        self.active = active
+        self.template = template
+        self.signature_required = signature_required
+        self.log_direction = log_direction
+        self.double_data_entry = double_data_entry
+        self.confirmation_style = confirmation_style
+        self.link_study_event_oid = link_study_event_oid
+        self.link_form_oid = link_form_oid
+        self.itemgroup_refs = []
+        self.helptexts = [] #Not clear that Rave can accept multiple from docs
+
+
+    def build(self, builder):
+        params = dict(OID = self.oid,
+                      Name = self.name,
+                      Repeating = bool_to_yes_no(self.repeating)
+                      )
+
+        if self.order_number is not None:
+            params['mdsol:OrderNumber'] = str(self.order_number)
+
+        if self.active is not None:
+            params['mdsol:Active'] = bool_to_yes_no(self.active)
+
+        params['mdsol:Template'] = bool_to_yes_no(self.template)
+        params['mdsol:SignatureRequired'] = bool_to_yes_no(self.signature_required)
+        params['mdsol:LogDirection'] = self.log_direction
+        params['mdsol:DoubleDataEntry'] = self.double_data_entry
+        params['mdsol:ConfirmationStyle'] = self.confirmation_style
+
+        if self.link_study_event_oid:
+            params['mdsol:LinkStudyEventOID'] = self.link_study_event_oid
+
+        if self.link_form_oid:
+            params['mdsol:LinkFormOID'] = self.link_form_oid
+
+        builder.start("FormDef", params)
+        for itemgroup_ref in self.itemgroup_refs:
+            itemgroup_ref.build(builder)
+
+        for helptext in self.helptexts:
+            helptext.build(builder)
+        builder.end("FormDef")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, (ItemGroupRef,MdsolHelpText)):
+            raise ValueError('StudyEventDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
+
+        if isinstance(other, ItemGroupRef):
+            self.itemgroup_refs.append(other)
+
+        if isinstance(other, MdsolHelpText):
+            self.helptexts.append(other)
+
+
 class MetaDataVersion(ODMElement):
     """MetaDataVersion, child of study"""
     def __init__(self, oid, name, description=None,
@@ -653,6 +777,7 @@ class MetaDataVersion(ODMElement):
         self.delete_existing = delete_existing
         self.signature_prompt = signature_prompt
         self.protocol = None
+        self.form_defs = []
         self.study_event_defs = []
 
     def build(self, builder):
@@ -678,14 +803,19 @@ class MetaDataVersion(ODMElement):
         builder.start("MetaDataVersion", params)
         if self.protocol:
             self.protocol.build(builder)
+
         for event in self.study_event_defs:
             event.build(builder)
+
+        for formdef in self.form_defs:
+           formdef.build(builder)
+
         builder.end("MetaDataVersion")
 
     def __lshift__(self, other):
         """Override << operator"""
 
-        if not isinstance(other, (Protocol, StudyEventDef)):
+        if not isinstance(other, (Protocol, StudyEventDef, FormDef)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         if isinstance(other, Protocol):
@@ -693,6 +823,10 @@ class MetaDataVersion(ODMElement):
 
         if isinstance(other, StudyEventDef):
             self.study_event_defs.append(other)
+
+        if isinstance(other, FormDef):
+            self.form_defs.append(other)
+
 
 
 class Study(ODMElement):
@@ -707,6 +841,7 @@ class Study(ODMElement):
         self.global_variables = None
         self.basic_definitions = None
         self.metadata_version = None
+        self.studyevent_defs = []
         if project_type is None:
             self.project_type = "Project"
         else:
@@ -736,7 +871,6 @@ class Study(ODMElement):
             if self.metadata_version is not None:
                 raise ValueError('A MetaDataVersion is already set and Rave only allows one.')
             self.metadata_version  = other
-
 
         return other
 

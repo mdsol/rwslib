@@ -42,17 +42,17 @@ def example_clinical_data():
     )
     return odm
 
-def example_metadata():
+def example_metadata(study_name, draft_name):
     """Example of building a metadata doc"""
-    odm = ODM("SYSTEM_NAME")
+    odm = ODM("SYSTEM_NAME", filetype=ODM.FILETYPE_SNAPSHOT)
 
-    study = Study("TESTSTUDY", project_type=Study.PROJECT)
+    study = Study(study_name, project_type=Study.PROJECT)
 
     # Push study element into odm
     odm << study
 
     # Create global variables and set them into study.
-    study << GlobalVariables("TESTSTUDY") #Expected that protocol name will match the Study OID.
+    study << GlobalVariables(study_name) #Expected that protocol name will match the Study OID.
 
     # Create some basic definitions
     bd = BasicDefinitions()
@@ -72,7 +72,7 @@ def example_metadata():
 
 
     # Now metadata which will contain all our form and field defs eventually
-    meta = MetaDataVersion('META1','Draft1') #Note that Draft1 becomes our draft name in Rave.
+    meta = MetaDataVersion('META1', draft_name)
     study << meta
 
     # Protocol contains StudyEventRefs
@@ -100,12 +100,29 @@ def example_metadata():
         FormRef("AE", 1, False)
     )
 
+    dm_form = FormDef("DM","Demography")
+    dm_form << MdsolHelpText("en","Some help text for Demography")
+    dm_form << ItemGroupRef("DM_ItemGroup1", 1)
+    dm_form << ItemGroupRef("DM_ItemGroup2", 2)
+
+    # Add to metadata
+    meta << dm_form
 
     return odm
 
-
-
-
 if __name__ == '__main__':
     #print str(example_clinical_data())
-    print str(example_metadata())
+    #print str(example_metadata())
+    projectname = 'TESTSTUDY'
+
+    odm_definition = example_metadata(projectname, "Draft1")
+    print str(odm_definition)
+
+    #print str(odm_definition).partition("?>")[2]
+    from rwslib import RWSConnection
+    from rwslib.rws_requests import PostMetadataRequest
+    from _settings import accounts
+    account = accounts['innovate']
+    r = RWSConnection('innovate', account['username'], account['password'])
+    response = r.send_request(PostMetadataRequest(projectname, str(odm_definition)))
+    print(str(response))
