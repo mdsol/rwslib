@@ -32,7 +32,11 @@ def parseXMLString(xml):
     while xml[0] != u'<':
         unichr_captured += xml[0]
         xml = xml[1:]
-    return etree.fromstring(xml.encode('utf-8'))
+    parser = etree.XMLParser(ns_clean=True, collect_ids=False, huge_tree=True)
+    try:
+        return etree.fromstring(xml.encode('utf-8'),parser=parser)
+    except etree.XMLSyntaxError:
+        raise Exception(xml)
 
 
 class RWSException(Exception):

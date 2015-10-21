@@ -298,7 +298,7 @@ class TestSubjectData(unittest.TestCase):
         """Test there are 3 children"""
         self.assertEquals("SITE1", self.tested.sitelocationoid)
         self.assertEquals("SUBJECT1", self.tested.subject_key)
-        #Default transaction type
+        # Default transaction type
         self.assertEquals("Update", self.tested.transaction_type)
 
     def test_invalid_transaction_type_direct_assign(self):
@@ -321,7 +321,7 @@ class TestSubjectData(unittest.TestCase):
     def test_builder(self):
         """XML produced"""
         doc = obj_to_doc(self.tested)
-        #Test default transaction tyoe
+        # Test default transaction tyoe
         self.assertEquals(doc.attrib["TransactionType"], "Update")
         self.assertEquals(doc.tag, "SubjectData")
 
@@ -338,6 +338,7 @@ class TestSubjectData(unittest.TestCase):
         def do():
             self.tested << ItemData("Field1", "ValueC")
         self.assertRaises(ValueError, do)
+
 
 class TestClinicalData(unittest.TestCase):
     """Test ClinicalData classes"""

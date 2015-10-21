@@ -60,10 +60,10 @@ def example_metadata(study_name, draft_name):
     # Add some measurement units to the basic definitions. This time using the call () syntax:
     bd(
         MeasurementUnit("KG", "Kilograms")(
-            Symbol()(TranslatedText("en", "Kilograms"))
+            Symbol()(TranslatedText("Kilograms"))
         ),
         MeasurementUnit("CM", "Centimeters")(
-            Symbol()(TranslatedText("en", "Centimeters"))
+            Symbol()(TranslatedText("Centimeters"))
         )
     )
 
@@ -101,12 +101,49 @@ def example_metadata(study_name, draft_name):
     )
 
     dm_form = FormDef("DM","Demography")
-    dm_form << MdsolHelpText("en","Some help text for Demography")
-    dm_form << ItemGroupRef("DM_ItemGroup1", 1)
-    dm_form << ItemGroupRef("DM_ItemGroup2", 2)
+    # dm_form << MdsolHelpText("en","Some help text for Demography")
+    # dm_form << MdsolViewRestriction('Data Manager')
+    # dm_form << MdsolEntryRestriction('Batch Upload')
+    dm_form << ItemGroupRef("DM_IG1", 1)
+    dm_form << ItemGroupRef("DM_IG2", 2)
 
     # Add to metadata
     meta << dm_form
+
+    # Define item group
+    meta << ItemGroupDef("DM_IG1", "DM Item Group 1")(
+        ItemRef("SEX", 1),
+        ItemRef("RACE", 2),
+        ItemRef("RACE_OTH", 3),
+        ItemRef("DOB", 4)
+    )
+
+    # Add some ItemDefs
+    meta << ItemDef("SEX", "Gender", ItemDef.DATATYPE_TEXT, 1, #control_type=ItemDef.CONTROLTYPE_RADIOBUTTON
+       )(
+        Question()(TranslatedText("Gender at Birth")),
+        # CodeListRef("CL_SEX") #Doesn't exist yet, hold on.
+    )
+    meta << ItemDef("RACE", "Race", ItemDef.DATATYPE_TEXT, 2,
+                    #control_type=ItemDef.CONTROLTYPE_RADIOBUTTON_VERTICAL
+                    )(
+        Question()(TranslatedText("Race")),
+        # CodeListRef("CL_RACE") #Doesn't exist yet, hold on.
+    )
+    meta << ItemDef("RACE_OTH", "RaceOther", ItemDef.DATATYPE_TEXT, 20)(
+        Question()(TranslatedText("If Race Other, please specify")),
+    )
+
+    id = ItemDef("DOB", "DateOfBirth", ItemDef.DATATYPE_DATE, 10,
+                    control_type=ItemDef.CONTROLTYPE_DATETIME,
+                    date_time_format="dd/mm/yyyy"
+                    )(
+        Question()(TranslatedText("Date of Birth")),
+        MdsolHelpText("en","If month unknown, enter January")
+    )
+
+
+    meta << id
 
     return odm
 

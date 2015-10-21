@@ -414,9 +414,9 @@ class GlobalVariables(ODMElement):
 
 class TranslatedText(ODMElement):
     """Represents a language and a translated text for that language"""
-    def __init__(self, lang, text):
-        self.lang = lang
+    def __init__(self, text, lang=None):
         self.text = text
+        self.lang = lang
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -424,7 +424,10 @@ class TranslatedText(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        builder.start("TranslatedText", {'xml:lang':self.lang})
+        params = {}
+        if self.lang is not None:
+            params['xml:lang'] = self.lang
+        builder.start("TranslatedText", params)
         builder.data(self.text)
         builder.end("TranslatedText")
 
@@ -662,8 +665,9 @@ class ItemGroupRef(ODMElement):
         """Override << operator"""
         raise ValueError("ItemGroupRef does not accept any child elements.")
 
+
 class MdsolHelpText(ODMElement):
-    """Help element for FormDefs and Questions"""
+    """Help element for FormDefs and ItemDefs"""
     def __init__(self, lang, content):
         self.lang = lang
         self.content = content
@@ -676,6 +680,34 @@ class MdsolHelpText(ODMElement):
     def __lshift__(self, other):
         """Override << operator"""
         raise ValueError("mdsol:HelpText does not accept any child elements.")
+
+
+class MdsolViewRestriction(ODMElement):
+    """ViewRestriction for FormDefs and ItemDefs"""
+    def __init__(self, rolename):
+        self.rolename = rolename
+
+    def build(self, builder):
+        builder.start('mdsol:ViewRestriction')
+        builder.data(self.rolename)
+        builder.end('mdsol:ViewRestriction')
+
+    def __lshift__(self, other):
+        raise ValueError("mdsol:ViewRestriction does not accept any child elements.")
+
+
+class MdsolEntryRestriction(ODMElement):
+    """EntryRestriction for FormDefs and ItemDefs"""
+    def __init__(self, rolename):
+        self.rolename = rolename
+
+    def build(self, builder):
+        builder.start('mdsol:EntryRestriction')
+        builder.data(self.rolename)
+        builder.end('mdsol:EntryRestriction')
+
+    def __lshift__(self, other):
+        raise ValueError("mdsol:EntryRestriction does not accept any child elements.")
 
 
 class FormDef(ODMElement):
@@ -716,6 +748,8 @@ class FormDef(ODMElement):
         self.link_form_oid = link_form_oid
         self.itemgroup_refs = []
         self.helptexts = [] #Not clear that Rave can accept multiple from docs
+        self.view_restrictions = []
+        self.entry_restrictions = []
 
 
     def build(self, builder):
@@ -748,11 +782,18 @@ class FormDef(ODMElement):
 
         for helptext in self.helptexts:
             helptext.build(builder)
+
+        for view_restriction in self.view_restrictions:
+            view_restriction.build(builder)
+
+        for entry_restriction in self.entry_restrictions:
+            entry_restriction.build(builder)
+
         builder.end("FormDef")
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, (ItemGroupRef,MdsolHelpText)):
+        if not isinstance(other, (ItemGroupRef, MdsolHelpText, MdsolViewRestriction, MdsolEntryRestriction,)):
             raise ValueError('StudyEventDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         if isinstance(other, ItemGroupRef):
@@ -760,6 +801,376 @@ class FormDef(ODMElement):
 
         if isinstance(other, MdsolHelpText):
             self.helptexts.append(other)
+
+        if isinstance(other, MdsolViewRestriction):
+            self.view_restrictions.append(other)
+
+        if isinstance(other, MdsolEntryRestriction):
+            self.entry_restrictions.append(other)
+
+
+class ItemRef(ODMElement):
+
+    def __init__(self, oid, order_number, mandatory=False, key_sequence=None,
+                 imputation_method_oid = None, role = None, role_codelist_oid = None):
+        self.oid = oid
+        self.order_number = order_number
+        self.mandatory = mandatory
+        self.key_sequence = key_sequence
+        self.imputation_method_oid = imputation_method_oid
+        self.role = role
+        self.role_codelist_oid = role_codelist_oid
+
+    def build(self, builder):
+
+        params = dict(ItemOID= self.oid,
+                      OrderNumber = str(self.order_number),
+                      Mandatory = bool_to_yes_no(self.mandatory)
+                      )
+
+        if self.key_sequence is not None:
+            params['KeySequence'] = str(self.key_sequence)
+
+        if self.imputation_method_oid is not None:
+            params['ImputationMethodOID'] = self.imputation_method_oid
+
+        if self.role is not None:
+            params['Role'] = self.role
+
+        if self.role_codelist_oid is not None:
+            params['RoleCodeListOID'] = self.role_codelist_oid
+
+        builder.start('ItemRef', params)
+        builder.end('ItemRef')
+
+    def __lshift__(self, other):
+        raise ValueError('ItemRef does not accept any child elements') #TODO: MdsolAttribute if worthwhile
+
+
+class ItemGroupDef(ODMElement):
+    def __init__(self, oid, name, repeating=False, is_reference_data=False, sas_dataset_name=None,
+                 domain=None, origin=None, role=None, purpose=None, comment=None):
+        self.oid = oid
+        self.name = name
+        self.repeating = repeating
+        self.is_reference_data = is_reference_data
+        self.sas_dataset_name = sas_dataset_name
+        self.domain = domain
+        self.origin = origin
+        self.role = role
+        self.purpose = purpose
+        self.comment = comment
+        self.item_refs = []
+
+    def build(self, builder):
+
+        params = dict(OID= self.oid,
+                      Name = self.name,
+                      Repeating = bool_to_yes_no(self.repeating),
+                      IsReferenceData = bool_to_yes_no(self.is_reference_data)
+        )
+
+        if self.sas_dataset_name is not None:
+            params['SASDatasetName'] = self.sas_dataset_name
+
+        if self.domain is not None:
+            params['Domain'] = self.domain
+
+        if self.origin is not None:
+            params['Origin'] = self.origin
+
+        if self.role is not None:
+            params['Role'] = self.role
+
+        if self.purpose is not None:
+            params['Purpose'] = self.purpose
+
+        if self.comment is not None:
+            params['Comment'] = self.comment
+
+        builder.start('ItemGroupDef', params)
+        for itemref in self.item_refs:
+            itemref.build(builder)
+        builder.end('ItemGroupDef')
+
+    def __lshift__(self, other):
+        """Override << operator"""
+
+        if not isinstance(other, (ItemRef)):
+            raise ValueError('ItemGroupDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
+
+        if isinstance(other, ItemRef):
+            self.item_refs.append(other)
+
+
+class Question(ODMElement):
+    def __init__(self):
+        self.translations = []
+
+    def __lshift__(self, other):
+        """Override << operator"""
+
+        if not isinstance(other, (TranslatedText)):
+            raise ValueError('Question cannot accept a {0} as a child element'.format(other.__class__.__name__))
+
+        self.translations.append(other)
+
+    def build(self, builder):
+        """Questions can contain translations"""
+        builder.start('Question')
+        for translation in self.translations:
+            translation.build(builder)
+        builder.end('Question')
+
+
+class MeasurementUnitRef(ODMElement):
+    def __init__(self, oid, order_number=None):
+        self.oid = oid
+        self.order_number = order_number
+
+    def __lshift__(self, other):
+        """Has no children"""
+        raise ValueError("MeasurementUnitRef takes no child elements.")
+
+    def build(self, builder):
+        params = dict(MeasurementUnitOID=self.oid)
+        if self.order_number is not None:
+            params['mdsol:OrderNumber'] = str(self.order_number)
+
+        builder.start('MeasurementUnitRef', params)
+        builder.end('MeasurementUnitRef')
+
+
+class CodeListRef(ODMElement):
+    """CodeListRef: a reference a codelist within an ItemDef"""
+    def __init__(self, oid):
+        self.oid = oid
+
+    def __lshift__(self, other):
+        """Has no children"""
+        raise ValueError("CodeListRef takes no child elements.")
+
+    def build(self, builder):
+        builder.start('CodeListRef', {'CodeListOID': self.oid})
+        builder.end('CodeListRef')
+
+
+class ItemDef(ODMElement):
+    DATATYPE_TEXT = 'text'
+    DATATYPE_INTEGER = 'integer'
+    DATATYPE_FLOAT = 'float'
+    DATATYPE_DATE = 'date'
+    DATATYPE_DATETIME = 'datetime'
+    DATATYPE_TIME = 'time'
+    VALID_DATATYPES = [DATATYPE_TEXT, DATATYPE_INTEGER, DATATYPE_FLOAT,DATATYPE_DATE,
+                       DATATYPE_DATETIME, DATATYPE_TIME]
+
+    CONTROLTYPE_CHECKBOX = 'CheckBox'
+    CONTROLTYPE_TEXT = 'Text'
+    CONTROLTYPE_DATETIME = 'DateTime'
+    CONTROLTYPE_DROPDOWNLIST = 'DropDownList'
+    CONTROLTYPE_SEARCHLIST = 'SearchList'
+    CONTROLTYPE_RADIOBUTTON = 'RadioButton'
+    CONTROLTYPE_RADIOBUTTON_VERTICAL = 'RadioButton (Vertical)'
+    CONTROLTYPE_FILE_UPLOAD = 'File Upload'
+    CONTROLTYPE_LONGTEXT = 'LongText'
+    CONTROLTYPE_SIGNATURE_PAGE = 'Signature page'
+    CONTROLTYPE_SIGNATURE_FOLDER = 'Signature folder'
+    CONTROLTYPE_SIGNATURE_SUBJECT = 'Signature subject'
+
+    def __init__(self, oid, name, datatype, length,
+                 significant_digits=None,
+                 sas_field_name = None,
+                 sds_var_name = None,
+                 origin = None, #Not mapped in Rave
+                 comment = None,
+                 active = True,
+                 control_type = None,
+                 acceptable_file_extensions = None,
+                 indent_level = 0,
+                 source_document_verify = False,
+                 default_value = None,
+                 sas_format = None,
+                 sas_label = None,
+                 query_future_date = False,
+                 visible = True,
+                 translation_required = False,
+                 query_non_conformance = False,
+                 other_visits = False,
+                 can_set_item_group_date = False,
+                 can_set_form_date = False,
+                 can_set_study_event_date = False,
+                 can_set_subject_date = False,
+                 visual_verify=False,
+                 does_not_break_signature=False,
+                 date_time_format=None,
+                 field_number=None,
+                 variable_oid=None
+                 ):
+        self.oid = oid
+        self.name = name
+
+        if datatype not in ItemDef.VALID_DATATYPES:
+            raise KeyError('{0} is not a valid datatype!'.format(datatype))
+
+        self.datatype = datatype
+        self.length = length
+        self.significant_digits = significant_digits
+        self.sas_field_name = sas_field_name
+        self.sds_var_name = sds_var_name
+        self.origin = origin
+        self.comment = comment
+        self.active = active
+        self.control_type = control_type
+        self.acceptable_file_extensions = acceptable_file_extensions
+        self.indent_level = indent_level
+        self.source_document_verify = source_document_verify
+        self.default_value = default_value
+        self.sas_format = sas_format
+        self.sas_label = sas_label
+        self.query_future_date = query_future_date
+        self.visible = visible
+        self.translation_required = translation_required
+        self.query_non_conformance = query_non_conformance
+        self.other_visits = other_visits
+        self.can_set_item_group_date = can_set_item_group_date
+        self.can_set_form_date = can_set_form_date
+        self.can_set_study_event_date = can_set_study_event_date
+        self.can_set_subject_date = can_set_subject_date
+        self.visual_verify = visual_verify
+        self.does_not_break_signature = does_not_break_signature
+        self.date_time_format = date_time_format
+        self.field_number = field_number
+        self.variable_oid = variable_oid
+
+        self.question = None
+        self.codelistref = None
+        self.measurement_unit_refs = []
+        self.help_texts = []
+        self.view_restrictions = []
+        self.entry_restrictions = []
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+
+        params = dict(OID=self.oid,
+                      Name=self.name,
+                      DataType=self.datatype,
+                      Length=str(self.length),
+                      )
+
+        if self.date_time_format is not None:
+            params['mdsol:DateTimeFormat'] = self.date_time_format
+
+        params['mdsol:Active'] = bool_to_yes_no(self.active)
+
+        if self.significant_digits is not None:
+            params['SignificantDigits'] = str(self.significant_digits)
+
+        if self.sas_field_name is not None:
+            params['SASFieldName'] = self.sas_field_name
+
+        if self.sds_var_name is not None:
+            params['SDSVarName'] = self.sds_var_name
+
+        if self.origin is not None:
+            params['Origin'] = self.origin
+
+        if self.comment is not None:
+            params['Comment'] = self.comment
+
+        if self.control_type is not None:
+            params['mdsol:ControlType'] = self.control_type
+
+        if self.acceptable_file_extensions is not None:
+            params['mdsol:AcceptableFileExtensions'] = self.acceptable_file_extensions
+
+        if self.default_value is not None:
+            params['mdsol:DefaultValue'] = str(self.default_value)
+
+        params['mdsol:SourceDocument'] = bool_to_yes_no(self.source_document_verify)
+        params['mdsol:IndentLevel'] = str(self.indent_level)
+
+        if self.sas_format is not None:
+            params['mdsol:SASFormat'] = self.sas_format
+
+        if self.sas_label is not None:
+            params['mdsol:SASLabel'] = self.sas_label
+
+        params['mdsol:QueryFutureDate'] = bool_to_yes_no(self.query_future_date)
+        params['mdsol:Visible'] = bool_to_yes_no(self.visible)
+        params['mdsol:TranslationRequired'] = bool_to_yes_no(self.translation_required)
+        params['mdsol:QueryNonConformance'] = bool_to_yes_no(self.query_non_conformance)
+        params['mdsol:OtherVisits'] = bool_to_yes_no(self.other_visits)
+        params['mdsol:CanSetItemGroupDate'] = bool_to_yes_no(self.can_set_item_group_date)
+        params['mdsol:CanSetFormDate'] = bool_to_yes_no(self.can_set_form_date)
+        params['mdsol:CanSetStudyEventDate'] = bool_to_yes_no(self.can_set_study_event_date)
+        params['mdsol:CanSetSubjectDate'] = bool_to_yes_no(self.can_set_subject_date)
+        params['mdsol:VisualVerify'] = bool_to_yes_no(self.visual_verify)
+        params['mdsol:DoesNotBreakSignature'] = bool_to_yes_no(self.does_not_break_signature)
+
+        if self.field_number is not None:
+            params['mdsol:FieldNumber'] = self.field_number
+
+        if self.variable_oid is not None:
+            params['mdsol:VariableOID'] = self.variable_oid
+
+        builder.start("ItemDef", params)
+
+        if self.question is not None:
+            self.question.build(builder)
+
+        if self.codelistref is not None:
+            self.codelistref.build(builder)
+
+        for mur in self.measurement_unit_refs:
+            mur.build(builder)
+
+        for view_restriction in self.view_restrictions:
+            view_restriction.build(builder)
+
+        for entry_restriction in self.entry_restrictions:
+            entry_restriction.build(builder)
+
+        for help_text in self.help_texts:
+            help_text.build(builder)
+
+        builder.end("ItemDef")
+
+
+    def __lshift__(self, other):
+        """Override << operator"""
+
+# ExternalQuestion?,
+# RangeCheck*,
+# Role*, Alias*, mdsol:HeaderText?,
+# mdsol:HelpText?, mdsol:ViewRestriction* or mdsolEntryRestrictions*), mdsol:ReviewGroup* (or mdsol:ReviewGroups*), mdsol:Label?)
+
+        if not isinstance(other, (MdsolHelpText, MdsolEntryRestriction, MdsolViewRestriction, Question,
+                                  MeasurementUnitRef, CodeListRef)):
+            raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
+
+        if isinstance(other, Question):
+            if self.question is not None:
+                raise ValueError('ItemDef already contains a Question')
+            self.question = other
+
+        if isinstance(other, CodeListRef):
+            if self.codelistref is not None:
+                raise ValueError('ItemDef already contains a CodeListRef')
+            self.codelistref = other
+
+        if isinstance(other, MdsolHelpText):
+            self.help_texts.append(other)
+
+        if isinstance(other, MdsolViewRestriction):
+            self.view_restrictions.append(other)
+
+        if isinstance(other, MdsolEntryRestriction):
+            self.entry_restrictions.append(other)
+
+        if isinstance(other, MeasurementUnitRef):
+            self.measurement_unit_refs.append(other)
 
 
 class MetaDataVersion(ODMElement):
@@ -777,6 +1188,8 @@ class MetaDataVersion(ODMElement):
         self.delete_existing = delete_existing
         self.signature_prompt = signature_prompt
         self.protocol = None
+        self.item_defs = []
+        self.item_group_defs = []
         self.form_defs = []
         self.study_event_defs = []
 
@@ -810,12 +1223,18 @@ class MetaDataVersion(ODMElement):
         for formdef in self.form_defs:
            formdef.build(builder)
 
+        for itemgroupdef in self.item_group_defs:
+           itemgroupdef.build(builder)
+
+        for itemdef in self.item_defs:
+            itemdef.build(builder)
+
         builder.end("MetaDataVersion")
 
     def __lshift__(self, other):
         """Override << operator"""
 
-        if not isinstance(other, (Protocol, StudyEventDef, FormDef)):
+        if not isinstance(other, (Protocol, StudyEventDef, FormDef, ItemGroupDef, ItemDef)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         if isinstance(other, Protocol):
@@ -827,6 +1246,11 @@ class MetaDataVersion(ODMElement):
         if isinstance(other, FormDef):
             self.form_defs.append(other)
 
+        if isinstance(other, ItemGroupDef):
+            self.item_group_defs.append(other)
+
+        if isinstance(other, ItemDef):
+            self.item_defs.append(other)
 
 
 class Study(ODMElement):
