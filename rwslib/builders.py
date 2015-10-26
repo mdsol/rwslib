@@ -65,6 +65,12 @@ class ODMElement(object):
     def __lshift__(self, other):
         raise NotImplementedError('__lshift__ must be overriden in descendant classes.')
 
+    def add(self, *args):
+        """Like call but adds a set of args"""
+        for child in args:
+            self << child
+        return self
+
 
 class TransactionalElement(ODMElement):
     """Models an ODM Element that is allowed a transaction type. Different elements have different
@@ -74,6 +80,7 @@ class TransactionalElement(ODMElement):
     def __init__(self, transaction_type):
         self._transaction_type = None
         self.transaction_type = transaction_type
+        return self
 
     @property
     def transaction_type(self):
@@ -751,7 +758,6 @@ class FormDef(ODMElement):
         self.view_restrictions = []
         self.entry_restrictions = []
 
-
     def build(self, builder):
         params = dict(OID = self.oid,
                       Name = self.name,
@@ -788,7 +794,6 @@ class FormDef(ODMElement):
 
         for entry_restriction in self.entry_restrictions:
             entry_restriction.build(builder)
-
         builder.end("FormDef")
 
     def __lshift__(self, other):
@@ -1173,6 +1178,84 @@ class ItemDef(ODMElement):
             self.measurement_unit_refs.append(other)
 
 
+class Decode(ODMElement):
+    def __init__(self):
+        self.translations = []
+
+    def build(self, builder):
+        builder.start("Decode")
+        for translation in self.translations:
+            translation.build(builder)
+        builder.end("Decode")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, TranslatedText):
+            raise ValueError('Decode cannot accept child of type {0}'.format(other.__class__.__name__))
+        self.translations.append(other)
+
+
+class CodeListItem(ODMElement):
+    def __init__(self, coded_value, order_number=None, specify=False):
+        self.coded_value = coded_value
+        self.order_number = order_number
+        self.specify = specify
+        self.decode = None
+
+    def build(self, builder):
+        params = dict(CodedValue = self.coded_value)
+        if self.order_number is not None:
+            params['mdsol:OrderNumber'] = str(self.order_number)
+
+        if self.specify:
+            params['mdsol:Specify'] = "Yes"
+
+        builder.start("CodeListItem", params)
+        if self.decode is not None:
+            self.decode.build(builder)
+        builder.end("CodeListItem")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, Decode):
+            raise ValueError('CodelistItem cannot accept child of type {0}'.format(other.__class__.__name__))
+        self.decode = other
+
+
+class CodeList(ODMElement):
+    """A container for CodeListItems equivalent of Rave Dictionary"""
+    DATATYPE_INTEGER = 'integer'
+    DATATYPE_FLOAT = 'float'
+    DATATYPE_TEXT = 'text'
+    DATATYPE_STRING = 'string'
+    VALID_DATATYPES = [DATATYPE_INTEGER, DATATYPE_TEXT, DATATYPE_FLOAT, DATATYPE_STRING]
+
+    def __init__(self, oid, name, datatype, sas_format_name=None):
+        self.oid = oid
+        self.name = name
+        if datatype not in CodeList.VALID_DATATYPES:
+            raise ValueError("{0} is not a valid CodeList datatype".format(datatype))
+        self.datatype = datatype
+        self.sas_format_name = sas_format_name
+        self.codelist_items = []
+
+    def build(self, builder):
+        params = dict(OID = self.oid,
+                      Name = self.name,
+                      DataType = self.datatype)
+        if self.sas_format_name is not None:
+            params['SASFormatName'] = self.sas_format_name
+        builder.start("CodeList", params)
+        for item in self.codelist_items:
+            item.build(builder)
+        builder.end("CodeList")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, CodeListItem):
+            raise ValueError('Codelist cannot accept child of type {0}'.format(other.__class__.__name__))
+        self.codelist_items.append(other)
+
 class MetaDataVersion(ODMElement):
     """MetaDataVersion, child of study"""
     def __init__(self, oid, name, description=None,
@@ -1188,6 +1271,7 @@ class MetaDataVersion(ODMElement):
         self.delete_existing = delete_existing
         self.signature_prompt = signature_prompt
         self.protocol = None
+        self.codelists = []
         self.item_defs = []
         self.item_group_defs = []
         self.form_defs = []
@@ -1229,12 +1313,15 @@ class MetaDataVersion(ODMElement):
         for itemdef in self.item_defs:
             itemdef.build(builder)
 
+        for codelist in self.codelists:
+            codelist.build(builder)
+
         builder.end("MetaDataVersion")
 
     def __lshift__(self, other):
         """Override << operator"""
 
-        if not isinstance(other, (Protocol, StudyEventDef, FormDef, ItemGroupDef, ItemDef)):
+        if not isinstance(other, (Protocol, StudyEventDef, FormDef, ItemGroupDef, ItemDef, CodeList)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         if isinstance(other, Protocol):
@@ -1252,6 +1339,8 @@ class MetaDataVersion(ODMElement):
         if isinstance(other, ItemDef):
             self.item_defs.append(other)
 
+        if isinstance(other, CodeList):
+            self.codelists.append(other)
 
 class Study(ODMElement):
     """ODM Study Metadata element"""

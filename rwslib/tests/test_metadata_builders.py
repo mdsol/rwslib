@@ -371,7 +371,6 @@ class TestItemDef(unittest.TestCase):
         self.tested << MdsolViewRestriction("DM")
         self.assertEqual(1, len(self.tested.view_restrictions))
 
-
     def test_accepts_measurement_unit_ref(self):
         mu = MeasurementUnitRef("KG")
         self.tested << mu
@@ -458,6 +457,10 @@ class TestItemDef(unittest.TestCase):
 
 class TestItemGroupDef(unittest.TestCase):
 
+    def test_does_notaccept_non_itemref_child(self):
+        with self.assertRaises(ValueError):
+            ItemGroupDef("DM","Demog") << object()
+
     def test_accepts_itemref_child(self):
         tested = ItemGroupDef("DM","Demog")
         tested << ItemRef("OID1","1")
@@ -527,6 +530,83 @@ class TestFormDef(unittest.TestCase):
         self.assertEquals("mdsol:EntryRestriction", doc.getchildren()[3].tag)
 
 
+class TestDecode(unittest.TestCase):
+    def test_cannot_accept_non_translated_text(self):
+        with self.assertRaises(ValueError):
+            Decode() << object()
+
+    def test_accepts_decode(self):
+        tested = Decode()
+        tt = TranslatedText("Yes")
+        tested.add(tt)
+        self.assertEqual(tt, tested.translations[0])
+
+    def test_builder(self):
+        """XML produced"""
+        tested = Decode()
+        tested << TranslatedText("Yes")
+        doc = obj_to_doc(tested)
+        self.assertEquals("Decode", doc.tag)
+        self.assertEquals("TranslatedText", doc.getchildren()[0].tag)
+
+
+class TestCodeListItem(unittest.TestCase):
+    def test_cannot_accept_non_decode(self):
+        with self.assertRaises(ValueError):
+            CodeListItem("M") << object()
+
+    def test_accepts_decode(self):
+        tested = CodeListItem("N")
+        decode = Decode()
+        tested.add(decode)
+        self.assertEqual(decode, tested.decode)
+
+    def test_builder_basic(self):
+        """XML produced"""
+        tested = CodeListItem("Y")
+        tested << Decode()
+        doc = obj_to_doc(tested)
+        self.assertEquals("CodeListItem", doc.tag)
+        self.assertEquals("", doc.get('mdsol:Specify',''))
+        self.assertEquals("", doc.get('mdsol:OrderNumber', ''))
+        self.assertEquals("Y", doc.attrib['CodedValue'])
+        self.assertEquals("Decode", doc.getchildren()[0].tag)
+
+    def test_builder_order_specify(self):
+        """XML produced with optional params set"""
+        tested = CodeListItem("Y", order_number= 1, specify=True)
+        tested << Decode()
+        doc = obj_to_doc(tested)
+        self.assertEquals("CodeListItem", doc.tag)
+        self.assertEquals("Yes", doc.attrib['mdsol:Specify'])
+        self.assertEquals("1", doc.attrib['mdsol:OrderNumber'])
+        self.assertEquals("Y", doc.attrib['CodedValue'])
+        self.assertEquals("Decode", doc.getchildren()[0].tag)
+
+
+class TestCodeList(unittest.TestCase):
+    """Codelists contain codelistitems"""
+    def test_cannot_accept_non_codelistitem(self):
+        with self.assertRaises(ValueError):
+            CodeList("CL1","Codelist1",CodeList.DATATYPE_INTEGER) << object()
+
+    def test_accepts_codelistitem(self):
+        tested = CodeList("CL1","Codelist1",CodeList.DATATYPE_INTEGER)
+        cl1 = CodeListItem("1")
+        tested.add(cl1)
+        self.assertEqual(cl1, tested.codelist_items[0])
+
+    def test_builder(self):
+        """XML produced"""
+        tested = CodeList("CL_YN","YesNo", CodeList.DATATYPE_STRING, sas_format_name="YESNO_CL")
+        tested << CodeListItem("Y")
+        doc = obj_to_doc(tested)
+        self.assertEquals("CodeList", doc.tag)
+        self.assertEquals(CodeList.DATATYPE_STRING, doc.attrib['DataType'])
+        self.assertEquals("YESNO_CL", doc.attrib['SASFormatName'])
+        self.assertEquals("CodeListItem", doc.getchildren()[0].tag)
+
+
 class TestMetaDataVersion(unittest.TestCase):
     """Contains Metadata for study design. Rave only allows one, the spec allows many in an ODM doc"""
 
@@ -557,7 +637,7 @@ class TestMetaDataVersion(unittest.TestCase):
         tested << FormDef("FORM_OID","FORM_Name")
         tested << ItemGroupDef("IG_DEMO","Demography")
         tested << ItemDef("ID_AGE","Demography", ItemDef.DATATYPE_INTEGER, 3)
-
+        tested << CodeList("C_YESNO","Yes No", CodeList.DATATYPE_STRING)
 
         doc = obj_to_doc(tested)
         self.assertEquals(doc.tag, "MetaDataVersion")
@@ -573,7 +653,7 @@ class TestMetaDataVersion(unittest.TestCase):
         self.assertEquals("FormDef", doc.getchildren()[2].tag)
         self.assertEquals("ItemGroupDef", doc.getchildren()[3].tag)
         self.assertEquals("ItemDef", doc.getchildren()[4].tag)
-
+        self.assertEquals("CodeList", doc.getchildren()[5].tag)
 
 class TestStudy(unittest.TestCase):
     """Test Study Metadata class"""

@@ -119,16 +119,16 @@ def example_metadata(study_name, draft_name):
     )
 
     # Add some ItemDefs
-    meta << ItemDef("SEX", "Gender", ItemDef.DATATYPE_TEXT, 1, #control_type=ItemDef.CONTROLTYPE_RADIOBUTTON
+    meta << ItemDef("SEX", "Gender", ItemDef.DATATYPE_TEXT, 1, control_type=ItemDef.CONTROLTYPE_RADIOBUTTON
        )(
         Question()(TranslatedText("Gender at Birth")),
-        # CodeListRef("CL_SEX") #Doesn't exist yet, hold on.
+        CodeListRef("CL_SEX")
     )
     meta << ItemDef("RACE", "Race", ItemDef.DATATYPE_TEXT, 2,
-                    #control_type=ItemDef.CONTROLTYPE_RADIOBUTTON_VERTICAL
+                    control_type=ItemDef.CONTROLTYPE_RADIOBUTTON_VERTICAL
                     )(
         Question()(TranslatedText("Race")),
-        # CodeListRef("CL_RACE") #Doesn't exist yet, hold on.
+        CodeListRef("CL_RACE")
     )
     meta << ItemDef("RACE_OTH", "RaceOther", ItemDef.DATATYPE_TEXT, 20)(
         Question()(TranslatedText("If Race Other, please specify")),
@@ -142,8 +142,25 @@ def example_metadata(study_name, draft_name):
         MdsolHelpText("en","If month unknown, enter January")
     )
 
-
     meta << id
+
+    # As well as () and << you can use add()
+    meta.add(
+        CodeList("CL_SEX", "SEX", datatype=CodeList.DATATYPE_STRING) (
+            CodeListItem("M").add(
+                Decode().add(
+                    TranslatedText("Male"))
+            ),
+            CodeListItem("F").add(
+                Decode().add(
+                    TranslatedText("Female"))
+            ),
+        ),
+        CodeList("CL_RACE", "RACE", datatype=CodeList.DATATYPE_STRING) (
+            CodeListItem("Y")(Decode()(TranslatedText("Yes"))),
+            CodeListItem("N")(Decode()(TranslatedText("No"))),
+        )
+    )
 
     return odm
 
@@ -155,7 +172,6 @@ if __name__ == '__main__':
     odm_definition = example_metadata(projectname, "Draft1")
     print str(odm_definition)
 
-    #print str(odm_definition).partition("?>")[2]
     from rwslib import RWSConnection
     from rwslib.rws_requests import PostMetadataRequest
     from _settings import accounts
