@@ -437,10 +437,6 @@ class GlobalVariables(ODMElement):
         make_element(builder, 'ProtocolName', self.protocol_name)
         builder.end("GlobalVariables")
 
-    def __lshift__(self, other):
-        """Override << operator"""
-        raise ValueError("GlobalVariables does not accept any children")
-
 
 class TranslatedText(ODMElement):
     """Represents a language and a translated text for that language"""
@@ -448,10 +444,6 @@ class TranslatedText(ODMElement):
     def __init__(self, text, lang=None):
         self.text = text
         self.lang = lang
-
-    def __lshift__(self, other):
-        """Override << operator"""
-        raise ValueError("TranslatedText does not accept any children")
 
     def build(self, builder):
         """Build XML by appending to builder"""
@@ -559,10 +551,6 @@ class StudyEventRef(ODMElement):
         self.order_number = order_number
         self.mandatory = mandatory
 
-    def __lshift__(self, other):
-        """No children"""
-        raise ValueError("StudyEventRef does not accept any child elements")
-
     def build(self, builder):
         """Build XML by appending to builder"""
         params = dict(StudyEventOID=self.oid,
@@ -605,10 +593,6 @@ class FormRef(ODMElement):
                       )
         builder.start('FormRef', params)
         builder.end('FormRef')
-
-    def __lshift__(self, other):
-        """Override << operator"""
-        raise ValueError("FormRef does not accept any children")
 
 
 class StudyEventDef(ODMElement):
@@ -693,10 +677,6 @@ class ItemGroupRef(ODMElement):
         builder.start("ItemGroupRef", params)
         builder.end("ItemGroupRef")
 
-    def __lshift__(self, other):
-        """Override << operator"""
-        raise ValueError("ItemGroupRef does not accept any child elements.")
-
 
 class MdsolHelpText(ODMElement):
     """Help element for FormDefs and ItemDefs"""
@@ -710,10 +690,6 @@ class MdsolHelpText(ODMElement):
         builder.data(self.content)
         builder.end('mdsol:HelpText')
 
-    def __lshift__(self, other):
-        """Override << operator"""
-        raise ValueError("mdsol:HelpText does not accept any child elements.")
-
 
 class MdsolViewRestriction(ODMElement):
     """ViewRestriction for FormDefs and ItemDefs"""
@@ -726,9 +702,6 @@ class MdsolViewRestriction(ODMElement):
         builder.data(self.rolename)
         builder.end('mdsol:ViewRestriction')
 
-    def __lshift__(self, other):
-        raise ValueError("mdsol:ViewRestriction does not accept any child elements.")
-
 
 class MdsolEntryRestriction(ODMElement):
     """EntryRestriction for FormDefs and ItemDefs"""
@@ -740,9 +713,6 @@ class MdsolEntryRestriction(ODMElement):
         builder.start('mdsol:EntryRestriction')
         builder.data(self.rolename)
         builder.end('mdsol:EntryRestriction')
-
-    def __lshift__(self, other):
-        raise ValueError("mdsol:EntryRestriction does not accept any child elements.")
 
 
 class FormDef(ODMElement):
@@ -857,9 +827,6 @@ class MdsolLabelRef(ODMElement):
         builder.start('mdsol:LabelRef', params)
         builder.end('mdsol:LabelRef')
 
-    def __lshift__(self, other):
-        raise ValueError('MdsolLabelRef does not accept any child elements')
-
 
 class MdsolAttribute(ODMElement):
     def __init__(self, namespace, name, value, transaction_type='Insert'):
@@ -867,9 +834,6 @@ class MdsolAttribute(ODMElement):
         self.name = name
         self.value = value
         self.transaction_type = transaction_type
-
-    def __lshift__(self, other):
-        raise ValueError('MdsolAttribute does not accept any child elements')
 
     def build(self, builder):
         params = dict(Namespace=self.namespace,
@@ -1018,10 +982,6 @@ class MeasurementUnitRef(ODMElement):
         self.oid = oid
         self.order_number = order_number
 
-    def __lshift__(self, other):
-        """Has no children"""
-        raise ValueError("MeasurementUnitRef takes no child elements.")
-
     def build(self, builder):
         params = dict(MeasurementUnitOID=self.oid)
         if self.order_number is not None:
@@ -1047,20 +1007,12 @@ class MdsolHeaderText(ODMElement):
         builder.data(self.content)
         builder.end('mdsol:HeaderText')
 
-    def __lshift__(self, other):
-        """Has no children"""
-        raise ValueError("MdsolHeaderText takes no child elements.")
-
 
 class CodeListRef(ODMElement):
     """CodeListRef: a reference a codelist within an ItemDef"""
 
     def __init__(self, oid):
         self.oid = oid
-
-    def __lshift__(self, other):
-        """Has no children"""
-        raise ValueError("CodeListRef takes no child elements.")
 
     def build(self, builder):
         builder.start('CodeListRef', {'CodeListOID': self.oid})
@@ -1110,10 +1062,6 @@ class MdsolReviewGroup(ODMElement):
 
     def __init__(self, name):
         self.name = name
-
-    def __lshift__(self, other):
-        """Has no children"""
-        raise ValueError("MdsolReviewGroup takes no child elements.")
 
     def build(self, builder):
         builder.start('mdsol:ReviewGroup')
