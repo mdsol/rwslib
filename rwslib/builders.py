@@ -4,12 +4,12 @@ __author__ = 'isparks'
 builders.py provides convenience classes for building ODM documents for clinical data and metadata post messages.
 """
 
-
 import uuid
 from xml.etree import cElementTree as ET
 from datetime import datetime
 
-#-----------------------------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------------------------------------------------
 # Utilities
 
 
@@ -31,14 +31,14 @@ def bool_to_yes_no(val):
 
 def indent(elem, level=0):
     """Indent a elementree structure"""
-    i = "\n" + level*"  "
+    i = "\n" + level * "  "
     if len(elem):
         if not elem.text or not elem.text.strip():
             elem.text = i + "  "
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
         for elem in elem:
-            indent(elem, level+1)
+            indent(elem, level + 1)
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
     else:
@@ -49,13 +49,16 @@ def indent(elem, level=0):
 def make_element(builder, tag, content):
     """Make an element with this tag and text content"""
     builder.start(tag)
-    builder.data(content) #Must be UTF-8 encoded
+    builder.data(content)  # Must be UTF-8 encoded
     builder.end(tag)
-#-----------------------------------------------------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------------------------------------------------
 # Classes
 
 class ODMElement(object):
     """Base class for ODM XML element classes"""
+
     def __call__(self, *args):
         """Collect all children passed in call"""
         for child in args:
@@ -90,15 +93,16 @@ class TransactionalElement(ODMElement):
     def transaction_type(self, value):
         if value is not None:
             if value not in self.ALLOWED_TRANSACTION_TYPES:
-                raise AttributeError('%s transaction_type element must be one of %s not %s' % (self.__class__.__name__,','.join(self.ALLOWED_TRANSACTION_TYPES), value,))
+                raise AttributeError('%s transaction_type element must be one of %s not %s' % (
+                self.__class__.__name__, ','.join(self.ALLOWED_TRANSACTION_TYPES), value,))
         self._transaction_type = value
 
 
 class ItemData(TransactionalElement):
     """Models the ODM ItemData object"""
-    ALLOWED_TRANSACTION_TYPES = ['Insert','Update','Upsert','Context','Remove']
+    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert', 'Context', 'Remove']
 
-    def __init__(self, itemoid, value, specify_value = None, transaction_type = None, lock = None, freeze = None, verify = None):
+    def __init__(self, itemoid, value, specify_value=None, transaction_type=None, lock=None, freeze=None, verify=None):
         super(self.__class__, self).__init__(transaction_type)
         self.itemoid = itemoid
         self.value = value
@@ -117,7 +121,7 @@ class ItemData(TransactionalElement):
         if self.transaction_type is not None:
             params["TransactionType"] = self.transaction_type
 
-        if self.value in [None,'']:
+        if self.value in [None, '']:
             params['IsNull'] = 'Yes'
         else:
             params['Value'] = str(self.value)
@@ -136,16 +140,17 @@ class ItemData(TransactionalElement):
 
         builder.start("ItemData", params)
 
-        #Ask children (queries etc not added yet)
-        #for item  in self.items.values():
+        # Ask children (queries etc not added yet)
+        # for item  in self.items.values():
         #   item.build(builder)
         builder.end("ItemData")
+
 
 class ItemGroupData(TransactionalElement):
     """Models the ODM ItemGroupData object.
        Note no name for the ItemGroupData element is required. This is built automatically by the form.
     """
-    ALLOWED_TRANSACTION_TYPES = ['Insert','Update','Upsert','Context']
+    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert', 'Context']
 
     def __init__(self, transaction_type=None, item_group_repeat_key=None, whole_item_group=False):
         super(self.__class__, self).__init__(transaction_type)
@@ -173,21 +178,22 @@ class ItemGroupData(TransactionalElement):
             params["TransactionType"] = self.transaction_type
 
         if self.item_group_repeat_key is not None:
-            params["ItemGroupRepeatKey"] = str(self.item_group_repeat_key) #may be @context for transaction type upsert or context
+            params["ItemGroupRepeatKey"] = str(
+                self.item_group_repeat_key)  # may be @context for transaction type upsert or context
 
         params["mdsol:Submission"] = "WholeItemGroup" if self.whole_item_group else "SpecifiedItemsOnly"
 
         builder.start("ItemGroupData", params)
 
-        #Ask children
-        for item  in self.items.values():
-           item.build(builder)
+        # Ask children
+        for item in self.items.values():
+            item.build(builder)
         builder.end("ItemGroupData")
 
 
 class FormData(TransactionalElement):
     """Models the ODM FormData object"""
-    ALLOWED_TRANSACTION_TYPES = ['Insert','Update']
+    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update']
 
     def __init__(self, formoid, transaction_type=None, form_repeat_key=None):
         super(self.__class__, self).__init__(transaction_type)
@@ -221,7 +227,7 @@ class FormData(TransactionalElement):
 
         builder.start("FormData", params)
 
-        #Ask children
+        # Ask children
         for itemgroup in self.itemgroups:
             itemgroup.build(builder, self.formoid)
         builder.end("FormData")
@@ -229,7 +235,8 @@ class FormData(TransactionalElement):
 
 class StudyEventData(TransactionalElement):
     """Models the ODM StudyEventData object"""
-    ALLOWED_TRANSACTION_TYPES = ['Insert','Update','Remove','Context']
+    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Remove', 'Context']
+
     def __init__(self, study_event_oid, transaction_type="Update", study_event_repeat_key=None):
         super(self.__class__, self).__init__(transaction_type)
         self.study_event_oid = study_event_oid
@@ -270,15 +277,14 @@ class StudyEventData(TransactionalElement):
 
 class SubjectData(TransactionalElement):
     """Models the ODM SubjectData and ODM SiteRef objects"""
-    ALLOWED_TRANSACTION_TYPES = ['Insert','Update','Upsert']
+    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert']
 
     def __init__(self, sitelocationoid, subject_key, subject_key_type="SubjectName", transaction_type="Update"):
         super(self.__class__, self).__init__(transaction_type)
         self.sitelocationoid = sitelocationoid
         self.subject_key = subject_key
         self.subject_key_type = subject_key_type
-        self.study_events = [] #Can have collection
-
+        self.study_events = []  # Can have collection
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -293,7 +299,7 @@ class SubjectData(TransactionalElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(SubjectKey = self.subject_key)
+        params = dict(SubjectKey=self.subject_key)
         params['mdsol:SubjectKeyType'] = self.subject_key_type
 
         if self.transaction_type is not None:
@@ -304,7 +310,7 @@ class SubjectData(TransactionalElement):
         builder.start("SiteRef", {'LocationOID': self.sitelocationoid})
         builder.end("SiteRef")
 
-        #Ask children
+        # Ask children
         for event in self.study_events:
             event.build(builder)
         builder.end("SubjectData")
@@ -312,6 +318,7 @@ class SubjectData(TransactionalElement):
 
 class ClinicalData(ODMElement):
     """Models the ODM ClinicalData object"""
+
     def __init__(self, projectname, environment):
         self.projectname = projectname
         self.environment = environment
@@ -329,9 +336,9 @@ class ClinicalData(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(MetaDataVersionOID = '1',
-                      StudyOID = "%s (%s)" % (self.projectname, self.environment,),
-                     )
+        params = dict(MetaDataVersionOID='1',
+                      StudyOID="%s (%s)" % (self.projectname, self.environment,),
+                      )
 
         builder.start("ClinicalData", params)
         # Ask children
@@ -342,21 +349,21 @@ class ClinicalData(ODMElement):
 
 class ODM(ODMElement):
     """Models the ODM object"""
-    FILETYPE_TRANSACTIONAL='Transactional'
-    FILETYPE_SNAPSHOT='Snapshot'
+    FILETYPE_TRANSACTIONAL = 'Transactional'
+    FILETYPE_SNAPSHOT = 'Snapshot'
 
     def __init__(self, originator, description="", creationdatetime=now_to_iso8601(), fileoid=None, filetype=None):
-        self.originator = originator #Required
+        self.originator = originator  # Required
         self.description = description
         self.creationdatetime = creationdatetime
-        #filetype will always be "Transactional"
-        #ODM version will always be 1.3
-        #Granularity="SingleSubject"
-        #AsOfDateTime always OMITTED (it's optional)
+        # filetype will always be "Transactional"
+        # ODM version will always be 1.3
+        # Granularity="SingleSubject"
+        # AsOfDateTime always OMITTED (it's optional)
         self.clinical_data = None
         self.filetype = ODM.FILETYPE_TRANSACTIONAL if filetype is None else ODM.FILETYPE_SNAPSHOT
 
-        #Create unique fileoid if none given
+        # Create unique fileoid if none given
         self.fileoid = str(uuid.uuid4()) if fileoid is None else fileoid
 
     def __lshift__(self, other):
@@ -370,12 +377,12 @@ class ODM(ODMElement):
         """Build XML object, return the root"""
         builder = ET.TreeBuilder()
 
-        params = dict(ODMVersion = "1.3",
-                      FileType= self.filetype,
-                      CreationDateTime = self.creationdatetime,
-                      Originator = self.originator,
-                      FileOID = self.fileoid,
-                      xmlns = "http://www.cdisc.org/ns/odm/v1.3",
+        params = dict(ODMVersion="1.3",
+                      FileType=self.filetype,
+                      CreationDateTime=self.creationdatetime,
+                      Originator=self.originator,
+                      FileOID=self.fileoid,
+                      xmlns="http://www.cdisc.org/ns/odm/v1.3",
                       )
         params['xmlns:mdsol'] = "http://www.mdsol.com/ns/odm/metadata"
 
@@ -383,7 +390,7 @@ class ODM(ODMElement):
             params['Description'] = self.description
 
         builder.start("ODM", params)
-        #Ask the children
+        # Ask the children
         if self.clinical_data is not None:
             self.clinical_data.build(builder)
 
@@ -396,11 +403,23 @@ class ODM(ODMElement):
         header = '<?xml version="1.0" encoding="utf-8" ?>\n'
         return header + ET.tostring(doc, encoding='utf-8').decode('utf-8')
 
-#-----------------------------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------------------------------------------------
 # Metadata Objects
+
+
+DATATYPE_TEXT = 'text'
+DATATYPE_INTEGER = 'integer'
+DATATYPE_FLOAT = 'float'
+DATATYPE_DATE = 'date'
+DATATYPE_DATETIME = 'datetime'
+DATATYPE_TIME = 'time'
+DATATYPE_STRING = 'string'  # Used only by codelists
+
 
 class GlobalVariables(ODMElement):
     """GlobalVariables Metadata element"""
+
     def __init__(self, protocol_name, name=None, description=''):
         """Name and description are not important. protocol_name maps to the Rave project name"""
         self.protocol_name = protocol_name
@@ -410,17 +429,19 @@ class GlobalVariables(ODMElement):
     def build(self, builder):
         """Build XML by appending to builder"""
         builder.start("GlobalVariables")
-        make_element(builder, 'StudyName',self.name)
-        make_element(builder, 'StudyDescription',self.description)
-        make_element(builder, 'ProtocolName',self.protocol_name)
+        make_element(builder, 'StudyName', self.name)
+        make_element(builder, 'StudyDescription', self.description)
+        make_element(builder, 'ProtocolName', self.protocol_name)
         builder.end("GlobalVariables")
 
     def __lshift__(self, other):
         """Override << operator"""
         raise ValueError("GlobalVariables does not accept any children")
 
+
 class TranslatedText(ODMElement):
     """Represents a language and a translated text for that language"""
+
     def __init__(self, text, lang=None):
         self.text = text
         self.lang = lang
@@ -437,6 +458,7 @@ class TranslatedText(ODMElement):
         builder.start("TranslatedText", params)
         builder.data(self.text)
         builder.end("TranslatedText")
+
 
 class Symbol(ODMElement):
     def __init__(self):
@@ -458,14 +480,15 @@ class Symbol(ODMElement):
 
 class MeasurementUnit(ODMElement):
     """A measurement unit"""
+
     def __init__(self,
                  oid,
                  name,
                  unit_dictionary_name=None,
-                 constant_a = 1,
-                 constant_b = 1,
-                 constant_c = 0,
-                 constant_k = 0,
+                 constant_a=1,
+                 constant_b=1,
+                 constant_c=0,
+                 constant_k=0,
                  standard_unit=False):
         self.symbols = []
         self.oid = oid
@@ -486,13 +509,12 @@ class MeasurementUnit(ODMElement):
         if self.unit_dictionary_name:
             params['mdsol:UnitDictionaryName'] = self.unit_dictionary_name
 
-        for suffix in ['A','B','C','K']:
+        for suffix in ['A', 'B', 'C', 'K']:
             val = getattr(self, 'constant_{0}'.format(suffix.lower()))
             params['mdsol:Constant{0}'.format(suffix)] = str(val)
 
         if self.standard_unit:
             params['mdsol:StandardUnit'] = 'Yes'
-
 
         builder.start("MeasurementUnit", params)
         for child in self.symbols:
@@ -509,6 +531,7 @@ class MeasurementUnit(ODMElement):
 
 class BasicDefinitions(ODMElement):
     """Container for Measurement units"""
+
     def __init__(self):
         self.measurement_units = []
 
@@ -539,15 +562,16 @@ class StudyEventRef(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(StudyEventOID = self.oid,
-                      OrderNumber = str(self.order_number),
-                      Mandatory = bool_to_yes_no(self.mandatory))
+        params = dict(StudyEventOID=self.oid,
+                      OrderNumber=str(self.order_number),
+                      Mandatory=bool_to_yes_no(self.mandatory))
         builder.start("StudyEventRef", params)
         builder.end("StudyEventRef")
 
 
 class Protocol(ODMElement):
     """Protocol child of MetaDataVersion, holder of StudyEventRefs"""
+
     def __init__(self):
         self.study_event_refs = []
 
@@ -555,7 +579,7 @@ class Protocol(ODMElement):
         """Build XML by appending to builder"""
         builder.start("Protocol")
         for child in self.study_event_refs:
-             child.build(builder)
+            child.build(builder)
         builder.end("Protocol")
 
     def __lshift__(self, other):
@@ -566,15 +590,15 @@ class Protocol(ODMElement):
 
 
 class FormRef(ODMElement):
-    def __init__(self,oid, order_number, mandatory):
+    def __init__(self, oid, order_number, mandatory):
         self.oid = oid
         self.order_number = order_number
         self.mandatory = mandatory
 
     def build(self, builder):
-        params = dict(FormOID = self.oid,
-                      OrderNumber = str(self.order_number),
-                      Mandatory = bool_to_yes_no(self.mandatory)
+        params = dict(FormOID=self.oid,
+                      OrderNumber=str(self.order_number),
+                      Mandatory=bool_to_yes_no(self.mandatory)
                       )
         builder.start('FormRef', params)
         builder.end('FormRef')
@@ -584,22 +608,20 @@ class FormRef(ODMElement):
         raise ValueError("FormRef does not accept any children")
 
 
-
 class StudyEventDef(ODMElement):
-
     # Event types
     SCHEDULED = 'Scheduled'
     UNSCHEDULED = 'Unscheduled'
     COMMON = 'Common'
 
     def __init__(self, oid, name, repeating, event_type,
-                 category = None,
-                 access_days= None,
-                 start_win_days = None,
-                 target_days = None,
-                 end_win_days = None,
-                 overdue_days = None,
-                 close_days = None
+                 category=None,
+                 access_days=None,
+                 start_win_days=None,
+                 target_days=None,
+                 end_win_days=None,
+                 overdue_days=None,
+                 close_days=None
                  ):
         self.oid = oid
         self.name = name
@@ -618,7 +640,7 @@ class StudyEventDef(ODMElement):
         """Build XML by appending to builder"""
 
         params = dict(OID=self.oid, Name=self.name,
-                      Repeating = bool_to_yes_no(self.repeating),
+                      Repeating=bool_to_yes_no(self.repeating),
                       Type=self.event_type)
 
         if self.category is not None:
@@ -661,9 +683,9 @@ class ItemGroupRef(ODMElement):
         self.mandatory = mandatory
 
     def build(self, builder):
-        params = dict(ItemGroupOID = self.oid,
+        params = dict(ItemGroupOID=self.oid,
                       OrderNumber=str(self.order_number),
-                      Mandatory = bool_to_yes_no(self.mandatory),
+                      Mandatory=bool_to_yes_no(self.mandatory),
                       )
         builder.start("ItemGroupRef", params)
         builder.end("ItemGroupRef")
@@ -675,12 +697,13 @@ class ItemGroupRef(ODMElement):
 
 class MdsolHelpText(ODMElement):
     """Help element for FormDefs and ItemDefs"""
+
     def __init__(self, lang, content):
         self.lang = lang
         self.content = content
 
     def build(self, builder):
-        builder.start('mdsol:HelpText', {'xml:lang' : self.lang})
+        builder.start('mdsol:HelpText', {'xml:lang': self.lang})
         builder.data(self.content)
         builder.end('mdsol:HelpText')
 
@@ -691,6 +714,7 @@ class MdsolHelpText(ODMElement):
 
 class MdsolViewRestriction(ODMElement):
     """ViewRestriction for FormDefs and ItemDefs"""
+
     def __init__(self, rolename):
         self.rolename = rolename
 
@@ -705,6 +729,7 @@ class MdsolViewRestriction(ODMElement):
 
 class MdsolEntryRestriction(ODMElement):
     """EntryRestriction for FormDefs and ItemDefs"""
+
     def __init__(self, rolename):
         self.rolename = rolename
 
@@ -744,7 +769,7 @@ class FormDef(ODMElement):
         self.oid = oid
         self.name = name
         self.order_number = order_number
-        self.repeating = repeating #Not actually used by Rave.
+        self.repeating = repeating  # Not actually used by Rave.
         self.active = active
         self.template = template
         self.signature_required = signature_required
@@ -754,14 +779,14 @@ class FormDef(ODMElement):
         self.link_study_event_oid = link_study_event_oid
         self.link_form_oid = link_form_oid
         self.itemgroup_refs = []
-        self.helptexts = [] #Not clear that Rave can accept multiple from docs
+        self.helptexts = []  # Not clear that Rave can accept multiple from docs
         self.view_restrictions = []
         self.entry_restrictions = []
 
     def build(self, builder):
-        params = dict(OID = self.oid,
-                      Name = self.name,
-                      Repeating = bool_to_yes_no(self.repeating)
+        params = dict(OID=self.oid,
+                      Name=self.name,
+                      Repeating=bool_to_yes_no(self.repeating)
                       )
 
         if self.order_number is not None:
@@ -814,10 +839,49 @@ class FormDef(ODMElement):
             self.entry_restrictions.append(other)
 
 
-class ItemRef(ODMElement):
+class MdsolLabelRef(ODMElement):
+    """A reference to a label on a form"""
 
+    def __init__(self, oid, order_number):
+        self.oid = oid
+        self.order_number = order_number
+
+    def build(self, builder):
+        params = dict(LabelOID=self.oid,
+                      OrderNumber=str(self.order_number),
+                      )
+
+        builder.start('mdsol:LabelRef', params)
+        builder.end('mdsol:LabelRef')
+
+    def __lshift__(self, other):
+        raise ValueError('MdsolLabelRef does not accept any child elements')
+
+
+class MdsolAttribute(ODMElement):
+    def __init__(self, namespace, name, value, transaction_type='Insert'):
+        self.namespace = namespace
+        self.name = name
+        self.value = value
+        self.transaction_type = transaction_type
+
+    def __lshift__(self, other):
+        raise ValueError('MdsolAttribute does not accept any child elements')
+
+    def build(self, builder):
+        params = dict(Namespace=self.namespace,
+                      Name=self.name,
+                      Value=self.value,
+                      TransactionType=self.transaction_type,
+                      )
+
+        builder.start('mdsol:Attribute', params)
+        builder.end('mdsol:Attribute')
+
+
+class ItemRef(ODMElement):
     def __init__(self, oid, order_number, mandatory=False, key_sequence=None,
-                 imputation_method_oid = None, role = None, role_codelist_oid = None):
+                 imputation_method_oid=None, role=None, role_codelist_oid=None):
         self.oid = oid
         self.order_number = order_number
         self.mandatory = mandatory
@@ -825,12 +889,13 @@ class ItemRef(ODMElement):
         self.imputation_method_oid = imputation_method_oid
         self.role = role
         self.role_codelist_oid = role_codelist_oid
+        self.attributes = []
 
     def build(self, builder):
 
-        params = dict(ItemOID= self.oid,
-                      OrderNumber = str(self.order_number),
-                      Mandatory = bool_to_yes_no(self.mandatory)
+        params = dict(ItemOID=self.oid,
+                      OrderNumber=str(self.order_number),
+                      Mandatory=bool_to_yes_no(self.mandatory)
                       )
 
         if self.key_sequence is not None:
@@ -846,10 +911,18 @@ class ItemRef(ODMElement):
             params['RoleCodeListOID'] = self.role_codelist_oid
 
         builder.start('ItemRef', params)
+
+        for attribute in self.attributes:
+            attribute.build(builder)
         builder.end('ItemRef')
 
     def __lshift__(self, other):
-        raise ValueError('ItemRef does not accept any child elements') #TODO: MdsolAttribute if worthwhile
+        """ItemRef can accept MdsolAttribute(s)"""
+
+        if not isinstance(other, (MdsolAttribute)):
+            raise ValueError('ItemRef cannot accept a {0} as a child element'.format(other.__class__.__name__))
+
+        self.attributes.append(other)
 
 
 class ItemGroupDef(ODMElement):
@@ -866,14 +939,15 @@ class ItemGroupDef(ODMElement):
         self.purpose = purpose
         self.comment = comment
         self.item_refs = []
+        self.label_refs = []
 
     def build(self, builder):
 
-        params = dict(OID= self.oid,
-                      Name = self.name,
-                      Repeating = bool_to_yes_no(self.repeating),
-                      IsReferenceData = bool_to_yes_no(self.is_reference_data)
-        )
+        params = dict(OID=self.oid,
+                      Name=self.name,
+                      Repeating=bool_to_yes_no(self.repeating),
+                      IsReferenceData=bool_to_yes_no(self.is_reference_data)
+                      )
 
         if self.sas_dataset_name is not None:
             params['SASDatasetName'] = self.sas_dataset_name
@@ -894,18 +968,26 @@ class ItemGroupDef(ODMElement):
             params['Comment'] = self.comment
 
         builder.start('ItemGroupDef', params)
+
         for itemref in self.item_refs:
             itemref.build(builder)
+
+        # Extensions always listed AFTER core elements
+        for labelref in self.label_refs:
+            labelref.build(builder)
         builder.end('ItemGroupDef')
 
     def __lshift__(self, other):
-        """Override << operator"""
+        """ItemGroupDef can accept ItemRef and LabelRef"""
 
-        if not isinstance(other, (ItemRef)):
+        if not isinstance(other, (ItemRef, MdsolLabelRef)):
             raise ValueError('ItemGroupDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         if isinstance(other, ItemRef):
             self.item_refs.append(other)
+
+        if isinstance(other, MdsolLabelRef):
+            self.label_refs.append(other)
 
 
 class Question(ODMElement):
@@ -946,8 +1028,30 @@ class MeasurementUnitRef(ODMElement):
         builder.end('MeasurementUnitRef')
 
 
+class MdsolHeaderText(ODMElement):
+    """Header text for ItemDef when showed in grid"""
+
+    def __init__(self, content, lang=None):
+        self.content = content
+        self.lang = lang
+
+    def build(self, builder):
+        params = {}
+        if self.lang is not None:
+            params['xml:lang'] = self.lang
+
+        builder.start('mdsol:HeaderText', params)
+        builder.data(self.content)
+        builder.end('mdsol:HeaderText')
+
+    def __lshift__(self, other):
+        """Has no children"""
+        raise ValueError("MdsolHeaderText takes no child elements.")
+
+
 class CodeListRef(ODMElement):
     """CodeListRef: a reference a codelist within an ItemDef"""
+
     def __init__(self, oid):
         self.oid = oid
 
@@ -960,14 +1064,62 @@ class CodeListRef(ODMElement):
         builder.end('CodeListRef')
 
 
+class MdsolLabelDef(ODMElement):
+    """Label definition"""
+
+    def __init__(self, oid, name, field_number=None):
+        self.oid = oid
+        self.name = name
+        self.field_number = field_number
+        self.help_texts = []
+        self.translations = []
+        self.view_restrictions = []
+
+    def build(self, builder):
+        params = dict(OID=self.oid, Name=self.name)
+        if self.field_number is not None:
+            params['FieldNumber'] = str(self.field_number)
+
+        builder.start("mdsol:LabelDef", params)
+
+        for translation in self.translations:
+            translation.build(builder)
+
+        for view_restriction in self.view_restrictions:
+            view_restriction.build(builder)
+
+        builder.end("mdsol:LabelDef")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, (MdsolViewRestriction, TranslatedText)):
+            raise ValueError('MdsolLabelDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
+
+        if isinstance(other, TranslatedText):
+            self.translations.append(other)
+
+        if isinstance(other, MdsolViewRestriction):
+            self.view_restrictions.append(other)
+
+
+class MdsolReviewGroup(ODMElement):
+    """Maps to Rave review groups for an Item"""
+
+    def __init__(self, name):
+        self.name = name
+
+    def __lshift__(self, other):
+        """Has no children"""
+        raise ValueError("MdsolReviewGroup takes no child elements.")
+
+    def build(self, builder):
+        builder.start('mdsol:ReviewGroup')
+        builder.data(self.name)
+        builder.end('mdsol:ReviewGroup')
+
+
 class ItemDef(ODMElement):
-    DATATYPE_TEXT = 'text'
-    DATATYPE_INTEGER = 'integer'
-    DATATYPE_FLOAT = 'float'
-    DATATYPE_DATE = 'date'
-    DATATYPE_DATETIME = 'datetime'
-    DATATYPE_TIME = 'time'
-    VALID_DATATYPES = [DATATYPE_TEXT, DATATYPE_INTEGER, DATATYPE_FLOAT,DATATYPE_DATE,
+    VALID_DATATYPES = [DATATYPE_TEXT, DATATYPE_INTEGER, DATATYPE_FLOAT, DATATYPE_DATE,
                        DATATYPE_DATETIME, DATATYPE_TIME]
 
     CONTROLTYPE_CHECKBOX = 'CheckBox'
@@ -985,27 +1137,27 @@ class ItemDef(ODMElement):
 
     def __init__(self, oid, name, datatype, length,
                  significant_digits=None,
-                 sas_field_name = None,
-                 sds_var_name = None,
-                 origin = None, #Not mapped in Rave
-                 comment = None,
-                 active = True,
-                 control_type = None,
-                 acceptable_file_extensions = None,
-                 indent_level = 0,
-                 source_document_verify = False,
-                 default_value = None,
-                 sas_format = None,
-                 sas_label = None,
-                 query_future_date = False,
-                 visible = True,
-                 translation_required = False,
-                 query_non_conformance = False,
-                 other_visits = False,
-                 can_set_item_group_date = False,
-                 can_set_form_date = False,
-                 can_set_study_event_date = False,
-                 can_set_subject_date = False,
+                 sas_field_name=None,
+                 sds_var_name=None,
+                 origin=None,  # Not mapped in Rave
+                 comment=None,
+                 active=True,
+                 control_type=None,
+                 acceptable_file_extensions=None,
+                 indent_level=0,
+                 source_document_verify=False,
+                 default_value=None,
+                 sas_format=None,
+                 sas_label=None,
+                 query_future_date=False,
+                 visible=True,
+                 translation_required=False,
+                 query_non_conformance=False,
+                 other_visits=False,
+                 can_set_item_group_date=False,
+                 can_set_form_date=False,
+                 can_set_study_event_date=False,
+                 can_set_subject_date=False,
                  visual_verify=False,
                  does_not_break_signature=False,
                  date_time_format=None,
@@ -1054,6 +1206,8 @@ class ItemDef(ODMElement):
         self.help_texts = []
         self.view_restrictions = []
         self.entry_restrictions = []
+        self.header_text = None
+        self.review_groups = []
 
     def build(self, builder):
         """Build XML by appending to builder"""
@@ -1131,6 +1285,9 @@ class ItemDef(ODMElement):
         for mur in self.measurement_unit_refs:
             mur.build(builder)
 
+        if self.header_text is not None:
+            self.header_text.build(builder)
+
         for view_restriction in self.view_restrictions:
             view_restriction.build(builder)
 
@@ -1140,19 +1297,21 @@ class ItemDef(ODMElement):
         for help_text in self.help_texts:
             help_text.build(builder)
 
-        builder.end("ItemDef")
+        for review_group in self.review_groups:
+            review_group.build(builder)
 
+        builder.end("ItemDef")
 
     def __lshift__(self, other):
         """Override << operator"""
 
-# ExternalQuestion?,
-# RangeCheck*,
-# Role*, Alias*, mdsol:HeaderText?,
-# mdsol:HelpText?, mdsol:ViewRestriction* or mdsolEntryRestrictions*), mdsol:ReviewGroup* (or mdsol:ReviewGroups*), mdsol:Label?)
+        # ExternalQuestion?,
+        # RangeCheck*,
+        # Role*, Alias*,
+        # mdsol:HelpText?, mdsol:ViewRestriction* or mdsolEntryRestrictions*), (or mdsol:ReviewGroups*), mdsol:Label?)
 
         if not isinstance(other, (MdsolHelpText, MdsolEntryRestriction, MdsolViewRestriction, Question,
-                                  MeasurementUnitRef, CodeListRef)):
+                                  MeasurementUnitRef, CodeListRef, MdsolHeaderText, MdsolReviewGroup)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         if isinstance(other, Question):
@@ -1165,6 +1324,14 @@ class ItemDef(ODMElement):
                 raise ValueError('ItemDef already contains a CodeListRef')
             self.codelistref = other
 
+        if isinstance(other, MeasurementUnitRef):
+            self.measurement_unit_refs.append(other)
+
+        if isinstance(other, MdsolHeaderText):
+            if self.header_text is not None:
+                raise ValueError('ItemDef already contains an mdsol:HeaderText element')
+            self.header_text = other
+
         if isinstance(other, MdsolHelpText):
             self.help_texts.append(other)
 
@@ -1174,8 +1341,8 @@ class ItemDef(ODMElement):
         if isinstance(other, MdsolEntryRestriction):
             self.entry_restrictions.append(other)
 
-        if isinstance(other, MeasurementUnitRef):
-            self.measurement_unit_refs.append(other)
+        if isinstance(other, MdsolReviewGroup):
+            self.review_groups.append(other)
 
 
 class Decode(ODMElement):
@@ -1203,7 +1370,7 @@ class CodeListItem(ODMElement):
         self.decode = None
 
     def build(self, builder):
-        params = dict(CodedValue = self.coded_value)
+        params = dict(CodedValue=self.coded_value)
         if self.order_number is not None:
             params['mdsol:OrderNumber'] = str(self.order_number)
 
@@ -1224,10 +1391,6 @@ class CodeListItem(ODMElement):
 
 class CodeList(ODMElement):
     """A container for CodeListItems equivalent of Rave Dictionary"""
-    DATATYPE_INTEGER = 'integer'
-    DATATYPE_FLOAT = 'float'
-    DATATYPE_TEXT = 'text'
-    DATATYPE_STRING = 'string'
     VALID_DATATYPES = [DATATYPE_INTEGER, DATATYPE_TEXT, DATATYPE_FLOAT, DATATYPE_STRING]
 
     def __init__(self, oid, name, datatype, sas_format_name=None):
@@ -1240,9 +1403,9 @@ class CodeList(ODMElement):
         self.codelist_items = []
 
     def build(self, builder):
-        params = dict(OID = self.oid,
-                      Name = self.name,
-                      DataType = self.datatype)
+        params = dict(OID=self.oid,
+                      Name=self.name,
+                      DataType=self.datatype)
         if self.sas_format_name is not None:
             params['SASFormatName'] = self.sas_format_name
         builder.start("CodeList", params)
@@ -1256,8 +1419,10 @@ class CodeList(ODMElement):
             raise ValueError('Codelist cannot accept child of type {0}'.format(other.__class__.__name__))
         self.codelist_items.append(other)
 
+
 class MetaDataVersion(ODMElement):
     """MetaDataVersion, child of study"""
+
     def __init__(self, oid, name, description=None,
                  primary_formoid=None,
                  default_matrix_oid=None,
@@ -1273,6 +1438,7 @@ class MetaDataVersion(ODMElement):
         self.protocol = None
         self.codelists = []
         self.item_defs = []
+        self.label_defs = []
         self.item_group_defs = []
         self.form_defs = []
         self.study_event_defs = []
@@ -1296,7 +1462,6 @@ class MetaDataVersion(ODMElement):
 
         params['mdsol:DeleteExisting'] = bool_to_yes_no(self.delete_existing)
 
-
         builder.start("MetaDataVersion", params)
         if self.protocol:
             self.protocol.build(builder)
@@ -1305,10 +1470,10 @@ class MetaDataVersion(ODMElement):
             event.build(builder)
 
         for formdef in self.form_defs:
-           formdef.build(builder)
+            formdef.build(builder)
 
         for itemgroupdef in self.item_group_defs:
-           itemgroupdef.build(builder)
+            itemgroupdef.build(builder)
 
         for itemdef in self.item_defs:
             itemdef.build(builder)
@@ -1316,12 +1481,16 @@ class MetaDataVersion(ODMElement):
         for codelist in self.codelists:
             codelist.build(builder)
 
+        # Extensions must always come after core elements
+        for labeldef in self.label_defs:
+            labeldef.build(builder)
+
         builder.end("MetaDataVersion")
 
     def __lshift__(self, other):
         """Override << operator"""
 
-        if not isinstance(other, (Protocol, StudyEventDef, FormDef, ItemGroupDef, ItemDef, CodeList)):
+        if not isinstance(other, (Protocol, StudyEventDef, FormDef, ItemGroupDef, ItemDef, MdsolLabelDef, CodeList)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         if isinstance(other, Protocol):
@@ -1336,11 +1505,15 @@ class MetaDataVersion(ODMElement):
         if isinstance(other, ItemGroupDef):
             self.item_group_defs.append(other)
 
+        if isinstance(other, MdsolLabelDef):
+            self.label_defs.append(other)
+
         if isinstance(other, ItemDef):
             self.item_defs.append(other)
 
         if isinstance(other, CodeList):
             self.codelists.append(other)
+
 
 class Study(ODMElement):
     """ODM Study Metadata element"""
@@ -1362,7 +1535,8 @@ class Study(ODMElement):
                 self.project_type = project_type
             else:
                 raise ValueError('Project type "{0}" not valid. Expected one of {1}'.format(project_type,
-                                 ','.join(Study.PROJECT_TYPES)))
+                                                                                            ','.join(
+                                                                                                Study.PROJECT_TYPES)))
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -1383,13 +1557,13 @@ class Study(ODMElement):
         if isinstance(other, MetaDataVersion):
             if self.metadata_version is not None:
                 raise ValueError('A MetaDataVersion is already set and Rave only allows one.')
-            self.metadata_version  = other
+            self.metadata_version = other
 
         return other
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(OID = self.oid)
+        params = dict(OID=self.oid)
         params['mdsol:ProjectType'] = self.project_type
 
         builder.start("Study", params)

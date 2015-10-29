@@ -222,6 +222,7 @@ class TestFormData(unittest.TestCase):
         doc = obj_to_doc(tested)
         self.assertEquals(doc.attrib["FormRepeatKey"],"9")
 
+
 class TestStudyEventData(unittest.TestCase):
     """Test StudyEventData classes"""
     def setUp(self):

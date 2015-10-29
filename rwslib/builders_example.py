@@ -42,6 +42,7 @@ def example_clinical_data():
     )
     return odm
 
+
 def example_metadata(study_name, draft_name):
     """Example of building a metadata doc"""
     odm = ODM("SYSTEM_NAME", filetype=ODM.FILETYPE_SNAPSHOT)
@@ -70,7 +71,6 @@ def example_metadata(study_name, draft_name):
     # Add basic definitions to study
     study << bd
 
-
     # Now metadata which will contain all our form and field defs eventually
     meta = MetaDataVersion('META1', draft_name)
     study << meta
@@ -79,8 +79,8 @@ def example_metadata(study_name, draft_name):
     protocol = Protocol()
     # Add some StudyEventRefs
     protocol << StudyEventRef("FLDR1", 1, True)  # Order 1, Mandatory
-    protocol << StudyEventRef("FLDR2", 2, False) # Order 2, Not Mandatory
-    protocol << StudyEventRef("AE", 3, True)
+    # protocol << StudyEventRef("FLDR2", 2, False) # Order 2, Not Mandatory
+    # protocol << StudyEventRef("AE", 3, True)
 
     meta << protocol
 
@@ -101,9 +101,9 @@ def example_metadata(study_name, draft_name):
     )
 
     dm_form = FormDef("DM","Demography")
-    # dm_form << MdsolHelpText("en","Some help text for Demography")
-    # dm_form << MdsolViewRestriction('Data Manager')
-    # dm_form << MdsolEntryRestriction('Batch Upload')
+    dm_form << MdsolHelpText("en","Some help text for Demography")
+    dm_form << MdsolViewRestriction('Data Manager')
+    dm_form << MdsolEntryRestriction('Batch Upload')
     dm_form << ItemGroupRef("DM_IG1", 1)
     dm_form << ItemGroupRef("DM_IG2", 2)
 
@@ -112,29 +112,33 @@ def example_metadata(study_name, draft_name):
 
     # Define item group
     meta << ItemGroupDef("DM_IG1", "DM Item Group 1")(
-        ItemRef("SEX", 1),
-        ItemRef("RACE", 2),
-        ItemRef("RACE_OTH", 3),
-        ItemRef("DOB", 4)
+        MdsolLabelRef("LBL1", 1),
+        ItemRef("SEX", 2)(
+            MdsolAttribute("Standards","CDASH","SEX"),
+            MdsolAttribute("Standards","STDNUMBER","1120")
+        ),
+        ItemRef("RACE", 3),
+        ItemRef("RACE_OTH", 4),
+        ItemRef("DOB", 5)
     )
 
-    # Add some ItemDefs
-    meta << ItemDef("SEX", "Gender", ItemDef.DATATYPE_TEXT, 1, control_type=ItemDef.CONTROLTYPE_RADIOBUTTON
+    # Add the ItemDefs
+    meta << ItemDef("SEX", "Gender", DATATYPE_TEXT, 1, control_type=ItemDef.CONTROLTYPE_RADIOBUTTON
        )(
         Question()(TranslatedText("Gender at Birth")),
         CodeListRef("CL_SEX")
     )
-    meta << ItemDef("RACE", "Race", ItemDef.DATATYPE_TEXT, 2,
+    meta << ItemDef("RACE", "Race", DATATYPE_TEXT, 2,
                     control_type=ItemDef.CONTROLTYPE_RADIOBUTTON_VERTICAL
                     )(
         Question()(TranslatedText("Race")),
         CodeListRef("CL_RACE")
     )
-    meta << ItemDef("RACE_OTH", "RaceOther", ItemDef.DATATYPE_TEXT, 20)(
+    meta << ItemDef("RACE_OTH", "RaceOther", DATATYPE_TEXT, 20)(
         Question()(TranslatedText("If Race Other, please specify")),
     )
 
-    id = ItemDef("DOB", "DateOfBirth", ItemDef.DATATYPE_DATE, 10,
+    id = ItemDef("DOB", "DateOfBirth", DATATYPE_DATE, 10,
                     control_type=ItemDef.CONTROLTYPE_DATETIME,
                     date_time_format="dd/mm/yyyy"
                     )(
@@ -144,9 +148,12 @@ def example_metadata(study_name, draft_name):
 
     meta << id
 
+    # Add a Label
+    meta.add(MdsolLabelDef("LBL1", "Label1")(TranslatedText("Please answer all questions.")))
+
     # As well as () and << you can use add()
     meta.add(
-        CodeList("CL_SEX", "SEX", datatype=CodeList.DATATYPE_STRING) (
+        CodeList("CL_SEX", "SEX", datatype=DATATYPE_TEXT)(
             CodeListItem("M").add(
                 Decode().add(
                     TranslatedText("Male"))
@@ -156,7 +163,7 @@ def example_metadata(study_name, draft_name):
                     TranslatedText("Female"))
             ),
         ),
-        CodeList("CL_RACE", "RACE", datatype=CodeList.DATATYPE_STRING) (
+        CodeList("CL_RACE", "RACE", datatype=DATATYPE_TEXT)(
             CodeListItem("Y")(Decode()(TranslatedText("Yes"))),
             CodeListItem("N")(Decode()(TranslatedText("No"))),
         )
