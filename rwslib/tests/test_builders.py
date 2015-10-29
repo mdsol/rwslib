@@ -19,11 +19,9 @@ class TestInheritance(unittest.TestCase):
             """We do not override the __lshift__ method"""
             pass
 
-        def do():
-            no = NewObj()
-            #Exercise __lshift__
-            no << object()
-        self.assertRaises(NotImplementedError,do)
+        with self.assertRaises(ValueError):
+            # Exercise __lshift__
+            NewObj() << object()
 
 
 class TestItemData(unittest.TestCase):

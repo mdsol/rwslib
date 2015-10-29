@@ -32,7 +32,7 @@ def bool_to_yes_no(val):
 def indent(elem, level=0):
     """Indent a elementree structure"""
     i = "\n" + level * "  "
-    if len(elem):
+    if len(elem) > 0:
         if not elem.text or not elem.text.strip():
             elem.text = i + "  "
         if not elem.tail or not elem.tail.strip():
@@ -66,7 +66,10 @@ class ODMElement(object):
         return self
 
     def __lshift__(self, other):
-        raise NotImplementedError('__lshift__ must be overriden in descendant classes.')
+        """__lshift should be overridden in descendant classes to accept child elements and incorporate them.
+           By default takes no child elements
+        """
+        raise ValueError("%s takes no child elements" % self.__class__.__name__)
 
     def add(self, *args):
         """Like call but adds a set of args"""
