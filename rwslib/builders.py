@@ -66,7 +66,7 @@ class ODMElement(object):
         return self
 
     def __lshift__(self, other):
-        """__lshift should be overridden in descendant classes to accept child elements and incorporate them.
+        """__lshift__ should be overridden in descendant classes to accept child elements and incorporate them.
            By default takes no child elements
         """
         raise ValueError("%s takes no child elements" % self.__class__.__name__)
@@ -464,6 +464,7 @@ class Symbol(ODMElement):
         if not isinstance(other, TranslatedText):
             raise ValueError("Symbol can only accept TranslatedText objects as children")
         self.translations.append(other)
+        return other
 
     def build(self, builder):
         """Build XML by appending to builder"""
@@ -578,7 +579,7 @@ class Protocol(ODMElement):
         if not isinstance(other, (StudyEventRef,)):
             raise ValueError('Protocol cannot accept a {0} as a child element'.format(other.__class__.__name__))
         self.study_event_refs.append(other)
-
+        return other
 
 class FormRef(ODMElement):
     def __init__(self, oid, order_number, mandatory):
@@ -661,7 +662,7 @@ class StudyEventDef(ODMElement):
         if not isinstance(other, (FormRef,)):
             raise ValueError('StudyEventDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
         self.formrefs.append(other)
-
+        return other
 
 class ItemGroupRef(ODMElement):
     def __init__(self, oid, order_number, mandatory=True):
@@ -810,7 +811,7 @@ class FormDef(ODMElement):
 
         if isinstance(other, MdsolEntryRestriction):
             self.entry_restrictions.append(other)
-
+        return other
 
 class MdsolLabelRef(ODMElement):
     """A reference to a label on a form"""
@@ -890,7 +891,7 @@ class ItemRef(ODMElement):
             raise ValueError('ItemRef cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         self.attributes.append(other)
-
+        return other
 
 class ItemGroupDef(ODMElement):
     def __init__(self, oid, name, repeating=False, is_reference_data=False, sas_dataset_name=None,
@@ -955,6 +956,7 @@ class ItemGroupDef(ODMElement):
 
         if isinstance(other, MdsolLabelRef):
             self.label_refs.append(other)
+        return other
 
 
 class Question(ODMElement):
@@ -1055,7 +1057,7 @@ class MdsolLabelDef(ODMElement):
 
         if isinstance(other, MdsolViewRestriction):
             self.view_restrictions.append(other)
-
+        return other
 
 class MdsolReviewGroup(ODMElement):
     """Maps to Rave review groups for an Item"""
@@ -1294,7 +1296,7 @@ class ItemDef(ODMElement):
 
         if isinstance(other, MdsolReviewGroup):
             self.review_groups.append(other)
-
+        return other
 
 class Decode(ODMElement):
     def __init__(self):
@@ -1311,7 +1313,7 @@ class Decode(ODMElement):
         if not isinstance(other, TranslatedText):
             raise ValueError('Decode cannot accept child of type {0}'.format(other.__class__.__name__))
         self.translations.append(other)
-
+        return other
 
 class CodeListItem(ODMElement):
     def __init__(self, coded_value, order_number=None, specify=False):
@@ -1338,7 +1340,7 @@ class CodeListItem(ODMElement):
         if not isinstance(other, Decode):
             raise ValueError('CodelistItem cannot accept child of type {0}'.format(other.__class__.__name__))
         self.decode = other
-
+        return other
 
 class CodeList(ODMElement):
     """A container for CodeListItems equivalent of Rave Dictionary"""
@@ -1369,7 +1371,7 @@ class CodeList(ODMElement):
         if not isinstance(other, CodeListItem):
             raise ValueError('Codelist cannot accept child of type {0}'.format(other.__class__.__name__))
         self.codelist_items.append(other)
-
+        return other
 
 class MetaDataVersion(ODMElement):
     """MetaDataVersion, child of study"""
@@ -1464,6 +1466,7 @@ class MetaDataVersion(ODMElement):
 
         if isinstance(other, CodeList):
             self.codelists.append(other)
+        return other
 
 
 class Study(ODMElement):
@@ -1509,7 +1512,6 @@ class Study(ODMElement):
             if self.metadata_version is not None:
                 raise ValueError('A MetaDataVersion is already set and Rave only allows one.')
             self.metadata_version = other
-
         return other
 
     def build(self, builder):

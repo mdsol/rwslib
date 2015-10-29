@@ -134,9 +134,8 @@ def example_metadata(study_name, draft_name):
         Question()(TranslatedText("Race")),
         CodeListRef("CL_RACE")
     )
-    meta << ItemDef("RACE_OTH", "RaceOther", DATATYPE_TEXT, 20)(
-        Question()(TranslatedText("If Race Other, please specify")),
-    )
+    meta << ItemDef("RACE_OTH", "RaceOther", DATATYPE_TEXT, 20) \
+           << Question() << TranslatedText("If Race Other, please specify")
 
     id = ItemDef("DOB", "DateOfBirth", DATATYPE_DATE, 10,
                     control_type=ItemDef.CONTROLTYPE_DATETIME,
