@@ -7,7 +7,12 @@ builders.py provides convenience classes for building ODM documents for clinical
 import uuid
 from xml.etree import cElementTree as ET
 from datetime import datetime
+from string import letters
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Constants
+
+VALID_ID_CHARS = letters + '_'
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Utilities
@@ -77,6 +82,147 @@ class ODMElement(object):
             self << child
         return self
 
+    def set_single_attribute(self, other, trigger_klass, property_name):
+        """Used to set guard the setting of an attribute which is singular and can't be set twice"""
+        if isinstance(other, trigger_klass):
+            if getattr(self, property_name) is None:
+                setattr(self, property_name, other)
+            else:
+                raise ValueError('%s already has a %s element set.' % (self.__class__.__name__, other.__class__.__name__,))
+
+
+class UserRef(ODMElement):
+    def __init__(self, oid):
+        self.oid = oid
+
+    def build(self, builder):
+        builder.start("UserRef", dict(UserOID = self.oid))
+        builder.end("UserRef")
+
+
+class LocationRef(ODMElement):
+    def __init__(self, oid):
+        self.oid = oid
+
+    def build(self, builder):
+        builder.start("LocationRef", dict(LocationOID = self.oid))
+        builder.end("LocationRef")
+
+
+class ReasonForChange(ODMElement):
+    def __init__(self, reason):
+        self.reason = reason
+
+    def build(self, builder):
+        builder.start("ReasonForChange")
+        builder.data(self.reason)
+        builder.end("ReasonForChange")
+
+
+class DateTimeStamp(ODMElement):
+    def __init__(self, date_time):
+        self.date_time = date_time
+
+    def build(self, builder):
+        builder.start("DateTimeStamp")
+        if isinstance(self.date_time, datetime):
+            builder.data(dt_to_iso8601(self.date_time))
+        else:
+            builder.data(self.date_time)
+        builder.end("DateTimeStamp")
+
+
+class AuditRecord(ODMElement):
+    """AuditRecord is supported only by ItemData in Rave"""
+    EDIT_MONITORING = 'Monitoring'
+    EDIT_DATA_MANAGEMENT = 'DataManagement'
+    EDIT_DB_AUDIT = 'DBAudit'
+    EDIT_POINTS = [EDIT_MONITORING, EDIT_DATA_MANAGEMENT, EDIT_DB_AUDIT]
+
+    def __init__(self, edit_point=None, used_imputation_method=None, identifier=None, include_file_oid=None):
+        self._edit_point = None
+        self.edit_point = edit_point
+        self.used_imputation_method = used_imputation_method
+        self._id = None
+        self.id = identifier
+        self.include_file_oid = include_file_oid
+        self.user_ref = None
+        self.location_ref = None
+        self.reason_for_change = None
+        self.date_time_stamp = None
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        if value not in [None,''] and str(value).strip() != '':
+            val = str(value).strip()[0]
+            if val not in VALID_ID_CHARS:
+                raise AttributeError('%s id cannot start with "%s" character' % (self.__class__.__name__, val,))
+        self._id = value
+
+    @property
+    def edit_point(self):
+        return self._edit_point
+
+
+
+    @edit_point.setter
+    def edit_point(self, value):
+        if value is not None:
+            if value not in self.EDIT_POINTS:
+                raise AttributeError('%s edit_point must be one of %s not %s' % (
+                self.__class__.__name__, ','.join(self.EDIT_POINTS), value,))
+        self._edit_point = value
+
+    def build(self, builder):
+        params = {}
+
+        if self.edit_point is not None:
+            params["EditPoint"] = self.edit_point
+
+        if self.used_imputation_method is not None:
+            params['UsedImputationMethod'] = bool_to_yes_no(self.used_imputation_method)
+
+        if self.id is not None:
+            params['ID'] = str(self.id)
+
+        if self.include_file_oid is not None:
+            params['mdsol:IncludeFileOID'] = bool_to_yes_no(self.include_file_oid)
+
+        builder.start("AuditRecord", params)
+        if self.user_ref is None:
+            raise ValueError("User Reference not set.")
+        self.user_ref.build(builder)
+
+        if self.location_ref is None:
+            raise ValueError("Location Reference not set.")
+        self.location_ref.build(builder)
+
+        if self.date_time_stamp is None:
+            raise ValueError("DateTime not set.")
+
+        self.date_time_stamp.build(builder)
+
+        # Optional
+        if self.reason_for_change is not None:
+            self.reason_for_change.build(builder)
+
+        builder.end("AuditRecord")
+
+    def __lshift__(self, other):
+        if not isinstance(other, (UserRef, LocationRef, DateTimeStamp, ReasonForChange,)):
+            raise ValueError("AuditRecord cannot accept a child element of type %s" % other.__class__.__name__)
+
+        # Order is important, apparently
+        self.set_single_attribute(other, UserRef, 'user_ref')
+        self.set_single_attribute(other, LocationRef, 'location_ref')
+        self.set_single_attribute(other, DateTimeStamp, 'date_time_stamp')
+        self.set_single_attribute(other, ReasonForChange, 'reason_for_change')
+        return other
+
 
 class TransactionalElement(ODMElement):
     """Models an ODM Element that is allowed a transaction type. Different elements have different
@@ -86,7 +232,6 @@ class TransactionalElement(ODMElement):
     def __init__(self, transaction_type):
         self._transaction_type = None
         self.transaction_type = transaction_type
-        return self
 
     @property
     def transaction_type(self):
@@ -114,6 +259,7 @@ class ItemData(TransactionalElement):
         self.lock = lock
         self.freeze = freeze
         self.verify = verify
+        self.audit_record = None
 
     def build(self, builder):
         """Build XML by appending to builder
@@ -142,11 +288,16 @@ class ItemData(TransactionalElement):
             params['mdsol:Verify'] = bool_to_yes_no(self.verify)
 
         builder.start("ItemData", params)
-
-        # Ask children (queries etc not added yet)
-        # for item  in self.items.values():
-        #   item.build(builder)
+        if self.audit_record is not None:
+            self.audit_record.build(builder)
         builder.end("ItemData")
+
+
+    def __lshift__(self, other):
+        if not isinstance(other, AuditRecord):
+            raise ValueError("ItemData object can only receive AuditRecord object")
+        self.set_single_attribute(other, AuditRecord, 'audit_record')
+        return other
 
 
 class ItemGroupData(TransactionalElement):
@@ -329,12 +480,9 @@ class ClinicalData(ODMElement):
 
     def __lshift__(self, other):
         """Override << operator"""
-        if self.subject_data is not None:
-            raise ValueError("Message already contains a SubjectData object")
-
         if not isinstance(other, SubjectData):
             raise ValueError("ClinicalData object can only receive SubjectData object")
-        self.subject_data = other
+        self.set_single_attribute(other, SubjectData, 'subject_data')
         return other
 
     def build(self, builder):
@@ -1267,23 +1415,12 @@ class ItemDef(ODMElement):
                                   MeasurementUnitRef, CodeListRef, MdsolHeaderText, MdsolReviewGroup)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
-        if isinstance(other, Question):
-            if self.question is not None:
-                raise ValueError('ItemDef already contains a Question')
-            self.question = other
-
-        if isinstance(other, CodeListRef):
-            if self.codelistref is not None:
-                raise ValueError('ItemDef already contains a CodeListRef')
-            self.codelistref = other
+        self.set_single_attribute(other, Question, 'question')
+        self.set_single_attribute(other, CodeListRef, 'codelistref')
+        self.set_single_attribute(other, MdsolHeaderText, 'header_text')
 
         if isinstance(other, MeasurementUnitRef):
             self.measurement_unit_refs.append(other)
-
-        if isinstance(other, MdsolHeaderText):
-            if self.header_text is not None:
-                raise ValueError('ItemDef already contains an mdsol:HeaderText element')
-            self.header_text = other
 
         if isinstance(other, MdsolHelpText):
             self.help_texts.append(other)
@@ -1498,20 +1635,10 @@ class Study(ODMElement):
         if not isinstance(other, (GlobalVariables, BasicDefinitions, MetaDataVersion)):
             raise ValueError('Study cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
-        if isinstance(other, GlobalVariables):
-            if self.global_variables is not None:
-                raise ValueError('GlobalVariables is already set.')
-            self.global_variables = other
+        self.set_single_attribute(other, GlobalVariables, 'global_variables')
+        self.set_single_attribute(other, BasicDefinitions, 'basic_definitions')
+        self.set_single_attribute(other, MetaDataVersion, 'metadata_version')
 
-        if isinstance(other, BasicDefinitions):
-            if self.basic_definitions is not None:
-                raise ValueError('BasicDefinitions is already set.')
-            self.basic_definitions = other
-
-        if isinstance(other, MetaDataVersion):
-            if self.metadata_version is not None:
-                raise ValueError('A MetaDataVersion is already set and Rave only allows one.')
-            self.metadata_version = other
         return other
 
     def build(self, builder):

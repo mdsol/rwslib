@@ -3,36 +3,26 @@ __author__ = 'isparks'
 
 from rwslib.builders import *
 
-def example_clinical_data():
+def example_clinical_data(study_name, environment):
     """Test demonstrating building clinical data"""
-    odm = ODM("test system")
-    cd = ClinicalData("Mediflex", "DEV")
-    subject_data = SubjectData("MDSOL", "New Subject", "Insert")
-
-
-    sed = StudyEventData("SUBJECT")
-
-
-    fd = FormData("EN", transaction_type="Update")
-
-    igd = ItemGroupData()
-
-    odm << cd << subject_data << sed << fd << igd
-
-    item1 = ItemData("SUBJINIT", "AAA")
-    item2 = ItemData("SUBJID", '001')
-
-    igd << item1
-    igd << item2
-
 
     odm = ODM("test system")(
        ClinicalData("Mediflex", "DEV")(
-          SubjectData("MDSOL", "New Subject", "Insert")(
-             StudyEventData("Subject")(
+          SubjectData("MDSOL", "IJS TEST3", transaction_type="Insert")(
+             StudyEventData("SUBJECT")(
                 FormData("EN", transaction_type="Update")(
                    ItemGroupData()(
-                      ItemData("SUBJINIT", "AAA"),
+                      ItemData("SUBJINIT", "AAA")(
+                            AuditRecord(edit_point=AuditRecord.EDIT_DATA_MANAGEMENT,
+                                      used_imputation_method= False,
+                                      identifier='X2011',
+                                      include_file_oid=False)(
+                                            UserRef("isparks"),
+                                            LocationRef("MDSOL"),
+                                            ReasonForChange("Data Entry Error"),
+                                            DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80))
+                            )
+                      ),
                       ItemData("SUBJID", '001')
                    )
                 )
@@ -171,17 +161,18 @@ def example_metadata(study_name, draft_name):
     return odm
 
 if __name__ == '__main__':
-    #print str(example_clinical_data())
-    #print str(example_metadata())
-    projectname = 'TESTSTUDY'
+    projectname = 'Mediflex' # 'TESTSTUDY'
 
-    odm_definition = example_metadata(projectname, "Draft1")
+    #odm_definition = example_metadata(projectname, "Draft1")
+    odm_definition = example_clinical_data("Mediflex","DEV")
     print str(odm_definition)
 
     from rwslib import RWSConnection
-    from rwslib.rws_requests import PostMetadataRequest
+    from rwslib.rws_requests import PostMetadataRequest, PostDataRequest
     from _settings import accounts
     account = accounts['innovate']
     r = RWSConnection('innovate', account['username'], account['password'])
-    response = r.send_request(PostMetadataRequest(projectname, str(odm_definition)))
+    #response = r.send_request(PostMetadataRequest(projectname, str(odm_definition)))
+    response = r.send_request(PostDataRequest(str(odm_definition)))
+
     print(str(response))

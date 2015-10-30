@@ -24,6 +24,134 @@ class TestInheritance(unittest.TestCase):
             NewObj() << object()
 
 
+class TestUserRef(unittest.TestCase):
+    def test_accepts_no_children(self):
+        with self.assertRaises(ValueError):
+            UserRef("Gertrude") << object()
+
+    def test_builder(self):
+        """Test building XML"""
+        tested = UserRef('Fred')
+        doc = obj_to_doc(tested)
+
+        self.assertEqual(doc.attrib['UserOID'],"Fred")
+        self.assertEquals(doc.tag,"UserRef")
+
+class TestLocationRef(unittest.TestCase):
+    def test_accepts_no_children(self):
+        with self.assertRaises(ValueError):
+            LocationRef("Nowhereville") << object()
+
+    def test_builder(self):
+        """Test building XML"""
+        tested = LocationRef('Gainesville')
+        doc = obj_to_doc(tested)
+
+        self.assertEqual(doc.attrib['LocationOID'], "Gainesville")
+        self.assertEquals(doc.tag, "LocationRef")
+
+class TestReasonForChange(unittest.TestCase):
+    def test_accepts_no_children(self):
+        with self.assertRaises(ValueError):
+            ReasonForChange("Because I wanted to") << object()
+
+    def test_builder(self):
+        """Test building XML"""
+        tested = ReasonForChange("Testing 1..2..3")
+        doc = obj_to_doc(tested)
+
+        self.assertEqual("Testing 1..2..3", doc.text)
+        self.assertEquals(doc.tag, "ReasonForChange")
+
+class TestDateTimeStamp(unittest.TestCase):
+    def test_accepts_no_children(self):
+        with self.assertRaises(ValueError):
+            DateTimeStamp(datetime.now()) << object()
+
+    def test_builder_with_datetime(self):
+        dt = datetime(2015, 9, 11, 10, 15, 22, 80)
+        tested = DateTimeStamp(dt)
+        doc = obj_to_doc(tested)
+
+        self.assertEqual(dt_to_iso8601(dt), doc.text)
+        self.assertEquals(doc.tag, "DateTimeStamp")
+
+    def test_builder_with_string(self):
+        dt = "2009-02-04T14:10:32-05:00"
+        tested = DateTimeStamp(dt)
+        doc = obj_to_doc(tested)
+        self.assertEqual(dt, doc.text)
+        self.assertEquals(doc.tag, "DateTimeStamp")
+
+
+class TestAuditRecord(unittest.TestCase):
+    def setUp(self):
+        self.tested = AuditRecord(edit_point=AuditRecord.EDIT_DATA_MANAGEMENT,
+                                  used_imputation_method= False,
+                                  identifier='X2011',
+                                  include_file_oid=False)
+        self.tested << UserRef("Fred")
+        self.tested << LocationRef("Site102")
+        self.tested << ReasonForChange("Data Entry Error")
+        self.tested << DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80))
+
+    def test_identifier_must_not_start_digit(self):
+        with self.assertRaises(AttributeError):
+            AuditRecord(identifier='2011')
+
+        with self.assertRaises(AttributeError):
+            AuditRecord(identifier='*Hello')
+
+        # Underscore OK
+        ar = AuditRecord(identifier='_Hello')
+        self.assertEqual('_Hello', ar.id)
+
+        # Letter OK
+        ar = AuditRecord(identifier='Hello')
+        self.assertEqual('Hello', ar.id)
+
+
+    def test_accepts_no_invalid_children(self):
+        with self.assertRaises(ValueError):
+            AuditRecord() << object()
+
+    def test_invalid_edit_point(self):
+        with self.assertRaises(AttributeError):
+            AuditRecord(edit_point='Blah')
+
+    def test_builder(self):
+        doc = obj_to_doc(self.tested)
+        self.assertEquals(doc.tag, "AuditRecord")
+        self.assertEquals(AuditRecord.EDIT_DATA_MANAGEMENT, doc.attrib["EditPoint"])
+        self.assertEquals("No", doc.attrib["UsedImputationMethod"])
+        self.assertEquals("No", doc.attrib["mdsol:IncludeFileOID"])
+        self.assertEquals("UserRef", doc.getchildren()[0].tag)
+        self.assertEquals("LocationRef", doc.getchildren()[1].tag)
+        self.assertEquals("DateTimeStamp", doc.getchildren()[2].tag)
+        self.assertEquals("ReasonForChange", doc.getchildren()[3].tag)
+
+    def test_no_user_ref(self):
+        """Test with no user ref should fail on build with a ValueError"""
+        self.tested.user_ref = None
+        with self.assertRaises(ValueError) as err:
+            doc = obj_to_doc(self.tested)
+            self.assertIn("UserRef", err.exception.message)
+
+    def test_no_location_ref(self):
+        """Test with no location ref should fail on build with a ValueError"""
+        self.tested.location_ref = None
+        with self.assertRaises(ValueError) as err:
+            doc = obj_to_doc(self.tested)
+            self.assertIn("LocationRef", err.exception.message)
+
+    def test_no_datetime_stamp(self):
+        """Test with no datetimestamp should fail on build with a ValueError"""
+        self.tested.date_time_stamp = None
+        with self.assertRaises(ValueError) as err:
+            doc = obj_to_doc(self.tested)
+            self.assertIn("DateTimeStamp", err.exception.message)
+
+
 class TestItemData(unittest.TestCase):
     """Test ItemData classes"""
     def setUp(self):
@@ -40,7 +168,7 @@ class TestItemData(unittest.TestCase):
     def test_isnull_not_set(self):
         """Isnull should not be set where we have a value not in '', None"""
         doc = obj_to_doc(self.tested)
-        #Check IsNull attribute is missing
+        # Check IsNull attribute is missing
         def do():
             doc.attrib['IsNull']
         self.assertRaises(KeyError,do)
@@ -61,6 +189,16 @@ class TestItemData(unittest.TestCase):
     def test_builder(self):
         """Test building XML"""
         tested = ItemData('FIELDA',"TEST", lock=True, verify=True, freeze=False)
+
+        tested << AuditRecord(edit_point=AuditRecord.EDIT_DATA_MANAGEMENT,
+                                  used_imputation_method= False,
+                                  identifier="x2011",
+                                  include_file_oid=False)(
+            UserRef("Fred"),
+            LocationRef("Site102"),
+            ReasonForChange("Data Entry Error"),
+            DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80))
+        )
         doc = obj_to_doc(tested)
 
         self.assertEqual(doc.attrib['ItemOID'],"FIELDA")
@@ -69,6 +207,7 @@ class TestItemData(unittest.TestCase):
         self.assertEqual(doc.attrib['mdsol:Lock'],"Yes")
         self.assertEqual(doc.attrib['mdsol:Freeze'],"No")
         self.assertEquals(doc.tag,"ItemData")
+        self.assertEquals("AuditRecord",doc.getchildren()[0].tag)
 
     def test_transaction_type(self):
         tested = self.tested
@@ -168,7 +307,6 @@ class TestFormData(unittest.TestCase):
     def test_children(self):
         """Test there are 3 children"""
         self.assertEqual(3, len(self.tested.itemgroups))
-
 
     def test_invalid_transaction_type(self):
         """Can only be insert, update, upsert not context"""
