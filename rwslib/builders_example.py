@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 __author__ = 'isparks'
 
 from rwslib.builders import *
 
-from lxml.builder import E
-
-if __name__ == '__main__':
+def example_clinical_data():
+    """Test demonstrating building clinical data"""
     odm = ODM("test system")
     cd = ClinicalData("Mediflex", "DEV")
     subject_data = SubjectData("MDSOL", "New Subject", "Insert")
@@ -19,29 +19,169 @@ if __name__ == '__main__':
 
     odm << cd << subject_data << sed << fd << igd
 
-    item1 = ItemData("SUBJINIT","AAA")
-    item2 = ItemData("SUBJID",001)
+    item1 = ItemData("SUBJINIT", "AAA")
+    item2 = ItemData("SUBJID", '001')
 
     igd << item1
     igd << item2
 
 
     odm = ODM("test system")(
-       ClinicalData("Mediflex","DEV")(
-          SubjectData("MDSOL","New Subject", "Insert")(
+       ClinicalData("Mediflex", "DEV")(
+          SubjectData("MDSOL", "New Subject", "Insert")(
              StudyEventData("Subject")(
                 FormData("EN", transaction_type="Update")(
                    ItemGroupData()(
-                      ItemData("SUBJINIT","AAA"),
-                      ItemData("SUBJID",001)
+                      ItemData("SUBJINIT", "AAA"),
+                      ItemData("SUBJID", '001')
                    )
                 )
              )
           )
        )
     )
-
-    root = odm.getroot()
-    print(str(odm))
+    return odm
 
 
+def example_metadata(study_name, draft_name):
+    """Example of building a metadata doc"""
+    odm = ODM("SYSTEM_NAME", filetype=ODM.FILETYPE_SNAPSHOT)
+
+    study = Study(study_name, project_type=Study.PROJECT)
+
+    # Push study element into odm
+    odm << study
+
+    # Create global variables and set them into study.
+    study << GlobalVariables(study_name) #Expected that protocol name will match the Study OID.
+
+    # Create some basic definitions
+    bd = BasicDefinitions()
+
+    # Add some measurement units to the basic definitions. This time using the call () syntax:
+    bd(
+        MeasurementUnit("KG", "Kilograms")(
+            Symbol()(TranslatedText("Kilograms"))
+        ),
+        MeasurementUnit("CM", "Centimeters")(
+            Symbol()(TranslatedText("Centimeters"))
+        )
+    )
+
+    # Add basic definitions to study
+    study << bd
+
+    # Now metadata which will contain all our form and field defs eventually
+    meta = MetaDataVersion('META1', draft_name)
+    study << meta
+
+    # Protocol contains StudyEventRefs
+    protocol = Protocol()
+    # Add some StudyEventRefs
+    protocol << StudyEventRef("FLDR1", 1, True)  # Order 1, Mandatory
+    # protocol << StudyEventRef("FLDR2", 2, False) # Order 2, Not Mandatory
+    # protocol << StudyEventRef("AE", 3, True)
+
+    meta << protocol
+
+    # Add Study Event Defs with some child FormRefs
+    fldr1 = StudyEventDef("FLDR1", "Folder 1", False, StudyEventDef.SCHEDULED)
+
+    fldr1 << FormRef("DM", 1, True)
+    fldr1 << FormRef("VS", 2, True)
+
+    meta << fldr1
+
+    meta << StudyEventDef("FLDR2", "Folder 2", False, StudyEventDef.UNSCHEDULED)(
+        FormRef("VS", 1, True)
+    )
+
+    meta << StudyEventDef("AE", "Adverse Events", False, StudyEventDef.COMMON)(
+        FormRef("AE", 1, False)
+    )
+
+    dm_form = FormDef("DM","Demography")
+    dm_form << MdsolHelpText("en","Some help text for Demography")
+    dm_form << MdsolViewRestriction('Data Manager')
+    dm_form << MdsolEntryRestriction('Batch Upload')
+    dm_form << ItemGroupRef("DM_IG1", 1)
+    dm_form << ItemGroupRef("DM_IG2", 2)
+
+    # Add to metadata
+    meta << dm_form
+
+    # Define item group
+    meta << ItemGroupDef("DM_IG1", "DM Item Group 1")(
+        MdsolLabelRef("LBL1", 1),
+        ItemRef("SEX", 2)(
+            MdsolAttribute("Standards","CDASH","SEX"),
+            MdsolAttribute("Standards","STDNUMBER","1120")
+        ),
+        ItemRef("RACE", 3),
+        ItemRef("RACE_OTH", 4),
+        ItemRef("DOB", 5)
+    )
+
+    # Add the ItemDefs
+    meta << ItemDef("SEX", "Gender", DATATYPE_TEXT, 1, control_type=ItemDef.CONTROLTYPE_RADIOBUTTON
+       )(
+        Question()(TranslatedText("Gender at Birth")),
+        CodeListRef("CL_SEX")
+    )
+    meta << ItemDef("RACE", "Race", DATATYPE_TEXT, 2,
+                    control_type=ItemDef.CONTROLTYPE_RADIOBUTTON_VERTICAL
+                    )(
+        Question()(TranslatedText("Race")),
+        CodeListRef("CL_RACE")
+    )
+    meta << ItemDef("RACE_OTH", "RaceOther", DATATYPE_TEXT, 20) \
+           << Question() << TranslatedText("If Race Other, please specify")
+
+    id = ItemDef("DOB", "DateOfBirth", DATATYPE_DATE, 10,
+                    control_type=ItemDef.CONTROLTYPE_DATETIME,
+                    date_time_format="dd/mm/yyyy"
+                    )(
+        Question()(TranslatedText("Date of Birth")),
+        MdsolHelpText("en","If month unknown, enter January")
+    )
+
+    meta << id
+
+    # Add a Label
+    meta.add(MdsolLabelDef("LBL1", "Label1")(TranslatedText("Please answer all questions.")))
+
+    # As well as () and << you can use add()
+    meta.add(
+        CodeList("CL_SEX", "SEX", datatype=DATATYPE_TEXT)(
+            CodeListItem("M").add(
+                Decode().add(
+                    TranslatedText("Male"))
+            ),
+            CodeListItem("F").add(
+                Decode().add(
+                    TranslatedText("Female"))
+            ),
+        ),
+        CodeList("CL_RACE", "RACE", datatype=DATATYPE_TEXT)(
+            CodeListItem("Y")(Decode()(TranslatedText("Yes"))),
+            CodeListItem("N")(Decode()(TranslatedText("No"))),
+        )
+    )
+
+    return odm
+
+if __name__ == '__main__':
+    #print str(example_clinical_data())
+    #print str(example_metadata())
+    projectname = 'TESTSTUDY'
+
+    odm_definition = example_metadata(projectname, "Draft1")
+    print str(odm_definition)
+
+    from rwslib import RWSConnection
+    from rwslib.rws_requests import PostMetadataRequest
+    from _settings import accounts
+    account = accounts['innovate']
+    r = RWSConnection('innovate', account['username'], account['password'])
+    response = r.send_request(PostMetadataRequest(projectname, str(odm_definition)))
+    print(str(response))
