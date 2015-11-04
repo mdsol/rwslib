@@ -384,6 +384,59 @@ class TestMdsolLabelDef(unittest.TestCase):
         self.assertEquals("mdsol:ViewRestriction", doc.getchildren()[1].tag)
 
 
+class TestCheckValue(unittest.TestCase):
+
+    def test_accepts_no_children(self):
+        with self.assertRaises(ValueError):
+            CheckValue("Test") << object()
+
+
+    def test_build(self):
+        doc = obj_to_doc(CheckValue(99))
+        self.assertEquals(doc.tag, "CheckValue")
+        self.assertEquals("99", doc.text)
+
+
+class TestRangeCheck(unittest.TestCase):
+
+    def test_accepts_no_strange_children(self):
+        with self.assertRaises(ValueError):
+            RangeCheck(comparator=RangeCheck.GREATER_THAN_EQUAL_TO, soft_hard=RangeCheck.SOFT) << object()
+
+    def test_accepts_no_strange_soft_hard(self):
+        with self.assertRaises(AttributeError):
+            RangeCheck(comparator=RangeCheck.GREATER_THAN_EQUAL_TO, soft_hard="Blash")
+
+    def test_accepts_no_strange_comparator(self):
+        with self.assertRaises(AttributeError):
+            RangeCheck(comparator="EQ",soft_hard="Blash")
+
+    def test_accepts_checkvalue(self):
+        tested = RangeCheck(comparator=RangeCheck.LESS_THAN_EQUAL_TO,soft_hard=RangeCheck.SOFT)
+        cv = CheckValue(0)
+        tested << cv
+        self.assertEqual(cv, tested.check_value)
+
+
+    def test_accepts_measurement_unit_ref(self):
+        tested = RangeCheck(comparator=RangeCheck.GREATER_THAN_EQUAL_TO,soft_hard=RangeCheck.SOFT)
+        mr =  MeasurementUnitRef('kg')
+        tested << mr
+        self.assertEqual(mr, tested.measurement_unit_ref)
+
+    def test_build(self):
+        self.tested = RangeCheck(comparator=RangeCheck.GREATER_THAN_EQUAL_TO, soft_hard=RangeCheck.SOFT)
+        self.tested << CheckValue(0)
+        self.tested << MeasurementUnitRef('kg')
+
+        doc = obj_to_doc(self.tested)
+        self.assertEquals(doc.tag, "RangeCheck")
+        self.assertEquals("Soft", doc.attrib['SoftHard'])
+        self.assertEquals("GE", doc.attrib['Comparator'])
+        self.assertEquals("CheckValue", doc.getchildren()[0].tag)
+        self.assertEquals("MeasurementUnitRef", doc.getchildren()[1].tag)
+
+
 class TestItemDef(unittest.TestCase):
     def setUp(self):
         self.tested = ItemDef("I_AGE", "Age", DATATYPE_INTEGER, 3,
@@ -479,6 +532,9 @@ class TestItemDef(unittest.TestCase):
         self.tested << MdsolReviewGroup("CRA")
         self.assertEqual(1, len(self.tested.review_groups))
 
+    def test_accepts_range_check(self):
+        self.tested << RangeCheck(RangeCheck.LESS_THAN_EQUAL_TO, RangeCheck.SOFT)
+        self.assertEqual(1, len(self.tested.range_checks))
 
     def test_build(self):
         self.tested << Question()(TranslatedText("How do you feel today?"))
@@ -489,6 +545,7 @@ class TestItemDef(unittest.TestCase):
         self.tested << MdsolEntryRestriction("CRA")
         self.tested << MdsolHeaderText("YRS")
         self.tested << MdsolReviewGroup("CRA")
+        self.tested << RangeCheck(RangeCheck.LESS_THAN_EQUAL_TO, RangeCheck.SOFT)
 
         doc = obj_to_doc(self.tested)
         self.assertEquals(doc.tag, "ItemDef")
@@ -527,11 +584,12 @@ class TestItemDef(unittest.TestCase):
         self.assertEquals("Question", doc.getchildren()[0].tag)
         self.assertEquals("CodeListRef", doc.getchildren()[1].tag)
         self.assertEquals("MeasurementUnitRef", doc.getchildren()[2].tag)
-        self.assertEquals("mdsol:HeaderText", doc.getchildren()[3].tag)
-        self.assertEquals("mdsol:ViewRestriction", doc.getchildren()[4].tag)
-        self.assertEquals("mdsol:EntryRestriction", doc.getchildren()[5].tag)
-        self.assertEquals("mdsol:HelpText", doc.getchildren()[6].tag)
-        self.assertEquals("mdsol:ReviewGroup", doc.getchildren()[7].tag)
+        self.assertEquals("RangeCheck", doc.getchildren()[3].tag)
+        self.assertEquals("mdsol:HeaderText", doc.getchildren()[4].tag)
+        self.assertEquals("mdsol:ViewRestriction", doc.getchildren()[5].tag)
+        self.assertEquals("mdsol:EntryRestriction", doc.getchildren()[6].tag)
+        self.assertEquals("mdsol:HelpText", doc.getchildren()[7].tag)
+        self.assertEquals("mdsol:ReviewGroup", doc.getchildren()[8].tag)
 
 
 class TestItemGroupDef(unittest.TestCase):
