@@ -90,6 +90,16 @@ class ODMElement(object):
             else:
                 raise ValueError('%s already has a %s element set.' % (self.__class__.__name__, other.__class__.__name__,))
 
+    def set_list_attribute(self, other, trigger_klass, property_name):
+        """Used to set guard the setting of a list attribute, ensuring the same element is not added twice."""
+        if isinstance(other, trigger_klass):
+            val = getattr(self, property_name, [])
+            if other in val:
+                raise ValueError("%s already exists in %s" % (other.__class__.__name__,self.__class__.__name__))
+            else:
+                val.append(other)
+                setattr(self, property_name, val)
+
 
 class UserRef(ODMElement):
     def __init__(self, oid):
@@ -359,11 +369,7 @@ class FormData(TransactionalElement):
         """Override << operator"""
         if not isinstance(other, ItemGroupData):
             raise ValueError("FormData object can only receive ItemGroupData object")
-
-        if other in self.itemgroups:
-            raise ValueError("ItemGroupData object is already in the FormData object")
-
-        self.itemgroups.append(other)
+        self.set_list_attribute(other, ItemGroupData, 'itemgroups')
         return other
 
     def build(self, builder):
@@ -401,11 +407,7 @@ class StudyEventData(TransactionalElement):
         """Override << operator"""
         if not isinstance(other, FormData):
             raise ValueError("StudyEventData object can only receive FormData object")
-
-        if other in self.forms:
-            raise ValueError("FormData object is already in the StudyEventData object")
-
-        self.forms.append(other)
+        self.set_list_attribute(other, FormData, 'forms')
         return other
 
     def build(self, builder):
@@ -444,11 +446,7 @@ class SubjectData(TransactionalElement):
         """Override << operator"""
         if not isinstance(other, StudyEventData):
             raise ValueError("SubjectData object can only receive StudyEventData object")
-
-        if other in self.study_events:
-            raise ValueError("StudyEventData object is already in the SubjectData object")
-
-        self.study_events.append(other)
+        self.set_list_attribute(other, StudyEventData, 'study_events')
         return other
 
     def build(self, builder):
@@ -512,6 +510,7 @@ class ODM(ODMElement):
         # Granularity="SingleSubject"
         # AsOfDateTime always OMITTED (it's optional)
         self.clinical_data = None
+        self.study = None
         self.filetype = ODM.FILETYPE_TRANSACTIONAL if filetype is None else ODM.FILETYPE_SNAPSHOT
 
         # Create unique fileoid if none given
@@ -521,7 +520,9 @@ class ODM(ODMElement):
         """Override << operator"""
         if not isinstance(other, (ClinicalData, Study,)):
             raise ValueError("ODM object can only receive ClinicalData or Study object")
-        self.clinical_data = other
+        self.set_single_attribute(other, ClinicalData, 'clinical_data')
+        self.set_single_attribute(other, Study, 'study')
+
         return other
 
     def getroot(self):
@@ -541,9 +542,14 @@ class ODM(ODMElement):
             params['Description'] = self.description
 
         builder.start("ODM", params)
+
         # Ask the children
+        if self.study is not None:
+            self.study.build(builder)
+
         if self.clinical_data is not None:
             self.clinical_data.build(builder)
+
 
         builder.end("ODM")
         return builder.close()
@@ -611,7 +617,8 @@ class Symbol(ODMElement):
         """Override << operator"""
         if not isinstance(other, TranslatedText):
             raise ValueError("Symbol can only accept TranslatedText objects as children")
-        self.translations.append(other)
+        self.set_list_attribute(other, TranslatedText, 'translations')
+
         return other
 
     def build(self, builder):
@@ -669,7 +676,8 @@ class MeasurementUnit(ODMElement):
         """Override << operator"""
         if not isinstance(other, Symbol):
             raise ValueError("MeasurementUnits object can only receive Symbol object")
-        self.symbols.append(other)
+        self.set_list_attribute(other, Symbol, 'symbols')
+
         return other
 
 
@@ -726,7 +734,8 @@ class Protocol(ODMElement):
         """Override << operator"""
         if not isinstance(other, (StudyEventRef,)):
             raise ValueError('Protocol cannot accept a {0} as a child element'.format(other.__class__.__name__))
-        self.study_event_refs.append(other)
+        self.set_list_attribute(other, StudyEventRef, 'study_event_refs')
+
         return other
 
 class FormRef(ODMElement):
@@ -809,7 +818,7 @@ class StudyEventDef(ODMElement):
         """Override << operator"""
         if not isinstance(other, (FormRef,)):
             raise ValueError('StudyEventDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
-        self.formrefs.append(other)
+        self.set_list_attribute(other, FormRef, 'formrefs')
         return other
 
 class ItemGroupRef(ODMElement):
@@ -948,17 +957,10 @@ class FormDef(ODMElement):
         if not isinstance(other, (ItemGroupRef, MdsolHelpText, MdsolViewRestriction, MdsolEntryRestriction,)):
             raise ValueError('StudyEventDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
-        if isinstance(other, ItemGroupRef):
-            self.itemgroup_refs.append(other)
-
-        if isinstance(other, MdsolHelpText):
-            self.helptexts.append(other)
-
-        if isinstance(other, MdsolViewRestriction):
-            self.view_restrictions.append(other)
-
-        if isinstance(other, MdsolEntryRestriction):
-            self.entry_restrictions.append(other)
+        self.set_list_attribute(other, ItemGroupRef, 'itemgroup_refs')
+        self.set_list_attribute(other, MdsolHelpText, 'helptexts')
+        self.set_list_attribute(other, MdsolViewRestriction, 'view_restrictions')
+        self.set_list_attribute(other, MdsolEntryRestriction, 'entry_restrictions')
         return other
 
 class MdsolLabelRef(ODMElement):
@@ -1037,9 +1039,9 @@ class ItemRef(ODMElement):
 
         if not isinstance(other, (MdsolAttribute)):
             raise ValueError('ItemRef cannot accept a {0} as a child element'.format(other.__class__.__name__))
-
-        self.attributes.append(other)
+        self.set_list_attribute(other, MdsolAttribute, 'attributes')
         return other
+
 
 class ItemGroupDef(ODMElement):
     def __init__(self, oid, name, repeating=False, is_reference_data=False, sas_dataset_name=None,
@@ -1099,11 +1101,8 @@ class ItemGroupDef(ODMElement):
         if not isinstance(other, (ItemRef, MdsolLabelRef)):
             raise ValueError('ItemGroupDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
-        if isinstance(other, ItemRef):
-            self.item_refs.append(other)
-
-        if isinstance(other, MdsolLabelRef):
-            self.label_refs.append(other)
+        self.set_list_attribute(other, ItemRef, 'item_refs')
+        self.set_list_attribute(other, MdsolLabelRef, 'label_refs')
         return other
 
 
@@ -1116,8 +1115,8 @@ class Question(ODMElement):
 
         if not isinstance(other, (TranslatedText)):
             raise ValueError('Question cannot accept a {0} as a child element'.format(other.__class__.__name__))
-
-        self.translations.append(other)
+        self.set_list_attribute(other, TranslatedText, 'translations')
+        return other
 
     def build(self, builder):
         """Questions can contain translations"""
@@ -1199,13 +1198,12 @@ class MdsolLabelDef(ODMElement):
         """Override << operator"""
         if not isinstance(other, (MdsolViewRestriction, TranslatedText)):
             raise ValueError('MdsolLabelDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
+        self.set_list_attribute(other, TranslatedText, 'translations')
+        self.set_list_attribute(other, MdsolViewRestriction, 'view_restrictions')
 
-        if isinstance(other, TranslatedText):
-            self.translations.append(other)
-
-        if isinstance(other, MdsolViewRestriction):
-            self.view_restrictions.append(other)
         return other
+
+
 
 class MdsolReviewGroup(ODMElement):
     """Maps to Rave review groups for an Item"""
@@ -1217,6 +1215,75 @@ class MdsolReviewGroup(ODMElement):
         builder.start('mdsol:ReviewGroup')
         builder.data(self.name)
         builder.end('mdsol:ReviewGroup')
+
+
+class CheckValue(ODMElement):
+    """A value in a RangeCheck"""
+    def __init__(self, value):
+        self.value = value
+
+    def build(self, builder):
+        builder.start('CheckValue')
+        builder.data(str(self.value))
+        builder.end('CheckValue')
+
+class RangeCheck(ODMElement):
+    LESS_THAN_EQUAL_TO = 'LE'
+    GREATER_THAN_EQUAL_TO = 'GE'
+    VALID_COMPARATORS = [LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO]
+    SOFT = 'Soft'
+    HARD = 'Hard'
+    VALID_SOFT_HARD = [SOFT, HARD]
+    """
+        Rangecheck in Rave relates to QueryHigh QueryLow and NonConformandHigh and NonComformanLow
+       for other types of RangeCheck, need to use an EditCheck (part of Rave's extensions to ODM)
+    """
+    def __init__(self, comparator, soft_hard):
+        self._comparator = None
+        self.comparator = comparator
+        self._soft_hard = None
+        self.soft_hard = soft_hard
+        self.check_value = None
+        self.measurement_unit_ref = None
+
+    @property
+    def comparator(self):
+        return self._comparator
+
+    @comparator.setter
+    def comparator(self, value):
+        val = str(value).strip()
+        if val not in RangeCheck.VALID_COMPARATORS:
+            raise AttributeError("%s comparator is invalid in RangeCheck." % (val,))
+        self._comparator = val
+
+    @property
+    def soft_hard(self):
+        return self._soft_hard
+
+    @soft_hard.setter
+    def soft_hard(self, value):
+        val = str(value).strip()
+        if val not in RangeCheck.VALID_SOFT_HARD:
+            raise AttributeError("%s soft_hard invalid in RangeCheck." % (val,))
+        self._soft_hard = val
+
+    def build(self, builder):
+        params = dict(SoftHard = self.soft_hard, Comparator= self.comparator)
+        builder.start("RangeCheck", params)
+        if self.check_value is not None:
+            self.check_value.build(builder)
+        if self.measurement_unit_ref is not None:
+            self.measurement_unit_ref.build(builder)
+        builder.end("RangeCheck")
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, (CheckValue, MeasurementUnitRef,)):
+            raise ValueError('RangeCheck cannot accept a {0} as a child element'.format(other.__class__.__name__))
+
+        self.set_single_attribute(other, CheckValue, 'check_value')
+        self.set_single_attribute(other, MeasurementUnitRef, 'measurement_unit_ref')
 
 
 class ItemDef(ODMElement):
@@ -1309,6 +1376,7 @@ class ItemDef(ODMElement):
         self.entry_restrictions = []
         self.header_text = None
         self.review_groups = []
+        self.range_checks = []
 
     def build(self, builder):
         """Build XML by appending to builder"""
@@ -1386,6 +1454,9 @@ class ItemDef(ODMElement):
         for mur in self.measurement_unit_refs:
             mur.build(builder)
 
+        for range_check in self.range_checks:
+            range_check.build(builder)
+
         if self.header_text is not None:
             self.header_text.build(builder)
 
@@ -1401,39 +1472,31 @@ class ItemDef(ODMElement):
         for review_group in self.review_groups:
             review_group.build(builder)
 
+
         builder.end("ItemDef")
 
     def __lshift__(self, other):
         """Override << operator"""
 
-        # ExternalQuestion?,
-        # RangeCheck*,
+        # ExternalQuestion?,,
         # Role*, Alias*,
         # mdsol:HelpText?, mdsol:ViewRestriction* or mdsolEntryRestrictions*), (or mdsol:ReviewGroups*), mdsol:Label?)
 
         if not isinstance(other, (MdsolHelpText, MdsolEntryRestriction, MdsolViewRestriction, Question,
-                                  MeasurementUnitRef, CodeListRef, MdsolHeaderText, MdsolReviewGroup)):
-            raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
+                                  MeasurementUnitRef, CodeListRef, MdsolHeaderText, MdsolReviewGroup, RangeCheck)):
+            raise ValueError('ItemDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         self.set_single_attribute(other, Question, 'question')
         self.set_single_attribute(other, CodeListRef, 'codelistref')
         self.set_single_attribute(other, MdsolHeaderText, 'header_text')
-
-        if isinstance(other, MeasurementUnitRef):
-            self.measurement_unit_refs.append(other)
-
-        if isinstance(other, MdsolHelpText):
-            self.help_texts.append(other)
-
-        if isinstance(other, MdsolViewRestriction):
-            self.view_restrictions.append(other)
-
-        if isinstance(other, MdsolEntryRestriction):
-            self.entry_restrictions.append(other)
-
-        if isinstance(other, MdsolReviewGroup):
-            self.review_groups.append(other)
+        self.set_list_attribute(other, RangeCheck, 'range_checks')
+        self.set_list_attribute(other, MeasurementUnitRef, 'measurement_unit_refs')
+        self.set_list_attribute(other, MdsolHelpText, 'help_texts')
+        self.set_list_attribute(other, MdsolViewRestriction, 'view_restrictions')
+        self.set_list_attribute(other, MdsolEntryRestriction, 'entry_restrictions')
+        self.set_list_attribute(other, MdsolReviewGroup, 'review_groups')
         return other
+
 
 class Decode(ODMElement):
     def __init__(self):
@@ -1451,6 +1514,7 @@ class Decode(ODMElement):
             raise ValueError('Decode cannot accept child of type {0}'.format(other.__class__.__name__))
         self.translations.append(other)
         return other
+
 
 class CodeListItem(ODMElement):
     def __init__(self, coded_value, order_number=None, specify=False):
@@ -1476,8 +1540,9 @@ class CodeListItem(ODMElement):
         """Override << operator"""
         if not isinstance(other, Decode):
             raise ValueError('CodelistItem cannot accept child of type {0}'.format(other.__class__.__name__))
-        self.decode = other
+        self.set_single_attribute(other, Decode, 'decode')
         return other
+
 
 class CodeList(ODMElement):
     """A container for CodeListItems equivalent of Rave Dictionary"""
@@ -1507,8 +1572,10 @@ class CodeList(ODMElement):
         """Override << operator"""
         if not isinstance(other, CodeListItem):
             raise ValueError('Codelist cannot accept child of type {0}'.format(other.__class__.__name__))
-        self.codelist_items.append(other)
+        self.set_list_attribute(other, CodeListItem, 'codelist_items')
+
         return other
+
 
 class MetaDataVersion(ODMElement):
     """MetaDataVersion, child of study"""
@@ -1583,26 +1650,13 @@ class MetaDataVersion(ODMElement):
         if not isinstance(other, (Protocol, StudyEventDef, FormDef, ItemGroupDef, ItemDef, MdsolLabelDef, CodeList)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
-        if isinstance(other, Protocol):
-            self.protocol = other
-
-        if isinstance(other, StudyEventDef):
-            self.study_event_defs.append(other)
-
-        if isinstance(other, FormDef):
-            self.form_defs.append(other)
-
-        if isinstance(other, ItemGroupDef):
-            self.item_group_defs.append(other)
-
-        if isinstance(other, MdsolLabelDef):
-            self.label_defs.append(other)
-
-        if isinstance(other, ItemDef):
-            self.item_defs.append(other)
-
-        if isinstance(other, CodeList):
-            self.codelists.append(other)
+        self.set_single_attribute(other, Protocol, 'protocol')
+        self.set_list_attribute(other, StudyEventDef, 'study_event_defs')
+        self.set_list_attribute(other, FormDef, 'form_defs')
+        self.set_list_attribute(other, ItemGroupDef, 'item_group_defs')
+        self.set_list_attribute(other, MdsolLabelDef, 'label_defs')
+        self.set_list_attribute(other, ItemDef, 'item_defs')
+        self.set_list_attribute(other, CodeList, 'codelists')
         return other
 
 

@@ -109,7 +109,8 @@ def example_metadata(study_name, draft_name):
         ),
         ItemRef("RACE", 3),
         ItemRef("RACE_OTH", 4),
-        ItemRef("DOB", 5)
+        ItemRef("DOB", 5),
+        ItemRef("AGE", 6)
     )
 
     # Add the ItemDefs
@@ -127,7 +128,7 @@ def example_metadata(study_name, draft_name):
     meta << ItemDef("RACE_OTH", "RaceOther", DATATYPE_TEXT, 20) \
            << Question() << TranslatedText("If Race Other, please specify")
 
-    id = ItemDef("DOB", "DateOfBirth", DATATYPE_DATE, 10,
+    meta << ItemDef("DOB", "DateOfBirth", DATATYPE_DATE, 10,
                     control_type=ItemDef.CONTROLTYPE_DATETIME,
                     date_time_format="dd/mm/yyyy"
                     )(
@@ -135,7 +136,16 @@ def example_metadata(study_name, draft_name):
         MdsolHelpText("en","If month unknown, enter January")
     )
 
-    meta << id
+    meta << ItemDef("AGE", "Age in Years", DATATYPE_INTEGER, 4, significant_digits=3, control_type=ItemDef.CONTROLTYPE_TEXT
+       )(
+        Question()(TranslatedText("Age in Years")),
+        RangeCheck(RangeCheck.GREATER_THAN_EQUAL_TO, RangeCheck.SOFT) (
+            CheckValue("18")
+        ),
+        RangeCheck(RangeCheck.LESS_THAN_EQUAL_TO, RangeCheck.SOFT) (
+            CheckValue("65")
+        )
+    )
 
     # Add a Label
     meta.add(MdsolLabelDef("LBL1", "Label1")(TranslatedText("Please answer all questions.")))
@@ -161,18 +171,22 @@ def example_metadata(study_name, draft_name):
     return odm
 
 if __name__ == '__main__':
-    projectname = 'Mediflex' # 'TESTSTUDY'
-
-    #odm_definition = example_metadata(projectname, "Draft1")
-    odm_definition = example_clinical_data("Mediflex","DEV")
-    print str(odm_definition)
-
     from rwslib import RWSConnection
     from rwslib.rws_requests import PostMetadataRequest, PostDataRequest
     from _settings import accounts
     account = accounts['innovate']
     r = RWSConnection('innovate', account['username'], account['password'])
-    #response = r.send_request(PostMetadataRequest(projectname, str(odm_definition)))
-    response = r.send_request(PostDataRequest(str(odm_definition)))
 
+
+    if True: # MetaData
+        projectname = 'TESTSTUDY'
+        odm_definition = example_metadata(projectname, "Draft1")
+        request = PostMetadataRequest(projectname, str(odm_definition))
+    else: #Clinical Data
+        projectname = 'Mediflex'
+        odm_definition = example_clinical_data(projectname,"DEV")
+        request = PostDataRequest(str(odm_definition))
+    print str(odm_definition)
+
+    response = r.send_request(request)
     print(str(response))
