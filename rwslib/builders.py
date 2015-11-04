@@ -1256,6 +1256,7 @@ class RangeCheck(ODMElement):
         if val not in RangeCheck.VALID_COMPARATORS:
             raise AttributeError("%s comparator is invalid in RangeCheck." % (val,))
         self._comparator = val
+
     @property
     def soft_hard(self):
         return self._soft_hard
