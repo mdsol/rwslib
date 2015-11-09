@@ -7,12 +7,12 @@ builders.py provides convenience classes for building ODM documents for clinical
 import uuid
 from xml.etree import cElementTree as ET
 from datetime import datetime
-from string import letters
+from string import ascii_letters
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Constants
 
-VALID_ID_CHARS = letters + '_'
+VALID_ID_CHARS = ascii_letters + '_'
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Utilities
