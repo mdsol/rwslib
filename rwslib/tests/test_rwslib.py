@@ -52,34 +52,6 @@ class VersionTest(unittest.TestCase):
         self.assertRaises(requests.ConnectionError, do)
 
 
-    @httpretty.activate
-    def test_version_with_retry(self):
-        """A simple test that fails with a socket error on first attempts"""
-        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
-
-
-        class FailResponse():
-            """A fake response that will raise a connection error as if socket connection failed"""
-            def fill_filekind(self, fk):
-                raise socket.error(errno.ECONNREFUSED, "Refused")
-
-
-        httpretty.register_uri(
-            httpretty.GET, "https://innovate.mdsol.com/RaveWebServices/version",
-                 responses=[
-                               FailResponse(), #First try
-                               FailResponse(), # Retry 1
-                               FailResponse(), # Retry 2
-                               httpretty.Response(body='1.0.0', status=200), #Retry 3
-                            ])
-
-
-        #Make request
-        v = rave.send_request(rwslib.rws_requests.VersionRequest(), retries=3)
-
-        self.assertEqual(v, '1.0.0')
-        self.assertEqual(rave.last_result.status_code,200)
-
 class TestMustBeRWSRequestSubclass(unittest.TestCase):
     """Test that request object passed must be RWSRequest subclass"""
     def test_basic(self):
