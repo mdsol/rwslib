@@ -1577,6 +1577,19 @@ class CodeList(ODMElement):
         return other
 
 
+class MdsolConfirmationMessage(ODMElement):
+    def __init__(self, message, lang=None):
+        self.message = message
+        self.lang = lang
+
+    def build(self, builder):
+        params= {}
+        if self.lang:
+            params['xml:lang'] = self.lang
+        builder.start('mdsol:ConfirmationMessage', params)
+        builder.data(self.message)
+        builder.end('mdsol:ConfirmationMessage')
+
 class MetaDataVersion(ODMElement):
     """MetaDataVersion, child of study"""
 
@@ -1592,6 +1605,7 @@ class MetaDataVersion(ODMElement):
         self.default_matrix_oid = default_matrix_oid
         self.delete_existing = delete_existing
         self.signature_prompt = signature_prompt
+        self.confirmation_message = None
         self.protocol = None
         self.codelists = []
         self.item_defs = []
@@ -1638,19 +1652,25 @@ class MetaDataVersion(ODMElement):
         for codelist in self.codelists:
             codelist.build(builder)
 
+        if self.confirmation_message:
+            self.confirmation_message.build(builder)
+
         # Extensions must always come after core elements
         for labeldef in self.label_defs:
             labeldef.build(builder)
+
 
         builder.end("MetaDataVersion")
 
     def __lshift__(self, other):
         """Override << operator"""
 
-        if not isinstance(other, (Protocol, StudyEventDef, FormDef, ItemGroupDef, ItemDef, MdsolLabelDef, CodeList)):
+        if not isinstance(other, (Protocol, StudyEventDef, FormDef, ItemGroupDef, ItemDef, MdsolLabelDef, CodeList,
+                                  MdsolConfirmationMessage)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         self.set_single_attribute(other, Protocol, 'protocol')
+        self.set_single_attribute(other, MdsolConfirmationMessage, 'confirmation_message')
         self.set_list_attribute(other, StudyEventDef, 'study_event_defs')
         self.set_list_attribute(other, FormDef, 'form_defs')
         self.set_list_attribute(other, ItemGroupDef, 'item_group_defs')

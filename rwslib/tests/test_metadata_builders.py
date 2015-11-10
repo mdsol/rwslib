@@ -752,6 +752,21 @@ class TestCodeList(unittest.TestCase):
         self.assertEquals("CodeListItem", doc.getchildren()[0].tag)
 
 
+class TestConfirmationMessage(unittest.TestCase):
+
+    def test_build(self):
+        cm = MdsolConfirmationMessage("Form saved.")
+        doc = obj_to_doc(cm)
+        self.assertEquals("mdsol:ConfirmationMessage", doc.tag)
+        self.assertEquals("Form saved.", doc.text)
+
+    def test_lang_set(self):
+        cm = MdsolConfirmationMessage("Form saved.", lang="en")
+        doc = obj_to_doc(cm)
+        self.assertEquals("en", doc.attrib['xml:lang'])
+
+
+
 class TestMetaDataVersion(unittest.TestCase):
     """Contains Metadata for study design. Rave only allows one, the spec allows many in an ODM doc"""
 
@@ -769,6 +784,11 @@ class TestMetaDataVersion(unittest.TestCase):
         tested = MetaDataVersion("OID", "NAME")(sed)
         self.assertEqual(sed, tested.study_event_defs[0])
 
+    def test_can_accept_confirmation_message(self):
+        cm = MdsolConfirmationMessage("Form saved", lang="eng")
+        tested = MetaDataVersion("OID", "NAME")(cm)
+        self.assertEqual(cm, tested.confirmation_message)
+
     def test_builder(self):
         """XML produced"""
         tested = MetaDataVersion("OID", "NAME", description="A description",
@@ -784,6 +804,7 @@ class TestMetaDataVersion(unittest.TestCase):
         tested << ItemDef("ID_AGE", "Demography", DATATYPE_INTEGER, 3)
         tested << CodeList("C_YESNO", "Yes No", DATATYPE_STRING)
         tested << MdsolLabelDef("LABEL1", "first label")
+        tested << MdsolConfirmationMessage("Form has been submitted!")
 
         doc = obj_to_doc(tested)
         self.assertEquals(doc.tag, "MetaDataVersion")
@@ -800,7 +821,8 @@ class TestMetaDataVersion(unittest.TestCase):
         self.assertEquals("ItemGroupDef", doc.getchildren()[3].tag)
         self.assertEquals("ItemDef", doc.getchildren()[4].tag)
         self.assertEquals("CodeList", doc.getchildren()[5].tag)
-        self.assertEquals("mdsol:LabelDef", doc.getchildren()[6].tag)
+        self.assertEquals("mdsol:ConfirmationMessage", doc.getchildren()[6].tag)
+        self.assertEquals("mdsol:LabelDef", doc.getchildren()[7].tag)
 
 
 class TestStudy(unittest.TestCase):
