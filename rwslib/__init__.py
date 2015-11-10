@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __title__ = 'rwslib'
-__author__ = 'Ian Sparks (isparks@mdsol.com), Geoff Low (glow@mdsol.com), Andrew Newbigging (anewbigging@mdsol.com)'
+__author__ = 'Ian Sparks (isparks@mdsol.com)'
 __version__ = '1.0.9'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Medidata Solutions Inc'
@@ -16,7 +16,8 @@ import time
 
 #-------------------------------------------------------------------------------------------------------
 # Classes
-#
+
+
 class AuthorizationException(Exception):
     """Raised if a request requires authorization but no authorization header is provided"""
     pass
@@ -43,7 +44,6 @@ class RWSConnection(object):
         else:
             self.domain = 'https://%s.mdsol.com' % domain
 
-
         self.auth = None
         if auth is not None:
             self.auth = auth
@@ -54,10 +54,10 @@ class RWSConnection(object):
 
         self.base_url = self.domain + '/RaveWebServices'
 
-        #Keep track of results of last request so users can get if they need.
+        # Keep track of results of last request so users can get if they need.
         self.last_result = None
 
-        #Time taken to process last request
+        # Time taken to process last request
         self.request_time = None
 
     def send_request(self, request_object, timeout=None, retries=1, **kwargs):
