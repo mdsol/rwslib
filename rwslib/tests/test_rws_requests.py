@@ -707,7 +707,7 @@ class TimeoutTest(unittest.TestCase):
             rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(),timeout=0.0001, verify=False)
 
         # Raise timeout and check no timeout occurs.  An exception will be raised because the request is unauthorised
-        with self.assertRaises(rwslib.RWSException):
+        with self.assertRaises(rwslib.AuthorizationException):
             rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(),timeout=3600, verify=False)
 
 

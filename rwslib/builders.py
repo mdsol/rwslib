@@ -7,12 +7,12 @@ builders.py provides convenience classes for building ODM documents for clinical
 import uuid
 from xml.etree import cElementTree as ET
 from datetime import datetime
-from string import letters
+from string import ascii_letters
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Constants
 
-VALID_ID_CHARS = letters + '_'
+VALID_ID_CHARS = ascii_letters + '_'
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Utilities
@@ -53,7 +53,7 @@ def indent(elem, level=0):
 
 def make_element(builder, tag, content):
     """Make an element with this tag and text content"""
-    builder.start(tag)
+    builder.start(tag, {})
     builder.data(content)  # Must be UTF-8 encoded
     builder.end(tag)
 
@@ -124,7 +124,7 @@ class ReasonForChange(ODMElement):
         self.reason = reason
 
     def build(self, builder):
-        builder.start("ReasonForChange")
+        builder.start("ReasonForChange", {})
         builder.data(self.reason)
         builder.end("ReasonForChange")
 
@@ -134,7 +134,7 @@ class DateTimeStamp(ODMElement):
         self.date_time = date_time
 
     def build(self, builder):
-        builder.start("DateTimeStamp")
+        builder.start("DateTimeStamp", {})
         if isinstance(self.date_time, datetime):
             builder.data(dt_to_iso8601(self.date_time))
         else:
@@ -585,7 +585,7 @@ class GlobalVariables(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        builder.start("GlobalVariables")
+        builder.start("GlobalVariables", {})
         make_element(builder, 'StudyName', self.name)
         make_element(builder, 'StudyDescription', self.description)
         make_element(builder, 'ProtocolName', self.protocol_name)
@@ -623,7 +623,7 @@ class Symbol(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        builder.start("Symbol")
+        builder.start("Symbol", {})
         for child in self.translations:
             child.build(builder)
         builder.end("Symbol")
@@ -689,7 +689,7 @@ class BasicDefinitions(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        builder.start("BasicDefinitions")
+        builder.start("BasicDefinitions", {})
         for child in self.measurement_units:
             child.build(builder)
         builder.end("BasicDefinitions")
@@ -725,7 +725,7 @@ class Protocol(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        builder.start("Protocol")
+        builder.start("Protocol", {})
         for child in self.study_event_refs:
             child.build(builder)
         builder.end("Protocol")
@@ -856,7 +856,7 @@ class MdsolViewRestriction(ODMElement):
         self.rolename = rolename
 
     def build(self, builder):
-        builder.start('mdsol:ViewRestriction')
+        builder.start('mdsol:ViewRestriction', {})
         builder.data(self.rolename)
         builder.end('mdsol:ViewRestriction')
 
@@ -868,7 +868,7 @@ class MdsolEntryRestriction(ODMElement):
         self.rolename = rolename
 
     def build(self, builder):
-        builder.start('mdsol:EntryRestriction')
+        builder.start('mdsol:EntryRestriction', {})
         builder.data(self.rolename)
         builder.end('mdsol:EntryRestriction')
 
@@ -1120,7 +1120,7 @@ class Question(ODMElement):
 
     def build(self, builder):
         """Questions can contain translations"""
-        builder.start('Question')
+        builder.start('Question', {})
         for translation in self.translations:
             translation.build(builder)
         builder.end('Question')
@@ -1212,7 +1212,7 @@ class MdsolReviewGroup(ODMElement):
         self.name = name
 
     def build(self, builder):
-        builder.start('mdsol:ReviewGroup')
+        builder.start('mdsol:ReviewGroup', {})
         builder.data(self.name)
         builder.end('mdsol:ReviewGroup')
 
@@ -1223,7 +1223,7 @@ class CheckValue(ODMElement):
         self.value = value
 
     def build(self, builder):
-        builder.start('CheckValue')
+        builder.start('CheckValue', {})
         builder.data(str(self.value))
         builder.end('CheckValue')
 
@@ -1503,7 +1503,7 @@ class Decode(ODMElement):
         self.translations = []
 
     def build(self, builder):
-        builder.start("Decode")
+        builder.start("Decode", {})
         for translation in self.translations:
             translation.build(builder)
         builder.end("Decode")
