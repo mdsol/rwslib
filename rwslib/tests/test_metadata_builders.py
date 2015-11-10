@@ -4,7 +4,7 @@ __author__ = 'isparks'
 import unittest
 from rwslib.builders import *
 from xml.etree import cElementTree as ET
-from test_builders import obj_to_doc, bool_to_yes_no
+from .test_builders import obj_to_doc, bool_to_yes_no
 
 
 # Metadata object tests
