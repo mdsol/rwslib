@@ -3,3 +3,4 @@ requests
 httpretty
 tox
 six
+enum34

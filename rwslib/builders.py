@@ -5,6 +5,7 @@ import uuid
 from xml.etree import cElementTree as ET
 from datetime import datetime
 from string import ascii_letters
+from rwslib.builder_constants import *
 
 """
 builders.py provides convenience classes for building ODM documents for clinical data and metadata post messages.
@@ -578,15 +579,6 @@ class ODM(ODMElement):
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Metadata Objects
-
-
-DATATYPE_TEXT = 'text'
-DATATYPE_INTEGER = 'integer'
-DATATYPE_FLOAT = 'float'
-DATATYPE_DATE = 'date'
-DATATYPE_DATETIME = 'datetime'
-DATATYPE_TIME = 'time'
-DATATYPE_STRING = 'string'  # Used only by codelists
 
 
 class GlobalVariables(ODMElement):
@@ -1247,12 +1239,6 @@ class CheckValue(ODMElement):
 
 
 class RangeCheck(ODMElement):
-    LESS_THAN_EQUAL_TO = 'LE'
-    GREATER_THAN_EQUAL_TO = 'GE'
-    VALID_COMPARATORS = [LESS_THAN_EQUAL_TO, GREATER_THAN_EQUAL_TO]
-    SOFT = 'Soft'
-    HARD = 'Hard'
-    VALID_SOFT_HARD = [SOFT, HARD]
     """
         Rangecheck in Rave relates to QueryHigh QueryLow and NonConformandHigh and NonComformanLow
        for other types of RangeCheck, need to use an EditCheck (part of Rave's extensions to ODM)
@@ -1272,10 +1258,9 @@ class RangeCheck(ODMElement):
 
     @comparator.setter
     def comparator(self, value):
-        val = str(value).strip()
-        if val not in RangeCheck.VALID_COMPARATORS:
-            raise AttributeError("%s comparator is invalid in RangeCheck." % (val,))
-        self._comparator = val
+        if not isinstance(value, RangeCheckComparatorType):
+            raise AttributeError("%s comparator is invalid in RangeCheck." % (value,))
+        self._comparator = value
 
     @property
     def soft_hard(self):
@@ -1283,13 +1268,12 @@ class RangeCheck(ODMElement):
 
     @soft_hard.setter
     def soft_hard(self, value):
-        val = str(value).strip()
-        if val not in RangeCheck.VALID_SOFT_HARD:
-            raise AttributeError("%s soft_hard invalid in RangeCheck." % (val,))
-        self._soft_hard = val
+        if not isinstance(value, RangeCheckType):
+            raise AttributeError("%s soft_hard invalid in RangeCheck." % (value,))
+        self._soft_hard = value
 
     def build(self, builder):
-        params = dict(SoftHard=self.soft_hard, Comparator=self.comparator)
+        params = dict(SoftHard=self.soft_hard.value, Comparator=self.comparator.value)
         builder.start("RangeCheck", params)
         if self.check_value is not None:
             self.check_value.build(builder)
@@ -1307,21 +1291,8 @@ class RangeCheck(ODMElement):
 
 
 class ItemDef(ODMElement):
-    VALID_DATATYPES = [DATATYPE_TEXT, DATATYPE_INTEGER, DATATYPE_FLOAT, DATATYPE_DATE,
-                       DATATYPE_DATETIME, DATATYPE_TIME]
-
-    CONTROLTYPE_CHECKBOX = 'CheckBox'
-    CONTROLTYPE_TEXT = 'Text'
-    CONTROLTYPE_DATETIME = 'DateTime'
-    CONTROLTYPE_DROPDOWNLIST = 'DropDownList'
-    CONTROLTYPE_SEARCHLIST = 'SearchList'
-    CONTROLTYPE_RADIOBUTTON = 'RadioButton'
-    CONTROLTYPE_RADIOBUTTON_VERTICAL = 'RadioButton (Vertical)'
-    CONTROLTYPE_FILE_UPLOAD = 'File Upload'
-    CONTROLTYPE_LONGTEXT = 'LongText'
-    CONTROLTYPE_SIGNATURE_PAGE = 'Signature page'
-    CONTROLTYPE_SIGNATURE_FOLDER = 'Signature folder'
-    CONTROLTYPE_SIGNATURE_SUBJECT = 'Signature subject'
+    VALID_DATATYPES = [DataType.Text, DataType.Integer, DataType.Float, DataType.Date,
+                       DataType.DateTime, DataType.Time]
 
     def __init__(self, oid, name, datatype, length,
                  significant_digits=None,
@@ -1356,7 +1327,11 @@ class ItemDef(ODMElement):
         self.name = name
 
         if datatype not in ItemDef.VALID_DATATYPES:
-            raise KeyError('{0} is not a valid datatype!'.format(datatype))
+            raise AttributeError('{0} is not a valid datatype!'.format(datatype))
+
+        if control_type is not None:
+            if not isinstance(control_type, ControlType):
+                raise AttributeError("{0} is not a valid Control Type".format(control_type))
 
         self.datatype = datatype
         self.length = length
@@ -1403,7 +1378,7 @@ class ItemDef(ODMElement):
 
         params = dict(OID=self.oid,
                       Name=self.name,
-                      DataType=self.datatype,
+                      DataType=self.datatype.value,
                       Length=str(self.length),
                       )
 
@@ -1428,7 +1403,7 @@ class ItemDef(ODMElement):
             params['Comment'] = self.comment
 
         if self.control_type is not None:
-            params['mdsol:ControlType'] = self.control_type
+            params['mdsol:ControlType'] = self.control_type.value
 
         if self.acceptable_file_extensions is not None:
             params['mdsol:AcceptableFileExtensions'] = self.acceptable_file_extensions
@@ -1565,7 +1540,7 @@ class CodeListItem(ODMElement):
 
 class CodeList(ODMElement):
     """A container for CodeListItems equivalent of Rave Dictionary"""
-    VALID_DATATYPES = [DATATYPE_INTEGER, DATATYPE_TEXT, DATATYPE_FLOAT, DATATYPE_STRING]
+    VALID_DATATYPES = [DataType.Integer, DataType.Text, DataType.Float, DataType.String]
 
     def __init__(self, oid, name, datatype, sas_format_name=None):
         self.oid = oid
@@ -1579,7 +1554,7 @@ class CodeList(ODMElement):
     def build(self, builder):
         params = dict(OID=self.oid,
                       Name=self.name,
-                      DataType=self.datatype)
+                      DataType=self.datatype.value)
         if self.sas_format_name is not None:
             params['SASFormatName'] = self.sas_format_name
         builder.start("CodeList", params)
@@ -1610,109 +1585,6 @@ class MdsolConfirmationMessage(ODMElement):
         builder.start('mdsol:ConfirmationMessage', params)
         builder.data(self.message)
         builder.end('mdsol:ConfirmationMessage')
-
-
-STEP_CUSTOMFUNCTION = "CustomFunction"
-STEP_IS_EMPTY = "IsEmpty"
-STEP_IS_NOT_EMPTY = "IsNotEmpty"
-STEP_CONTAINS = "Contains"
-STEP_STARTSWITH = "StartsWith"
-STEP_IS_LESS_THAN = "IsLessThan"
-STEP_IS_LESS_THAN_OR_EQUAL_TO = "IsLessThanOrEqualTo"
-STEP_IS_GREATER_THAN = "IsGreaterThan"
-STEP_IS_GREATER_THAN_OR_EQUAL_TO = "IsGreaterThanOrEqualTo"
-STEP_IS_EQUAL_TO = "IsEqualTo"
-STEP_IS_NON_CONFORMANT = "IsNonConformant"
-STEP_IS_NOT_EQUAL_TO = "IsNotEqualTo"
-STEP_IN_LOCAL_LAB_RANGE = "InLocalLabRange"
-STEP_LENGTH_IS_LESS_THAN = "LengthIsLessThan"
-STEP_LENGTH_IS_LESS_THAN_OR_EQUAL_TO = "LengthIsLessThanOrEqualTo"
-STEP_LENGTH_IS_GREATER_THAN = "LengthIsGreaterThan"
-STEP_LENGTH_IS_GREATER_THAN_OR_EQUAL_TO = "LengthIsGreaterThanOrEqualTo"
-STEP_LENGTH_IS_EQUAL_TO = "LengthIsEqualTo"
-STEP_OR = "Or"
-STEP_AND = "And"
-STEP_NOT = "Not"
-STEP_NOW = "Now"
-STEP_IS_PRESENT = "IsPresent"
-STEP_IS_ACTIVE = "IsActive"
-STEP_ADD = "Add"
-STEP_SUBTRACT = "Subtract"
-STEP_MULTIPLY = "Multiply"
-STEP_DIVIDE = "Divide"
-STEP_ADD_DAY = "AddDay"
-STEP_ADD_MONTH = "AddMonth"
-STEP_ADD_YEAR = "AddYear"
-STEP_ADD_SEC = "AddSec"
-STEP_ADD_MIN = "AddMin"
-STEP_ADD_HOUR = "AddHour"
-STEP_DAYSPAN = "DaySpan"
-STEP_TIMESPAN = "TimeSpan"
-STEP_AGE = "Age"
-STEP_STRING_ADD = "StringAdd"
-STEP_SPACE = "Space"
-
-ALL_STEPS = [STEP_CUSTOMFUNCTION,
-             STEP_IS_EMPTY,
-             STEP_IS_NOT_EMPTY,
-             STEP_CONTAINS,
-             STEP_STARTSWITH,
-             STEP_IS_LESS_THAN,
-             STEP_IS_LESS_THAN_OR_EQUAL_TO,
-             STEP_IS_GREATER_THAN,
-             STEP_IS_GREATER_THAN_OR_EQUAL_TO,
-             STEP_IS_EQUAL_TO,
-             STEP_IS_NON_CONFORMANT,
-             STEP_IS_NOT_EQUAL_TO,
-             STEP_IN_LOCAL_LAB_RANGE,
-             STEP_LENGTH_IS_LESS_THAN,
-             STEP_LENGTH_IS_LESS_THAN_OR_EQUAL_TO,
-             STEP_LENGTH_IS_GREATER_THAN,
-             STEP_LENGTH_IS_GREATER_THAN_OR_EQUAL_TO,
-             STEP_LENGTH_IS_EQUAL_TO,
-             STEP_OR,
-             STEP_AND,
-             STEP_NOT,
-             STEP_NOW,
-             STEP_IS_PRESENT,
-             STEP_IS_ACTIVE,
-             STEP_ADD,
-             STEP_SUBTRACT,
-             STEP_MULTIPLY,
-             STEP_DIVIDE,
-             STEP_ADD_DAY,
-             STEP_ADD_MONTH,
-             STEP_ADD_YEAR,
-             STEP_ADD_SEC,
-             STEP_ADD_MIN,
-             STEP_ADD_HOUR,
-             STEP_DAYSPAN,
-             STEP_TIMESPAN,
-             STEP_AGE,
-             STEP_STRING_ADD]
-
-# Note: Missing 2015 additions to edit check step functions.
-
-
-VALID_DERIVATION_STEPS = [
-    STEP_AGE,
-    STEP_SUBTRACT,
-    STEP_MULTIPLY,
-    STEP_DIVIDE,
-    STEP_ADD_DAY,
-    STEP_ADD_MONTH,
-    STEP_ADD_YEAR,
-    STEP_ADD_SEC,
-    STEP_ADD_MIN,
-    STEP_ADD_HOUR,
-    STEP_DAYSPAN,
-    STEP_TIMESPAN,
-    STEP_NOW,
-    STEP_STRING_ADD,
-    STEP_CUSTOMFUNCTION,
-    STEP_SPACE,
-    STEP_ADD
-]
 
 
 class MdsolDerivationStep(ODMElement):
@@ -1756,7 +1628,7 @@ class MdsolDerivationStep(ODMElement):
 
     @function.setter
     def function(self, value):
-        if value not in [None, ''] and str(value).strip() != '':
+        if value is not None:
             if value not in MdsolDerivationStep.VALID_STEPS:
                 raise AttributeError("Invalid derivation function %s" % value)
         self._function = value
@@ -1783,7 +1655,7 @@ class MdsolDerivationStep(ODMElement):
             params['Value'] = self.value
 
         if self.function is not None:
-            params['Function'] = self.function
+            params['Function'] = self.function.value
 
         if self.custom_function is not None:
             params['CustomFunction'] = self.custom_function
@@ -1845,7 +1717,7 @@ class MdsolCheckStep(ODMElement):
 
     @function.setter
     def function(self, value):
-        if value not in [None, ''] and str(value).strip() != '':
+        if value is not None:
             if value not in MdsolCheckStep.VALID_STEPS:
                 raise AttributeError("Invalid function %s" % value)
         self._function = value
@@ -1872,7 +1744,7 @@ class MdsolCheckStep(ODMElement):
             params['StaticValue'] = self.static_value
 
         if self.function is not None:
-            params['Function'] = self.function
+            params['Function'] = self.function.value
 
         if self.custom_function is not None:
             params['CustomFunction'] = self.custom_function
@@ -1893,78 +1765,11 @@ class MdsolCheckStep(ODMElement):
         builder.end("mdsol:CheckStep")
 
 
-ACTION_OPEN_QUERY = "OpenQuery"
-ACTION_REQUIRE_REVIEW = "RequireReview"
-ACTION_REQUIRE_VERIFICATION = "RequireVerification"
-ACTION_ADD_COMMENT = "AddComment"
-ACTION_ADD_DEVIATION = "AddDeviation"
-ACTION_CUSTOM_FUNCTION = "CustomFunction"
-ACTION_PLACE_STICKY = "PlaceSticky"
-ACTION_ADD_FORM = "AddForm"
-ACTION_ADD_MATRIX = "AddMatrix"
-ACTION_MERGE_MATRIX = "MrgMatrix"
-ACTION_OLD_MERGE_MATRIX = "OldMrgMatrix"
-ACTION_SET_NON_CONFORMANT = "SetNonconformant"
-ACTION_SEND_MESSAGE = "SendMessage"
-ACTION_SET_DATA_POINT = "SetDataPoint"
-ACTION_SET_TIME_ZERO = "SetTimeZero"
-ACTION_SET_TIME_FORWARD = "SetTimeForward"
-ACTION_SET_SUBJECT_STATUS = "SetSubjectStatus"
-ACTION_SET_SUBJECT_NAME = "SetSubjectName"
-ACTION_UPDATE_FORM_NAME = "UpdateFormName"
-ACTION_UPDATE_FOLDER_NAME = "UpdateFolderName"
-ACTION_SET_RECORED_DATE = "SetRecordDate"
-ACTION_SET_DATA_PAGE_DATE = "SetDataPageDate"
-ACTION_SET_INSTANCE_DATE = "SetInstanceDate"
-ACTION_SET_SUBJECT_DATE = "SetSubjectDate"
-ACTION_SET_DATA_POINT_VISIBLE = "SetDataPointVisible"
-ACTION_SET_SECONDARY_SUBJECT_NAME = "SetSecondarySubjectName"
-ACTION_SET_FORM_REQUIRES_SIGNATURE = "SetFormRequiresSignature"
-ACTION_SET_FOLDER_REQUIRES_SIGNATURE = "SetFolderRequiresSignature"
-ACTION_SET_SUBJECT_REQUIRES_SIGNATURE = "SetSubjectRequiresSignature"
-ACTION_SET_DYNAMIC_SEARCH_LIST = "SetDynamicSearchList"
-
-ALL_ACTIONS = [
-    ACTION_OPEN_QUERY,
-    ACTION_REQUIRE_REVIEW,
-    ACTION_REQUIRE_VERIFICATION,
-    ACTION_ADD_COMMENT,
-    ACTION_ADD_DEVIATION,
-    ACTION_CUSTOM_FUNCTION,
-    ACTION_PLACE_STICKY,
-    ACTION_ADD_FORM,
-    ACTION_ADD_MATRIX,
-    ACTION_MERGE_MATRIX,
-    ACTION_OLD_MERGE_MATRIX,
-    ACTION_SET_NON_CONFORMANT,
-    ACTION_SEND_MESSAGE,
-    ACTION_SET_DATA_POINT,
-    ACTION_SET_TIME_ZERO,
-    ACTION_SET_TIME_FORWARD,
-    ACTION_SET_SUBJECT_STATUS,
-    ACTION_SET_SUBJECT_NAME,
-    ACTION_UPDATE_FORM_NAME,
-    ACTION_UPDATE_FOLDER_NAME,
-    ACTION_SET_RECORED_DATE,
-    ACTION_SET_DATA_PAGE_DATE,
-    ACTION_SET_INSTANCE_DATE,
-    ACTION_SET_SUBJECT_DATE,
-    ACTION_SET_DATA_POINT_VISIBLE,
-    ACTION_SET_SECONDARY_SUBJECT_NAME,
-    ACTION_SET_FORM_REQUIRES_SIGNATURE,
-    ACTION_SET_FOLDER_REQUIRES_SIGNATURE,
-    ACTION_SET_SUBJECT_REQUIRES_SIGNATURE,
-    ACTION_SET_DYNAMIC_SEARCH_LIST,
-]
-
-
 class MdsolCheckAction(ODMElement):
     """
     Check Action modeled after check action in Architect Loader spreadsheet.
     Do not use directly, use appropriate sub-class.
     """
-    VALID_ACTIONS = ALL_ACTIONS
-
     def __init__(self,
                  variable_oid=None,
                  field_oid=None,
@@ -1998,8 +1803,8 @@ class MdsolCheckAction(ODMElement):
 
     @check_action_type.setter
     def check_action_type(self, value):
-        if value not in [None, ''] and str(value).strip() != '':
-            if value not in MdsolCheckAction.VALID_ACTIONS:
+        if value is not None:
+            if not isinstance(value, ActionType):
                 raise AttributeError("Invalid check action %s" % value)
         self._check_action_type = value
 
@@ -2028,7 +1833,7 @@ class MdsolCheckAction(ODMElement):
             params['FolderRepeatNumber'] = str(self.folder_repeat_number)
 
         if self.check_action_type is not None:
-            params['Type'] = self.check_action_type
+            params['Type'] = self.check_action_type.value
 
         if self.check_string is not None:
             params['String'] = self.check_string

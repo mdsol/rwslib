@@ -114,35 +114,35 @@ def example_metadata(study_name, draft_name):
     )
 
     # Add the ItemDefs
-    meta << ItemDef("SEX", "Gender", DATATYPE_TEXT, 1, control_type=ItemDef.CONTROLTYPE_RADIOBUTTON
+    meta << ItemDef("SEX", "Gender", DataType.Text, 1, control_type=ControlType.RadioButton
        )(
         Question()(TranslatedText("Gender at Birth")),
         CodeListRef("CL_SEX")
     )
-    meta << ItemDef("RACE", "Race", DATATYPE_TEXT, 2,
-                    control_type=ItemDef.CONTROLTYPE_RADIOBUTTON_VERTICAL
+    meta << ItemDef("RACE", "Race", DataType.Text, 2,
+                    control_type=ControlType.RadioButtonVertical
                     )(
         Question()(TranslatedText("Race")),
         CodeListRef("CL_RACE")
     )
-    meta << ItemDef("RACE_OTH", "RaceOther", DATATYPE_TEXT, 20) \
+    meta << ItemDef("RACE_OTH", "RaceOther", DataType.Text, 20) \
            << Question() << TranslatedText("If Race Other, please specify")
 
-    meta << ItemDef("DOB", "DateOfBirth", DATATYPE_DATE, 10,
-                    control_type=ItemDef.CONTROLTYPE_DATETIME,
+    meta << ItemDef("DOB", "DateOfBirth", DataType.Date, 10,
+                    control_type=ControlType.DateTime,
                     date_time_format="dd/mm/yyyy"
                     )(
         Question()(TranslatedText("Date of Birth")),
         MdsolHelpText("en","If month unknown, enter January")
     )
 
-    meta << ItemDef("AGE", "Age in Years", DATATYPE_INTEGER, 4, significant_digits=3, control_type=ItemDef.CONTROLTYPE_TEXT
+    meta << ItemDef("AGE", "Age in Years", DataType.Integer, 4, significant_digits=3, control_type=ControlType.Text
        )(
         Question()(TranslatedText("Age in Years")),
-        RangeCheck(RangeCheck.GREATER_THAN_EQUAL_TO, RangeCheck.SOFT) (
+        RangeCheck(RangeCheckComparatorType.GreaterThanEqualTo, RangeCheckType.Soft) (
             CheckValue("18")
         ),
-        RangeCheck(RangeCheck.LESS_THAN_EQUAL_TO, RangeCheck.SOFT) (
+        RangeCheck(RangeCheckComparatorType.LessThanEqualTo, RangeCheckType.Soft) (
             CheckValue("65")
         )
     )
@@ -152,7 +152,7 @@ def example_metadata(study_name, draft_name):
 
     # As well as () and << you can use add()
     meta.add(
-        CodeList("CL_SEX", "SEX", datatype=DATATYPE_TEXT)(
+        CodeList("CL_SEX", "SEX", datatype=DataType.Text)(
             CodeListItem("M").add(
                 Decode().add(
                     TranslatedText("Male"))
@@ -162,7 +162,7 @@ def example_metadata(study_name, draft_name):
                     TranslatedText("Female"))
             ),
         ),
-        CodeList("CL_RACE", "RACE", datatype=DATATYPE_TEXT)(
+        CodeList("CL_RACE", "RACE", datatype=DataType.Text)(
             CodeListItem("AS")(Decode()(TranslatedText("Asian"))),
             CodeListItem("CA")(Decode()(TranslatedText("White"))),
             CodeListItem("OT")(Decode()(TranslatedText("Other"))),
@@ -173,13 +173,13 @@ def example_metadata(study_name, draft_name):
                 # Static value required to make this stick, gets ignored but won't load without it
                 MdsolCheckStep(form_oid="DM", field_oid="RACE", data_format='CodedValue', static_value="1"),
                 MdsolCheckStep(static_value="OT", data_format="$2"),
-                MdsolCheckStep(function=STEP_IS_EQUAL_TO),
+                MdsolCheckStep(function=StepType.IsEqualTo),
                 MdsolCheckStep(form_oid="DM", field_oid="RACE_OTH"),
-                MdsolCheckStep(function=STEP_IS_EMPTY),
-                MdsolCheckStep(function=STEP_AND),
+                MdsolCheckStep(function=StepType.IsEmpty),
+                MdsolCheckStep(function=StepType.And),
 
                 MdsolCheckAction(form_oid="DM", field_oid="RACE_OTH",
-                                 check_action_type=ACTION_OPEN_QUERY,
+                                 check_action_type=ActionType.OpenQuery,
                                  check_string="Race is set as OTHER but not specified. Please correct.",
                                  check_options="Site from System,RequiresResponse,RequiresManualClose"
                                  )
@@ -196,7 +196,7 @@ def example_metadata(study_name, draft_name):
             MdsolDerivationDef("AGE", form_oid="DM", field_oid="AGE")(
             # Variable OID required to be identified as a data step
             MdsolDerivationStep(form_oid="DM", field_oid="DOB", data_format="StandardValue", variable_oid="DOB"),
-            MdsolDerivationStep(function=STEP_AGE)
+            MdsolDerivationStep(function=StepType.Age)
         )
     )
 
