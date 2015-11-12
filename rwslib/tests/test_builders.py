@@ -24,6 +24,28 @@ class TestInheritance(unittest.TestCase):
             NewObj() << object()
 
 
+class TestAttributeSetters(unittest.TestCase):
+
+    class TestElem(ODMElement):
+        """Test class with a bad __lshift__ implementation"""
+        def __init__(self):
+            self.user = None
+            self.locations = []
+
+        def __lshift__(self, other):
+            self.set_single_attribute(other, UserRef, "xxxuser")   #Incorrect spelling of user attribute
+            self.set_list_attribute(other, LocationRef, "xxxlocations")   #Incorrect spelling of location attribute
+
+    def test_single_attribute_misspelling(self):
+        tested = TestAttributeSetters.TestElem()
+        with self.assertRaises(AttributeError):
+            tested << UserRef("Fred")
+
+    def test_list_attribute_misspelling(self):
+        tested = TestAttributeSetters.TestElem()
+        with self.assertRaises(AttributeError):
+            tested << LocationRef("Site 22")
+
 class TestUserRef(unittest.TestCase):
     def test_accepts_no_children(self):
         with self.assertRaises(ValueError):
@@ -164,6 +186,11 @@ class TestItemData(unittest.TestCase):
         self.assertEqual(tested.lock, None)
         self.assertEqual(tested.freeze, None)
         self.assertEqual(tested.verify, None)
+
+    def test_only_accepts_itemdata(self):
+        """Test that an ItemData will not accept any old object"""
+        with self.assertRaises(ValueError):
+            self.tested << {"Field1" : "ValueC"}
 
     def test_isnull_not_set(self):
         """Isnull should not be set where we have a value not in '', None"""
@@ -553,11 +580,21 @@ class TestODM(unittest.TestCase):
         tested = ODM("MY TEST SYSTEM", fileoid="F1")
         self.assertEquals("F1", tested.fileoid)
 
-    def test_only_accepts_clinicaldata(self):
-        """Test that only ClinicalData can be inserted"""
+    def test_only_accepts_valid_children(self):
+        """Test that only ClinicalData or Study can be inserted"""
         def do():
             self.tested << ItemData("Field1", "ValueC")
         self.assertRaises(ValueError,do)
+
+    def test_accepts_clinicaldata_and_study(self):
+        """Test that accepts clinicaldata"""
+        tested = ODM("MY TEST SYSTEM", fileoid="F1")
+        cd = ClinicalData("Project1","DEV")
+        study = Study("PROJ1",project_type=Study.PROJECT)
+        tested << cd
+        tested << study
+        self.assertEqual(study,tested.study)
+        self.assertEqual(cd, tested.clinical_data)
 
     def test_getroot(self):
         """XML produced"""
@@ -565,6 +602,16 @@ class TestODM(unittest.TestCase):
         self.assertEquals(doc.tag,"ODM")
         self.assertEquals(doc.attrib["Originator"], "MY TEST SYSTEM")
         self.assertEquals(doc.attrib["Description"], self.tested.description)
+        self.assertEquals("ClinicalData", doc.getchildren()[0].tag)
+
+    def test_getroot_study(self):
+        """XML produced with a study child"""
+        tested = ODM("MY TEST SYSTEM", fileoid="F1")
+        study = Study("PROJ1",project_type=Study.PROJECT)
+        tested << study
+        doc = tested.getroot()
+        self.assertEquals(doc.tag,"ODM")
+        self.assertEquals("Study", doc.getchildren()[0].tag)
 
     def test_str_well_formed(self):
         """Make an XML string from the object, parse it to ensure it's well formed"""

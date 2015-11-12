@@ -163,8 +163,40 @@ def example_metadata(study_name, draft_name):
             ),
         ),
         CodeList("CL_RACE", "RACE", datatype=DATATYPE_TEXT)(
-            CodeListItem("Y")(Decode()(TranslatedText("Yes"))),
-            CodeListItem("N")(Decode()(TranslatedText("No"))),
+            CodeListItem("AS")(Decode()(TranslatedText("Asian"))),
+            CodeListItem("CA")(Decode()(TranslatedText("White"))),
+            CodeListItem("OT")(Decode()(TranslatedText("Other"))),
+        )
+    )
+
+    meta.add(MdsolEditCheckDef('CHECK1')(
+                # Static value required to make this stick, gets ignored but won't load without it
+                MdsolCheckStep(form_oid="DM", field_oid="RACE", data_format='CodedValue', static_value="1"),
+                MdsolCheckStep(static_value="OT", data_format="$2"),
+                MdsolCheckStep(function=STEP_IS_EQUAL_TO),
+                MdsolCheckStep(form_oid="DM", field_oid="RACE_OTH"),
+                MdsolCheckStep(function=STEP_IS_EMPTY),
+                MdsolCheckStep(function=STEP_AND),
+
+                MdsolCheckAction(form_oid="DM", field_oid="RACE_OTH",
+                                 check_action_type=ACTION_OPEN_QUERY,
+                                 check_string="Race is set as OTHER but not specified. Please correct.",
+                                 check_options="Site from System,RequiresResponse,RequiresManualClose"
+                                 )
+
+             ),
+             MdsolEditCheckDef('CHECK2')
+    )
+
+    meta.add(MdsolCustomFunctionDef("CF1","SELECT 1,2 FROM DataPoints", language="SQ"))
+    meta.add(MdsolCustomFunctionDef("CF2","return true;", language="C#"))
+
+    meta.add(
+            # Variable OID required
+            MdsolDerivationDef("AGE", form_oid="DM", field_oid="AGE")(
+            # Variable OID required to be identified as a data step
+            MdsolDerivationStep(form_oid="DM", field_oid="DOB", data_format="StandardValue", variable_oid="DOB"),
+            MdsolDerivationStep(function=STEP_AGE)
         )
     )
 

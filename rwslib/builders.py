@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 __author__ = 'isparks'
-"""
-builders.py provides convenience classes for building ODM documents for clinical data and metadata post messages.
-"""
 
 import uuid
 from xml.etree import cElementTree as ET
 from datetime import datetime
 from string import ascii_letters
 
+"""
+builders.py provides convenience classes for building ODM documents for clinical data and metadata post messages.
+"""
+
 # -----------------------------------------------------------------------------------------------------------------------
 # Constants
 
 VALID_ID_CHARS = ascii_letters + '_'
+
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Utilities
@@ -32,6 +34,11 @@ def dt_to_iso8601(dt):
 def bool_to_yes_no(val):
     """Convert True/False to Yes/No"""
     return 'Yes' if val else 'No'
+
+
+def bool_to_true_false(val):
+    """Convert True/False to TRUE / FALSE"""
+    return 'TRUE' if val else 'FALSE'
 
 
 def indent(elem, level=0):
@@ -84,18 +91,30 @@ class ODMElement(object):
 
     def set_single_attribute(self, other, trigger_klass, property_name):
         """Used to set guard the setting of an attribute which is singular and can't be set twice"""
+
         if isinstance(other, trigger_klass):
+
+            # Check property exists
+            if not hasattr(self, property_name):
+                raise AttributeError("%s has no property %s" % (self.__class__.__name__, property_name))
+
             if getattr(self, property_name) is None:
                 setattr(self, property_name, other)
             else:
-                raise ValueError('%s already has a %s element set.' % (self.__class__.__name__, other.__class__.__name__,))
+                raise ValueError(
+                    '%s already has a %s element set.' % (self.__class__.__name__, other.__class__.__name__,))
 
     def set_list_attribute(self, other, trigger_klass, property_name):
         """Used to set guard the setting of a list attribute, ensuring the same element is not added twice."""
+        # Check property exists
         if isinstance(other, trigger_klass):
+
+            if not hasattr(self, property_name):
+                raise AttributeError("%s has no property %s" % (self.__class__.__name__, property_name))
+
             val = getattr(self, property_name, [])
             if other in val:
-                raise ValueError("%s already exists in %s" % (other.__class__.__name__,self.__class__.__name__))
+                raise ValueError("%s already exists in %s" % (other.__class__.__name__, self.__class__.__name__))
             else:
                 val.append(other)
                 setattr(self, property_name, val)
@@ -106,7 +125,7 @@ class UserRef(ODMElement):
         self.oid = oid
 
     def build(self, builder):
-        builder.start("UserRef", dict(UserOID = self.oid))
+        builder.start("UserRef", dict(UserOID=self.oid))
         builder.end("UserRef")
 
 
@@ -115,7 +134,7 @@ class LocationRef(ODMElement):
         self.oid = oid
 
     def build(self, builder):
-        builder.start("LocationRef", dict(LocationOID = self.oid))
+        builder.start("LocationRef", dict(LocationOID=self.oid))
         builder.end("LocationRef")
 
 
@@ -167,7 +186,7 @@ class AuditRecord(ODMElement):
 
     @id.setter
     def id(self, value):
-        if value not in [None,''] and str(value).strip() != '':
+        if value not in [None, ''] and str(value).strip() != '':
             val = str(value).strip()[0]
             if val not in VALID_ID_CHARS:
                 raise AttributeError('%s id cannot start with "%s" character' % (self.__class__.__name__, val,))
@@ -177,14 +196,12 @@ class AuditRecord(ODMElement):
     def edit_point(self):
         return self._edit_point
 
-
-
     @edit_point.setter
     def edit_point(self, value):
         if value is not None:
             if value not in self.EDIT_POINTS:
                 raise AttributeError('%s edit_point must be one of %s not %s' % (
-                self.__class__.__name__, ','.join(self.EDIT_POINTS), value,))
+                    self.__class__.__name__, ','.join(self.EDIT_POINTS), value,))
         self._edit_point = value
 
     def build(self, builder):
@@ -252,7 +269,7 @@ class TransactionalElement(ODMElement):
         if value is not None:
             if value not in self.ALLOWED_TRANSACTION_TYPES:
                 raise AttributeError('%s transaction_type element must be one of %s not %s' % (
-                self.__class__.__name__, ','.join(self.ALLOWED_TRANSACTION_TYPES), value,))
+                    self.__class__.__name__, ','.join(self.ALLOWED_TRANSACTION_TYPES), value,))
         self._transaction_type = value
 
 
@@ -301,7 +318,6 @@ class ItemData(TransactionalElement):
         if self.audit_record is not None:
             self.audit_record.build(builder)
         builder.end("ItemData")
-
 
     def __lshift__(self, other):
         if not isinstance(other, AuditRecord):
@@ -550,7 +566,6 @@ class ODM(ODMElement):
         if self.clinical_data is not None:
             self.clinical_data.build(builder)
 
-
         builder.end("ODM")
         return builder.close()
 
@@ -738,6 +753,7 @@ class Protocol(ODMElement):
 
         return other
 
+
 class FormRef(ODMElement):
     def __init__(self, oid, order_number, mandatory):
         self.oid = oid
@@ -820,6 +836,7 @@ class StudyEventDef(ODMElement):
             raise ValueError('StudyEventDef cannot accept a {0} as a child element'.format(other.__class__.__name__))
         self.set_list_attribute(other, FormRef, 'formrefs')
         return other
+
 
 class ItemGroupRef(ODMElement):
     def __init__(self, oid, order_number, mandatory=True):
@@ -962,6 +979,7 @@ class FormDef(ODMElement):
         self.set_list_attribute(other, MdsolViewRestriction, 'view_restrictions')
         self.set_list_attribute(other, MdsolEntryRestriction, 'entry_restrictions')
         return other
+
 
 class MdsolLabelRef(ODMElement):
     """A reference to a label on a form"""
@@ -1204,7 +1222,6 @@ class MdsolLabelDef(ODMElement):
         return other
 
 
-
 class MdsolReviewGroup(ODMElement):
     """Maps to Rave review groups for an Item"""
 
@@ -1219,6 +1236,7 @@ class MdsolReviewGroup(ODMElement):
 
 class CheckValue(ODMElement):
     """A value in a RangeCheck"""
+
     def __init__(self, value):
         self.value = value
 
@@ -1226,6 +1244,7 @@ class CheckValue(ODMElement):
         builder.start('CheckValue', {})
         builder.data(str(self.value))
         builder.end('CheckValue')
+
 
 class RangeCheck(ODMElement):
     LESS_THAN_EQUAL_TO = 'LE'
@@ -1238,6 +1257,7 @@ class RangeCheck(ODMElement):
         Rangecheck in Rave relates to QueryHigh QueryLow and NonConformandHigh and NonComformanLow
        for other types of RangeCheck, need to use an EditCheck (part of Rave's extensions to ODM)
     """
+
     def __init__(self, comparator, soft_hard):
         self._comparator = None
         self.comparator = comparator
@@ -1269,7 +1289,7 @@ class RangeCheck(ODMElement):
         self._soft_hard = val
 
     def build(self, builder):
-        params = dict(SoftHard = self.soft_hard, Comparator= self.comparator)
+        params = dict(SoftHard=self.soft_hard, Comparator=self.comparator)
         builder.start("RangeCheck", params)
         if self.check_value is not None:
             self.check_value.build(builder)
@@ -1472,7 +1492,6 @@ class ItemDef(ODMElement):
         for review_group in self.review_groups:
             review_group.build(builder)
 
-
         builder.end("ItemDef")
 
     def __lshift__(self, other):
@@ -1578,22 +1597,593 @@ class CodeList(ODMElement):
 
 
 class MdsolConfirmationMessage(ODMElement):
+    """Form is saved confirmation message"""
+
     def __init__(self, message, lang=None):
         self.message = message
         self.lang = lang
 
     def build(self, builder):
-        params= {}
+        params = {}
         if self.lang:
             params['xml:lang'] = self.lang
         builder.start('mdsol:ConfirmationMessage', params)
         builder.data(self.message)
         builder.end('mdsol:ConfirmationMessage')
 
+
+STEP_CUSTOMFUNCTION = "CustomFunction"
+STEP_IS_EMPTY = "IsEmpty"
+STEP_IS_NOT_EMPTY = "IsNotEmpty"
+STEP_CONTAINS = "Contains"
+STEP_STARTSWITH = "StartsWith"
+STEP_IS_LESS_THAN = "IsLessThan"
+STEP_IS_LESS_THAN_OR_EQUAL_TO = "IsLessThanOrEqualTo"
+STEP_IS_GREATER_THAN = "IsGreaterThan"
+STEP_IS_GREATER_THAN_OR_EQUAL_TO = "IsGreaterThanOrEqualTo"
+STEP_IS_EQUAL_TO = "IsEqualTo"
+STEP_IS_NON_CONFORMANT = "IsNonConformant"
+STEP_IS_NOT_EQUAL_TO = "IsNotEqualTo"
+STEP_IN_LOCAL_LAB_RANGE = "InLocalLabRange"
+STEP_LENGTH_IS_LESS_THAN = "LengthIsLessThan"
+STEP_LENGTH_IS_LESS_THAN_OR_EQUAL_TO = "LengthIsLessThanOrEqualTo"
+STEP_LENGTH_IS_GREATER_THAN = "LengthIsGreaterThan"
+STEP_LENGTH_IS_GREATER_THAN_OR_EQUAL_TO = "LengthIsGreaterThanOrEqualTo"
+STEP_LENGTH_IS_EQUAL_TO = "LengthIsEqualTo"
+STEP_OR = "Or"
+STEP_AND = "And"
+STEP_NOT = "Not"
+STEP_NOW = "Now"
+STEP_IS_PRESENT = "IsPresent"
+STEP_IS_ACTIVE = "IsActive"
+STEP_ADD = "Add"
+STEP_SUBTRACT = "Subtract"
+STEP_MULTIPLY = "Multiply"
+STEP_DIVIDE = "Divide"
+STEP_ADD_DAY = "AddDay"
+STEP_ADD_MONTH = "AddMonth"
+STEP_ADD_YEAR = "AddYear"
+STEP_ADD_SEC = "AddSec"
+STEP_ADD_MIN = "AddMin"
+STEP_ADD_HOUR = "AddHour"
+STEP_DAYSPAN = "DaySpan"
+STEP_TIMESPAN = "TimeSpan"
+STEP_AGE = "Age"
+STEP_STRING_ADD = "StringAdd"
+STEP_SPACE = "Space"
+
+ALL_STEPS = [STEP_CUSTOMFUNCTION,
+             STEP_IS_EMPTY,
+             STEP_IS_NOT_EMPTY,
+             STEP_CONTAINS,
+             STEP_STARTSWITH,
+             STEP_IS_LESS_THAN,
+             STEP_IS_LESS_THAN_OR_EQUAL_TO,
+             STEP_IS_GREATER_THAN,
+             STEP_IS_GREATER_THAN_OR_EQUAL_TO,
+             STEP_IS_EQUAL_TO,
+             STEP_IS_NON_CONFORMANT,
+             STEP_IS_NOT_EQUAL_TO,
+             STEP_IN_LOCAL_LAB_RANGE,
+             STEP_LENGTH_IS_LESS_THAN,
+             STEP_LENGTH_IS_LESS_THAN_OR_EQUAL_TO,
+             STEP_LENGTH_IS_GREATER_THAN,
+             STEP_LENGTH_IS_GREATER_THAN_OR_EQUAL_TO,
+             STEP_LENGTH_IS_EQUAL_TO,
+             STEP_OR,
+             STEP_AND,
+             STEP_NOT,
+             STEP_NOW,
+             STEP_IS_PRESENT,
+             STEP_IS_ACTIVE,
+             STEP_ADD,
+             STEP_SUBTRACT,
+             STEP_MULTIPLY,
+             STEP_DIVIDE,
+             STEP_ADD_DAY,
+             STEP_ADD_MONTH,
+             STEP_ADD_YEAR,
+             STEP_ADD_SEC,
+             STEP_ADD_MIN,
+             STEP_ADD_HOUR,
+             STEP_DAYSPAN,
+             STEP_TIMESPAN,
+             STEP_AGE,
+             STEP_STRING_ADD]
+
+# Note: Missing 2015 additions to edit check step functions.
+
+
+VALID_DERIVATION_STEPS = [
+    STEP_AGE,
+    STEP_SUBTRACT,
+    STEP_MULTIPLY,
+    STEP_DIVIDE,
+    STEP_ADD_DAY,
+    STEP_ADD_MONTH,
+    STEP_ADD_YEAR,
+    STEP_ADD_SEC,
+    STEP_ADD_MIN,
+    STEP_ADD_HOUR,
+    STEP_DAYSPAN,
+    STEP_TIMESPAN,
+    STEP_NOW,
+    STEP_STRING_ADD,
+    STEP_CUSTOMFUNCTION,
+    STEP_SPACE,
+    STEP_ADD
+]
+
+
+class MdsolDerivationStep(ODMElement):
+    """A derivation step modeled after the Architect Loader definition.
+       Do not use directly, use appropriate subclasses.
+    """
+    VALID_STEPS = VALID_DERIVATION_STEPS
+
+    def __init__(self,
+                 variable_oid=None,
+                 data_format=None,
+                 form_oid=None,
+                 folder_oid=None,
+                 field_oid=None,
+                 value=None,
+                 function=None,
+                 custom_function=None,
+                 record_position=None,
+                 form_repeat_number=None,
+                 folder_repeat_number=None,
+                 logical_record_position=None
+                 ):
+
+        self.variable_oid = variable_oid
+        self.data_format = data_format
+        self.form_oid = form_oid
+        self.folder_oid = folder_oid
+        self.field_oid = field_oid
+        self.value = value
+        self._function = None
+        self.function = function
+        self.custom_function = custom_function
+        self.record_position = record_position
+        self.form_repeat_number = form_repeat_number
+        self.folder_repeat_number = folder_repeat_number
+        self.logical_record_position = logical_record_position
+
+    @property
+    def function(self):
+        return self._function
+
+    @function.setter
+    def function(self, value):
+        if value not in [None, ''] and str(value).strip() != '':
+            if value not in MdsolDerivationStep.VALID_STEPS:
+                raise AttributeError("Invalid derivation function %s" % value)
+        self._function = value
+
+    def build(self, builder):
+        params = dict()
+
+        if self.variable_oid is not None:
+            params['VariableOID'] = self.variable_oid
+
+        if self.data_format is not None:
+            params['DataFormat'] = self.data_format
+
+        if self.folder_oid is not None:
+            params['FolderOID'] = self.folder_oid
+
+        if self.field_oid is not None:
+            params['FieldOID'] = self.field_oid
+
+        if self.form_oid is not None:
+            params['FormOID'] = self.form_oid
+
+        if self.value is not None:
+            params['Value'] = self.value
+
+        if self.function is not None:
+            params['Function'] = self.function
+
+        if self.custom_function is not None:
+            params['CustomFunction'] = self.custom_function
+
+        if self.record_position is not None:
+            params['RecordPosition'] = str(self.record_position)
+
+        if self.form_repeat_number is not None:
+            params['FormRepeatNumber'] = str(self.form_repeat_number)
+
+        if self.folder_repeat_number is not None:
+            params['FolderRepeatNumber'] = str(self.folder_repeat_number)
+
+        if self.logical_record_position is not None:
+            params['LogicalRecordPosition'] = self.logical_record_position
+
+        builder.start("mdsol:DerivationStep", params)
+        builder.end("mdsol:DerivationStep")
+
+
+class MdsolCheckStep(ODMElement):
+    """A check step modeled after the Architect Loader definition.
+       Do not use directly, use appropriate subclasses.
+    """
+    VALID_STEPS = ALL_STEPS
+
+    def __init__(self,
+                 variable_oid=None,
+                 data_format=None,
+                 form_oid=None,
+                 folder_oid=None,
+                 field_oid=None,
+                 static_value=None,
+                 function=None,
+                 custom_function=None,
+                 record_position=None,
+                 form_repeat_number=None,
+                 folder_repeat_number=None,
+                 logical_record_position=None
+                 ):
+
+        self.variable_oid = variable_oid
+        self.data_format = data_format
+        self.form_oid = form_oid
+        self.folder_oid = folder_oid
+        self.field_oid = field_oid
+        self.static_value = static_value
+        self._function = None
+        self.function = function
+        self.custom_function = custom_function
+        self.record_position = record_position
+        self.form_repeat_number = form_repeat_number
+        self.folder_repeat_number = folder_repeat_number
+        self.logical_record_position = logical_record_position
+
+    @property
+    def function(self):
+        return self._function
+
+    @function.setter
+    def function(self, value):
+        if value not in [None, ''] and str(value).strip() != '':
+            if value not in MdsolCheckStep.VALID_STEPS:
+                raise AttributeError("Invalid function %s" % value)
+        self._function = value
+
+    def build(self, builder):
+        params = dict()
+
+        if self.variable_oid is not None:
+            params['VariableOID'] = self.variable_oid
+
+        if self.data_format is not None:
+            params['DataFormat'] = self.data_format
+
+        if self.folder_oid is not None:
+            params['FolderOID'] = self.folder_oid
+
+        if self.field_oid is not None:
+            params['FieldOID'] = self.field_oid
+
+        if self.form_oid is not None:
+            params['FormOID'] = self.form_oid
+
+        if self.static_value is not None:
+            params['StaticValue'] = self.static_value
+
+        if self.function is not None:
+            params['Function'] = self.function
+
+        if self.custom_function is not None:
+            params['CustomFunction'] = self.custom_function
+
+        if self.record_position is not None:
+            params['RecordPosition'] = str(self.record_position)
+
+        if self.form_repeat_number is not None:
+            params['FormRepeatNumber'] = str(self.form_repeat_number)
+
+        if self.folder_repeat_number is not None:
+            params['FolderRepeatNumber'] = str(self.folder_repeat_number)
+
+        if self.logical_record_position is not None:
+            params['LogicalRecordPosition'] = self.logical_record_position
+
+        builder.start("mdsol:CheckStep", params)
+        builder.end("mdsol:CheckStep")
+
+
+ACTION_OPEN_QUERY = "OpenQuery"
+ACTION_REQUIRE_REVIEW = "RequireReview"
+ACTION_REQUIRE_VERIFICATION = "RequireVerification"
+ACTION_ADD_COMMENT = "AddComment"
+ACTION_ADD_DEVIATION = "AddDeviation"
+ACTION_CUSTOM_FUNCTION = "CustomFunction"
+ACTION_PLACE_STICKY = "PlaceSticky"
+ACTION_ADD_FORM = "AddForm"
+ACTION_ADD_MATRIX = "AddMatrix"
+ACTION_MERGE_MATRIX = "MrgMatrix"
+ACTION_OLD_MERGE_MATRIX = "OldMrgMatrix"
+ACTION_SET_NON_CONFORMANT = "SetNonconformant"
+ACTION_SEND_MESSAGE = "SendMessage"
+ACTION_SET_DATA_POINT = "SetDataPoint"
+ACTION_SET_TIME_ZERO = "SetTimeZero"
+ACTION_SET_TIME_FORWARD = "SetTimeForward"
+ACTION_SET_SUBJECT_STATUS = "SetSubjectStatus"
+ACTION_SET_SUBJECT_NAME = "SetSubjectName"
+ACTION_UPDATE_FORM_NAME = "UpdateFormName"
+ACTION_UPDATE_FOLDER_NAME = "UpdateFolderName"
+ACTION_SET_RECORED_DATE = "SetRecordDate"
+ACTION_SET_DATA_PAGE_DATE = "SetDataPageDate"
+ACTION_SET_INSTANCE_DATE = "SetInstanceDate"
+ACTION_SET_SUBJECT_DATE = "SetSubjectDate"
+ACTION_SET_DATA_POINT_VISIBLE = "SetDataPointVisible"
+ACTION_SET_SECONDARY_SUBJECT_NAME = "SetSecondarySubjectName"
+ACTION_SET_FORM_REQUIRES_SIGNATURE = "SetFormRequiresSignature"
+ACTION_SET_FOLDER_REQUIRES_SIGNATURE = "SetFolderRequiresSignature"
+ACTION_SET_SUBJECT_REQUIRES_SIGNATURE = "SetSubjectRequiresSignature"
+ACTION_SET_DYNAMIC_SEARCH_LIST = "SetDynamicSearchList"
+
+ALL_ACTIONS = [
+    ACTION_OPEN_QUERY,
+    ACTION_REQUIRE_REVIEW,
+    ACTION_REQUIRE_VERIFICATION,
+    ACTION_ADD_COMMENT,
+    ACTION_ADD_DEVIATION,
+    ACTION_CUSTOM_FUNCTION,
+    ACTION_PLACE_STICKY,
+    ACTION_ADD_FORM,
+    ACTION_ADD_MATRIX,
+    ACTION_MERGE_MATRIX,
+    ACTION_OLD_MERGE_MATRIX,
+    ACTION_SET_NON_CONFORMANT,
+    ACTION_SEND_MESSAGE,
+    ACTION_SET_DATA_POINT,
+    ACTION_SET_TIME_ZERO,
+    ACTION_SET_TIME_FORWARD,
+    ACTION_SET_SUBJECT_STATUS,
+    ACTION_SET_SUBJECT_NAME,
+    ACTION_UPDATE_FORM_NAME,
+    ACTION_UPDATE_FOLDER_NAME,
+    ACTION_SET_RECORED_DATE,
+    ACTION_SET_DATA_PAGE_DATE,
+    ACTION_SET_INSTANCE_DATE,
+    ACTION_SET_SUBJECT_DATE,
+    ACTION_SET_DATA_POINT_VISIBLE,
+    ACTION_SET_SECONDARY_SUBJECT_NAME,
+    ACTION_SET_FORM_REQUIRES_SIGNATURE,
+    ACTION_SET_FOLDER_REQUIRES_SIGNATURE,
+    ACTION_SET_SUBJECT_REQUIRES_SIGNATURE,
+    ACTION_SET_DYNAMIC_SEARCH_LIST,
+]
+
+
+class MdsolCheckAction(ODMElement):
+    """
+    Check Action modeled after check action in Architect Loader spreadsheet.
+    Do not use directly, use appropriate sub-class.
+    """
+    VALID_ACTIONS = ALL_ACTIONS
+
+    def __init__(self,
+                 variable_oid=None,
+                 field_oid=None,
+                 form_oid=None,
+                 folder_oid=None,
+                 record_position=None,
+                 form_repeat_number=None,
+                 folder_repeat_number=None,
+                 check_action_type=None,
+                 check_string=None,
+                 check_options=None,
+                 check_script=None
+                 ):
+
+        self.variable_oid = variable_oid
+        self.folder_oid = folder_oid
+        self.field_oid = field_oid
+        self.form_oid = form_oid
+        self.record_position = record_position
+        self.form_repeat_number = form_repeat_number
+        self.folder_repeat_number = folder_repeat_number
+        self._check_action_type = None
+        self.check_action_type = check_action_type
+        self.check_string = check_string
+        self.check_options = check_options
+        self.check_script = check_script
+
+    @property
+    def check_action_type(self):
+        return self._check_action_type
+
+    @check_action_type.setter
+    def check_action_type(self, value):
+        if value not in [None, ''] and str(value).strip() != '':
+            if value not in MdsolCheckAction.VALID_ACTIONS:
+                raise AttributeError("Invalid check action %s" % value)
+        self._check_action_type = value
+
+    def build(self, builder):
+        params = dict()
+
+        if self.variable_oid is not None:
+            params['VariableOID'] = self.variable_oid
+
+        if self.field_oid is not None:
+            params['FieldOID'] = self.field_oid
+
+        if self.form_oid is not None:
+            params['FormOID'] = self.form_oid
+
+        if self.folder_oid is not None:
+            params['FolderOID'] = self.folder_oid
+
+        if self.record_position is not None:
+            params['RecordPosition'] = str(self.record_position)
+
+        if self.form_repeat_number is not None:
+            params['FormRepeatNumber'] = str(self.form_repeat_number)
+
+        if self.folder_repeat_number is not None:
+            params['FolderRepeatNumber'] = str(self.folder_repeat_number)
+
+        if self.check_action_type is not None:
+            params['Type'] = self.check_action_type
+
+        if self.check_string is not None:
+            params['String'] = self.check_string
+
+        if self.check_options is not None:
+            params['Options'] = self.check_options
+
+        if self.check_script is not None:
+            params['Script'] = self.check_script
+
+        builder.start("mdsol:CheckAction", params)
+        builder.end("mdsol:CheckAction")
+
+
+class MdsolEditCheckDef(ODMElement):
+    """Extension for Rave edit checks"""
+
+    def __init__(self, oid, active=True, bypass_during_migration=False, needs_retesting=False):
+        self.oid = oid
+        self.active = active
+        self.bypass_during_migration = bypass_during_migration
+        self.needs_retesting = needs_retesting
+        self.check_steps = []
+        self.check_actions = []
+
+    def build(self, builder):
+        params = dict(OID=self.oid,
+                      Active=bool_to_true_false(self.active),
+                      BypassDuringMigration=bool_to_true_false(self.bypass_during_migration),
+                      NeedsRetesting=bool_to_true_false(self.needs_retesting)
+                      )
+
+        builder.start('mdsol:EditCheckDef', params)
+        for step in self.check_steps:
+            step.build(builder)
+
+        for action in self.check_actions:
+            action.build(builder)
+        builder.end('mdsol:EditCheckDef')
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, (MdsolCheckStep, MdsolCheckAction,)):
+            raise ValueError('EditCheck cannot accept a {0} as a child element'.format(other.__class__.__name__))
+        self.set_list_attribute(other, MdsolCheckStep, 'check_steps')
+        self.set_list_attribute(other, MdsolCheckAction, 'check_actions')
+
+
+class MdsolDerivationDef(ODMElement):
+    """Extension for Rave derivations"""
+
+    def __init__(self, oid, active=True,
+                 bypass_during_migration=False,
+                 needs_retesting=False,
+                 variable_oid=None,
+                 field_oid=None,
+                 form_oid=None,
+                 folder_oid=None,
+                 record_position=None,
+                 form_repeat_number=None,
+                 folder_repeat_number=None,
+                 logical_record_position=None,
+                 all_variables_in_folders=None,
+                 all_variables_in_fields=None
+                 ):
+        self.oid = oid
+        self.active = active
+        self.bypass_during_migration = bypass_during_migration
+        self.needs_retesting = needs_retesting
+        self.variable_oid = variable_oid
+        self.field_oid = field_oid
+        self.form_oid = form_oid
+        self.folder_oid = folder_oid
+        self.record_position = record_position
+        self.form_repeat_number = form_repeat_number
+        self.folder_repeat_number = folder_repeat_number
+        self.logical_record_position = logical_record_position
+        self.all_variables_in_folders = all_variables_in_folders
+        self.all_variables_in_fields = all_variables_in_fields
+        self.derivation_steps = []
+
+    def build(self, builder):
+        params = dict(
+            OID=self.oid,
+            Active=bool_to_true_false(self.active),
+            BypassDuringMigration=bool_to_true_false(self.bypass_during_migration),
+            NeedsRetesting=bool_to_true_false(self.needs_retesting)
+        )
+
+        if self.variable_oid is not None:
+            params['VariableOID'] = self.variable_oid
+
+        if self.field_oid is not None:
+            params['FieldOID'] = self.field_oid
+
+        if self.form_oid is not None:
+            params['FormOID'] = self.form_oid
+
+        if self.folder_oid is not None:
+            params['FolderOID'] = self.folder_oid
+
+        if self.record_position is not None:
+            params['RecordPosition'] = str(self.record_position)
+
+        if self.form_repeat_number is not None:
+            params['FormRepeatNumber'] = str(self.form_repeat_number)
+
+        if self.folder_repeat_number is not None:
+            params['FolderRepeatNumber'] = str(self.folder_repeat_number)
+
+        if self.all_variables_in_folders is not None:
+            params['AllVariablesInFolders'] = bool_to_true_false(self.all_variables_in_folders)
+
+        if self.all_variables_in_fields is not None:
+            params['AllVariablesInFields'] = bool_to_true_false(self.all_variables_in_fields)
+
+        if self.logical_record_position is not None:
+            params['LogicalRecordPosition'] = self.logical_record_position
+
+        builder.start('mdsol:DerivationDef', params)
+        for step in self.derivation_steps:
+            step.build(builder)
+        builder.end('mdsol:DerivationDef')
+
+    def __lshift__(self, other):
+        """Override << operator"""
+        if not isinstance(other, MdsolDerivationStep):
+            raise ValueError('Derivation cannot accept a {0} as a child element'.format(other.__class__.__name__))
+        self.set_list_attribute(other, MdsolDerivationStep, 'derivation_steps')
+
+
+class MdsolCustomFunctionDef(ODMElement):
+    """Extension for Rave Custom functions"""
+    VB = "VB"  # VB was deprecated in later Rave versions.
+    C_SHARP = "C#"
+    SQL = "SQ"
+    VALID_LANGUAGES = [C_SHARP, SQL, VB]
+
+    def __init__(self, oid, code, language="C#"):
+        self.oid = oid
+        self.code = code
+        self.language = language
+
+    def build(self, builder):
+        params = dict(OID=self.oid, Language=self.language)
+        builder.start('mdsol:CustomFunctionDef', params)
+        builder.data(self.code)
+        builder.end('mdsol:CustomFunctionDef')
+
+
 class MetaDataVersion(ODMElement):
     """MetaDataVersion, child of study"""
 
-    def __init__(self, oid, name, description=None,
+    def __init__(self, oid, name,
+                 description=None,
                  primary_formoid=None,
                  default_matrix_oid=None,
                  delete_existing=False,
@@ -1613,6 +2203,9 @@ class MetaDataVersion(ODMElement):
         self.item_group_defs = []
         self.form_defs = []
         self.study_event_defs = []
+        self.edit_checks = []
+        self.derivations = []
+        self.custom_functions = []
 
     def build(self, builder):
         """Build XML by appending to builder"""
@@ -1652,13 +2245,21 @@ class MetaDataVersion(ODMElement):
         for codelist in self.codelists:
             codelist.build(builder)
 
+        # Extensions must always come after core elements
         if self.confirmation_message:
             self.confirmation_message.build(builder)
 
-        # Extensions must always come after core elements
         for labeldef in self.label_defs:
             labeldef.build(builder)
 
+        for edit_check in self.edit_checks:
+            edit_check.build(builder)
+
+        for derivation in self.derivations:
+            derivation.build(builder)
+
+        for custom_function in self.custom_functions:
+            custom_function.build(builder)
 
         builder.end("MetaDataVersion")
 
@@ -1666,7 +2267,8 @@ class MetaDataVersion(ODMElement):
         """Override << operator"""
 
         if not isinstance(other, (Protocol, StudyEventDef, FormDef, ItemGroupDef, ItemDef, MdsolLabelDef, CodeList,
-                                  MdsolConfirmationMessage)):
+                                  MdsolConfirmationMessage, MdsolEditCheckDef, MdsolDerivationDef,
+                                  MdsolCustomFunctionDef)):
             raise ValueError('MetaDataVersion cannot accept a {0} as a child element'.format(other.__class__.__name__))
 
         self.set_single_attribute(other, Protocol, 'protocol')
@@ -1677,6 +2279,9 @@ class MetaDataVersion(ODMElement):
         self.set_list_attribute(other, MdsolLabelDef, 'label_defs')
         self.set_list_attribute(other, ItemDef, 'item_defs')
         self.set_list_attribute(other, CodeList, 'codelists')
+        self.set_list_attribute(other, MdsolEditCheckDef, 'edit_checks')
+        self.set_list_attribute(other, MdsolDerivationDef, 'derivations')
+        self.set_list_attribute(other, MdsolCustomFunctionDef, 'custom_functions')  # NB. Current schema limits to 1
         return other
 
 

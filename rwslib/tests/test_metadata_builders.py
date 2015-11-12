@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 __author__ = 'isparks'
-
 import unittest
 from rwslib.builders import *
 from xml.etree import cElementTree as ET
-from .test_builders import obj_to_doc, bool_to_yes_no
-
+from rwslib.tests.test_builders import obj_to_doc, bool_to_yes_no
 
 # Metadata object tests
 
@@ -430,11 +428,21 @@ class TestRangeCheck(unittest.TestCase):
         self.tested << MeasurementUnitRef('kg')
 
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.tag, "RangeCheck")
+        self.assertEquals("RangeCheck", doc.tag)
         self.assertEquals("Soft", doc.attrib['SoftHard'])
         self.assertEquals("GE", doc.attrib['Comparator'])
         self.assertEquals("CheckValue", doc.getchildren()[0].tag)
         self.assertEquals("MeasurementUnitRef", doc.getchildren()[1].tag)
+
+
+class TestMdsolHeaderText(unittest.TestCase):
+    def test_lang_default(self):
+        tested = MdsolHeaderText("Content","en")
+        self.assertEqual("en", tested.lang)
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:HeaderText", doc.tag)
+        self.assertEquals("Content", doc.text)
+        self.assertEquals("en", doc.attrib['xml:lang'])
 
 
 class TestItemDef(unittest.TestCase):
@@ -766,6 +774,228 @@ class TestConfirmationMessage(unittest.TestCase):
         self.assertEquals("en", doc.attrib['xml:lang'])
 
 
+class TestMdsolCheckAction(unittest.TestCase):
+    """Test extensions to ODM for Edit Checks Steps in Rave"""
+    def test_build(self):
+        tested = MdsolCheckAction(
+                                  field_oid="Field",
+                                  variable_oid="TheVAR",
+                                  form_oid="The Form",
+                                  form_repeat_number=1,
+                                  folder_oid="The Folder",
+                                  folder_repeat_number=2,
+                                  record_position=3,
+                                  check_action_type=ACTION_SET_DATA_POINT,
+                                  check_string="CString",   # Knowing which of these to use for each action type is
+                                  check_script="CScript",   # the trick. Best to look in an Architect Loader Spreadsheet
+                                  check_options="COptions") # to get an idea
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:CheckAction", doc.tag)
+        self.assertEquals("The Folder", doc.attrib['FolderOID'])
+        self.assertEquals("The Form", doc.attrib['FormOID'])
+        self.assertEquals("Field", doc.attrib['FieldOID'])
+        self.assertEquals("TheVAR", doc.attrib['VariableOID'])
+        self.assertEquals("1", doc.attrib['FormRepeatNumber'])
+        self.assertEquals("2", doc.attrib['FolderRepeatNumber'])
+        self.assertEquals("3", doc.attrib['RecordPosition'])
+        self.assertEquals("CString", doc.attrib['String'])
+        self.assertEquals("CScript", doc.attrib['Script'])
+        self.assertEquals("COptions", doc.attrib['Options'])
+        self.assertEquals(ACTION_SET_DATA_POINT, doc.attrib['Type'])
+
+    def test_invalid_action(self):
+        with self.assertRaises(AttributeError):
+            MdsolCheckAction(check_action_type='bad_name')
+
+
+class TestMdsolCheckStep(unittest.TestCase):
+    """Test extensions to ODM for Edit Checks Steps in Rave"""
+    def test_build(self):
+        tested = MdsolCheckStep(data_format="$1", static_value="1")
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:CheckStep", doc.tag)
+        self.assertEquals("$1", doc.attrib['DataFormat'])
+        self.assertEquals("1", doc.attrib['StaticValue'])
+        # No function param
+        self.assertEquals("", doc.attrib.get('Function',''))
+
+    def test_build_function(self):
+        tested = MdsolCheckStep(function=STEP_ADD)
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:CheckStep", doc.tag)
+        self.assertEquals(STEP_ADD, doc.attrib['Function'])
+        # No data format param
+        self.assertEquals("", doc.attrib.get('DataFormat',''))
+
+    def test_build_datastep(self):
+        tested = MdsolCheckStep(variable_oid="VAROID", field_oid="FIELDOID",
+                                form_oid="MyForm",
+                                folder_oid="MyFolder",
+                                record_position=0, form_repeat_number = 2, folder_repeat_number=3,
+                                logical_record_position="MaxBySubject")
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:CheckStep", doc.tag)
+        self.assertEquals("VAROID", doc.attrib['VariableOID'])
+        self.assertEquals("FIELDOID", doc.attrib['FieldOID'])
+        self.assertEquals("MyForm", doc.attrib['FormOID'])
+        self.assertEquals("MyFolder", doc.attrib['FolderOID'])
+        self.assertEquals("0", doc.attrib['RecordPosition'])
+        self.assertEquals("2", doc.attrib['FormRepeatNumber'])
+        self.assertEquals("3", doc.attrib['FolderRepeatNumber'])
+        self.assertEquals("MaxBySubject", doc.attrib['LogicalRecordPosition'])
+        # No data format param
+        self.assertEquals("", doc.attrib.get('DataFormat',''))
+        # No function param
+        self.assertEquals("", doc.attrib.get('Function',''))
+
+    def test_build_custom_function(self):
+        tested = MdsolCheckStep(custom_function="AlwaysTrue*")
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:CheckStep", doc.tag)
+        self.assertEquals("AlwaysTrue*", doc.attrib['CustomFunction'])
+        # No data format param
+        self.assertEquals("", doc.attrib.get('DataFormat',''))
+        # No function param
+        self.assertEquals("", doc.attrib.get('Function',''))
+
+    def test_invalid_function(self):
+        with self.assertRaises(AttributeError):
+            MdsolCheckStep(function='bad_name')
+
+class TestMdsolEditCheckDef(unittest.TestCase):
+    """Test extensions to ODM for Edit Checks in Rave"""
+    def test_build(self):
+        tested = MdsolEditCheckDef("CHECK1")
+
+        tested << MdsolCheckStep(data_format="$1", static_value="1")
+        tested << MdsolCheckAction()
+
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:EditCheckDef", doc.tag)
+        self.assertEquals("TRUE", doc.attrib['Active'])
+        self.assertEquals("CHECK1", doc.attrib['OID'])
+        self.assertEquals("FALSE", doc.attrib['NeedsRetesting'])
+        self.assertEquals("FALSE", doc.attrib['BypassDuringMigration'])
+        self.assertEquals("mdsol:CheckStep", doc.getchildren()[0].tag)
+        self.assertEquals("mdsol:CheckAction", doc.getchildren()[1].tag)
+
+
+    def test_cannot_accept_non_check_or_action_child(self):
+        with self.assertRaises(ValueError):
+            MdsolEditCheckDef("OID") << object()
+
+    def test_accepts_check_step(self):
+        tested = MdsolEditCheckDef("CHECK1")
+        cs = MdsolCheckStep(data_format="$1", static_value="1")
+        tested << cs
+        self.assertEqual(cs, tested.check_steps[0])
+
+    def test_accepts_check_action(self):
+        tested = MdsolEditCheckDef("CHECK1")
+        ca = MdsolCheckAction()
+        tested << ca
+        self.assertEqual(ca, tested.check_actions[0])
+
+
+class TestMdsolDerivationStep(unittest.TestCase):
+    """Test extensions to ODM for Derivation Steps in Rave"""
+    def test_build(self):
+        tested = MdsolDerivationStep(data_format="$1", value="1")
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:DerivationStep", doc.tag)
+        self.assertEquals("$1", doc.attrib['DataFormat'])
+        self.assertEquals("1", doc.attrib['Value'])
+        # No function param
+        self.assertEquals("", doc.attrib.get('Function',''))
+
+    def test_build_function(self):
+        tested = MdsolDerivationStep(function=STEP_ADD)
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:DerivationStep", doc.tag)
+        self.assertEquals(STEP_ADD, doc.attrib['Function'])
+        # No data format param
+        self.assertEquals("", doc.attrib.get('DataFormat',''))
+
+    def test_build_datastep(self):
+        tested = MdsolDerivationStep(variable_oid="VAROID", field_oid="FIELDOID",
+                                     form_oid="VFORM",
+                                     folder_oid="MyFolder",
+                                record_position=0, form_repeat_number = 2, folder_repeat_number=3,
+                                logical_record_position="MaxBySubject")
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:DerivationStep", doc.tag)
+        self.assertEquals("VAROID", doc.attrib['VariableOID'])
+        self.assertEquals("FIELDOID", doc.attrib['FieldOID'])
+        self.assertEquals("VFORM", doc.attrib['FormOID'])
+        self.assertEquals("MyFolder", doc.attrib['FolderOID'])
+        self.assertEquals("0", doc.attrib['RecordPosition'])
+        self.assertEquals("2", doc.attrib['FormRepeatNumber'])
+        self.assertEquals("3", doc.attrib['FolderRepeatNumber'])
+        self.assertEquals("MaxBySubject", doc.attrib['LogicalRecordPosition'])
+        # No data format param
+        self.assertEquals("", doc.attrib.get('DataFormat',''))
+        # No function param
+        self.assertEquals("", doc.attrib.get('Function',''))
+
+    def test_build_custom_function(self):
+        tested = MdsolDerivationStep(custom_function="AlwaysTrue*")
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:DerivationStep", doc.tag)
+        self.assertEquals("AlwaysTrue*", doc.attrib['CustomFunction'])
+        # No data format param
+        self.assertEquals("", doc.attrib.get('DataFormat',''))
+        # No function param
+        self.assertEquals("", doc.attrib.get('Function',''))
+
+    def test_invalid_function(self):
+        with self.assertRaises(AttributeError):
+            # STEP_IS_PRESENT not valid for derivation
+            MdsolDerivationStep(function=STEP_IS_PRESENT)
+
+class TestMdsolDerivationDef(unittest.TestCase):
+    """Test extensions to ODM for Derivatipns in Rave"""
+    def test_build(self):
+        tested = MdsolDerivationDef("AGE",
+                                variable_oid="VAROID", field_oid="FIELDOID",
+                                form_oid="MyForm",
+                                folder_oid="MyFolder",
+                                record_position=0, form_repeat_number = 2, folder_repeat_number=3,
+                                logical_record_position="MaxBySubject",
+                                    all_variables_in_fields=True,
+                                    all_variables_in_folders=True)
+        doc = obj_to_doc(tested)
+        tested << MdsolDerivationStep(function=STEP_AGE)
+
+        doc = obj_to_doc(tested)
+        self.assertEquals("mdsol:DerivationDef", doc.tag)
+        self.assertEquals("TRUE", doc.attrib['Active'])
+        self.assertEquals("AGE", doc.attrib['OID'])
+        self.assertEquals("FALSE", doc.attrib['NeedsRetesting'])
+        self.assertEquals("FALSE", doc.attrib['BypassDuringMigration'])
+        self.assertEquals("TRUE", doc.attrib['AllVariablesInFolders'])
+        self.assertEquals("TRUE", doc.attrib['AllVariablesInFields'])
+        self.assertEquals("VAROID", doc.attrib['VariableOID'])
+        self.assertEquals("FIELDOID", doc.attrib['FieldOID'])
+        self.assertEquals("MyForm", doc.attrib['FormOID'])
+        self.assertEquals("MyFolder", doc.attrib['FolderOID'])
+        self.assertEquals("0", doc.attrib['RecordPosition'])
+        self.assertEquals("2", doc.attrib['FormRepeatNumber'])
+        self.assertEquals("3", doc.attrib['FolderRepeatNumber'])
+        self.assertEquals("MaxBySubject", doc.attrib['LogicalRecordPosition'])
+
+        self.assertEquals("mdsol:DerivationStep", doc.getchildren()[0].tag)
+
+
+    def test_cannot_accept_any_child(self):
+        with self.assertRaises(ValueError):
+            MdsolDerivationDef("OID") << object()
+
+    def test_accepts_derivation_step(self):
+        tested = MdsolDerivationDef("AGE")
+        ds = MdsolDerivationStep(function=STEP_AGE)
+        tested << ds
+        self.assertEqual(ds, tested.derivation_steps[0])
+
 
 class TestMetaDataVersion(unittest.TestCase):
     """Contains Metadata for study design. Rave only allows one, the spec allows many in an ODM doc"""
@@ -789,6 +1019,21 @@ class TestMetaDataVersion(unittest.TestCase):
         tested = MetaDataVersion("OID", "NAME")(cm)
         self.assertEqual(cm, tested.confirmation_message)
 
+    def test_can_accept_edit_check_def(self):
+        ec = MdsolEditCheckDef("CHECK1")
+        tested = MetaDataVersion("OID", "NAME")(ec)
+        self.assertEqual(ec, tested.edit_checks[0])
+
+    def test_can_accept_derivation_def(self):
+        dd = MdsolDerivationDef("DEV1")
+        tested = MetaDataVersion("OID", "NAME")(dd)
+        self.assertEqual(dd, tested.derivations[0])
+
+    def test_can_accept_custom_function_def(self):
+        cf = MdsolCustomFunctionDef("DEV1","return true;",language=MdsolCustomFunctionDef.C_SHARP)
+        tested = MetaDataVersion("OID", "NAME")(cf)
+        self.assertEqual(cf, tested.custom_functions[0])
+
     def test_builder(self):
         """XML produced"""
         tested = MetaDataVersion("OID", "NAME", description="A description",
@@ -805,6 +1050,10 @@ class TestMetaDataVersion(unittest.TestCase):
         tested << CodeList("C_YESNO", "Yes No", DATATYPE_STRING)
         tested << MdsolLabelDef("LABEL1", "first label")
         tested << MdsolConfirmationMessage("Form has been submitted!")
+        tested << MdsolCustomFunctionDef("AlwaysTrue*","return true;")
+        tested << MdsolEditCheckDef("DM01")
+        tested << MdsolDerivationDef("AGE")
+
 
         doc = obj_to_doc(tested)
         self.assertEquals(doc.tag, "MetaDataVersion")
@@ -823,6 +1072,10 @@ class TestMetaDataVersion(unittest.TestCase):
         self.assertEquals("CodeList", doc.getchildren()[5].tag)
         self.assertEquals("mdsol:ConfirmationMessage", doc.getchildren()[6].tag)
         self.assertEquals("mdsol:LabelDef", doc.getchildren()[7].tag)
+        self.assertEquals("mdsol:EditCheckDef", doc.getchildren()[8].tag)
+        self.assertEquals("mdsol:DerivationDef", doc.getchildren()[9].tag)
+        self.assertEquals("mdsol:CustomFunctionDef", doc.getchildren()[10].tag)
+
 
 
 class TestStudy(unittest.TestCase):
