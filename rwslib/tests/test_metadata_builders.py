@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 __author__ = 'isparks'
-
 import unittest
 from rwslib.builders import *
+from rwslib.builder_constants import *
 from xml.etree import cElementTree as ET
-from .test_builders import obj_to_doc, bool_to_yes_no
+from rwslib.tests.test_builders import obj_to_doc, bool_to_yes_no
 
 
 # Metadata object tests
@@ -15,17 +15,17 @@ class TestTranslatedText(unittest.TestCase):
         """XML produced"""
         tested = TranslatedText('A test', lang='en')
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "TranslatedText")
-        self.assertEquals("en", doc.attrib['xml:lang'])
-        self.assertEquals("A test", doc.text)
+        self.assertEqual(doc.tag, "TranslatedText")
+        self.assertEqual("en", doc.attrib['xml:lang'])
+        self.assertEqual("A test", doc.text)
 
     def test_builder_no_lang(self):
         """XML produced when no lang is provided"""
         tested = TranslatedText('A test')
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "TranslatedText")
-        self.assertEquals("", doc.get('xml:lang', ''))
-        self.assertEquals("A test", doc.text)
+        self.assertEqual(doc.tag, "TranslatedText")
+        self.assertEqual("", doc.get('xml:lang', ''))
+        self.assertEqual("A test", doc.text)
 
     def test_accepts_no_children(self):
         with self.assertRaises(ValueError):
@@ -46,8 +46,8 @@ class TestSymbols(unittest.TestCase):
         """XML produced"""
         tested = Symbol()(TranslatedText('en', 'Test string'))
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "Symbol")
-        self.assertEquals(doc.getchildren()[0].tag, "TranslatedText")
+        self.assertEqual(doc.tag, "Symbol")
+        self.assertEqual(doc.getchildren()[0].tag, "TranslatedText")
 
 
 class TestMeasurementUnits(unittest.TestCase):
@@ -62,7 +62,7 @@ class TestMeasurementUnits(unittest.TestCase):
     def test_kg(self):
         tested = MeasurementUnit("MSU00001", "KG", unit_dictionary_name='UN1', standard_unit=True)
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.attrib['mdsol:StandardUnit'], "Yes")
+        self.assertEqual(doc.attrib['mdsol:StandardUnit'], "Yes")
 
     def test_can_only_receive_symbol(self):
         with self.assertRaises(ValueError):
@@ -77,8 +77,8 @@ class TestMeasurementUnits(unittest.TestCase):
         """XML produced"""
         tested = MeasurementUnit('MU_OID', 'MU_NAME')(Symbol())
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "MeasurementUnit")
-        self.assertEquals(doc.getchildren()[0].tag, "Symbol")
+        self.assertEqual(doc.tag, "MeasurementUnit")
+        self.assertEqual(doc.getchildren()[0].tag, "Symbol")
 
 
 class TestBasicDefinitions(unittest.TestCase):
@@ -100,8 +100,8 @@ class TestBasicDefinitions(unittest.TestCase):
         """XML produced"""
         tested = BasicDefinitions()(MeasurementUnit("MU_OID", "MUNAME"))
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "BasicDefinitions")
-        self.assertEquals(doc.getchildren()[0].tag, "MeasurementUnit")
+        self.assertEqual(doc.tag, "BasicDefinitions")
+        self.assertEqual(doc.getchildren()[0].tag, "MeasurementUnit")
 
 
 class TestGlobalVariables(unittest.TestCase):
@@ -128,13 +128,13 @@ class TestGlobalVariables(unittest.TestCase):
         """XML produced"""
         tested = GlobalVariables('project_name', description="A description")
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "GlobalVariables")
-        self.assertEquals(doc.getchildren()[0].tag, "StudyName")
-        self.assertEquals("project_name", doc.getchildren()[0].text)
-        self.assertEquals(doc.getchildren()[1].tag, "StudyDescription")
-        self.assertEquals("A description", doc.getchildren()[1].text)
-        self.assertEquals(doc.getchildren()[2].tag, "ProtocolName")
-        self.assertEquals("project_name", doc.getchildren()[2].text)
+        self.assertEqual(doc.tag, "GlobalVariables")
+        self.assertEqual(doc.getchildren()[0].tag, "StudyName")
+        self.assertEqual("project_name", doc.getchildren()[0].text)
+        self.assertEqual(doc.getchildren()[1].tag, "StudyDescription")
+        self.assertEqual("A description", doc.getchildren()[1].text)
+        self.assertEqual(doc.getchildren()[2].tag, "ProtocolName")
+        self.assertEqual("project_name", doc.getchildren()[2].text)
 
 
 class TestStudyEventRef(unittest.TestCase):
@@ -156,8 +156,8 @@ class TestProtocol(unittest.TestCase):
     def test_builder(self):
         """XML produced"""
         doc = obj_to_doc(Protocol()(StudyEventRef("OID", 1, True)))
-        self.assertEquals(doc.tag, "Protocol")
-        self.assertEquals(doc.getchildren()[0].tag, "StudyEventRef")
+        self.assertEqual(doc.tag, "Protocol")
+        self.assertEqual(doc.getchildren()[0].tag, "StudyEventRef")
 
 
 class TestFormRef(unittest.TestCase):
@@ -189,18 +189,18 @@ class TestStudyEventDef(unittest.TestCase):
         tested << FormRef("FORMOID", 1, False)
 
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "StudyEventDef")
-        self.assertEquals("OID", doc.attrib['OID'])
-        self.assertEquals("Name", doc.attrib['Name'])
-        self.assertEquals("Scheduled", doc.attrib['Type'])
-        self.assertEquals("Test Cat", doc.attrib['Category'])
-        self.assertEquals("1", doc.attrib['mdsol:AccessDays'])
-        self.assertEquals("2", doc.attrib['mdsol:StartWinDays'])
-        self.assertEquals("3", doc.attrib['mdsol:TargetDays'])
-        self.assertEquals("4", doc.attrib['mdsol:EndWinDays'])
-        self.assertEquals("5", doc.attrib['mdsol:OverDueDays'])
-        self.assertEquals("6", doc.attrib['mdsol:CloseDays'])
-        self.assertEquals("FormRef", doc.getchildren()[0].tag)
+        self.assertEqual(doc.tag, "StudyEventDef")
+        self.assertEqual("OID", doc.attrib['OID'])
+        self.assertEqual("Name", doc.attrib['Name'])
+        self.assertEqual("Scheduled", doc.attrib['Type'])
+        self.assertEqual("Test Cat", doc.attrib['Category'])
+        self.assertEqual("1", doc.attrib['mdsol:AccessDays'])
+        self.assertEqual("2", doc.attrib['mdsol:StartWinDays'])
+        self.assertEqual("3", doc.attrib['mdsol:TargetDays'])
+        self.assertEqual("4", doc.attrib['mdsol:EndWinDays'])
+        self.assertEqual("5", doc.attrib['mdsol:OverDueDays'])
+        self.assertEqual("6", doc.attrib['mdsol:CloseDays'])
+        self.assertEqual("FormRef", doc.getchildren()[0].tag)
 
 
 class TestItemGroupRef(unittest.TestCase):
@@ -211,19 +211,19 @@ class TestItemGroupRef(unittest.TestCase):
     def test_builder(self):
         tested = ItemGroupRef("ItemGroup1", 1, mandatory=True)
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "ItemGroupRef")
-        self.assertEquals("ItemGroup1", doc.attrib['ItemGroupOID'])
-        self.assertEquals("1", doc.attrib['OrderNumber'])
-        self.assertEquals("Yes", doc.attrib['Mandatory'])
+        self.assertEqual(doc.tag, "ItemGroupRef")
+        self.assertEqual("ItemGroup1", doc.attrib['ItemGroupOID'])
+        self.assertEqual("1", doc.attrib['OrderNumber'])
+        self.assertEqual("Yes", doc.attrib['Mandatory'])
 
 
 class TestMdsolHelpTexts(unittest.TestCase):
     def test_build(self):
         tested = MdsolHelpText("en", "This is a help text")
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "mdsol:HelpText")
-        self.assertEquals("en", doc.attrib['xml:lang'])
-        self.assertEquals("This is a help text", doc.text)
+        self.assertEqual(doc.tag, "mdsol:HelpText")
+        self.assertEqual("en", doc.attrib['xml:lang'])
+        self.assertEqual("This is a help text", doc.text)
 
     def test_accepts_no_children(self):
         with self.assertRaises(ValueError):
@@ -238,8 +238,8 @@ class TestMdsolViewRestriction(unittest.TestCase):
     def test_build(self):
         tested = MdsolViewRestriction("DM")
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "mdsol:ViewRestriction")
-        self.assertEquals("DM", doc.text)
+        self.assertEqual(doc.tag, "mdsol:ViewRestriction")
+        self.assertEqual("DM", doc.text)
 
 
 class TestMdsolEntryRestriction(unittest.TestCase):
@@ -250,8 +250,8 @@ class TestMdsolEntryRestriction(unittest.TestCase):
     def test_build(self):
         tested = MdsolEntryRestriction("DM")
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "mdsol:EntryRestriction")
-        self.assertEquals("DM", doc.text)
+        self.assertEqual(doc.tag, "mdsol:EntryRestriction")
+        self.assertEqual("DM", doc.text)
 
 
 class TestMdsolLabelRef(unittest.TestCase):
@@ -263,9 +263,9 @@ class TestMdsolLabelRef(unittest.TestCase):
         tested = MdsolLabelRef("OID1", 1)
 
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "mdsol:LabelRef")
-        self.assertEquals("OID1", doc.attrib['LabelOID'])
-        self.assertEquals("1", doc.attrib['OrderNumber'])
+        self.assertEqual(doc.tag, "mdsol:LabelRef")
+        self.assertEqual("OID1", doc.attrib['LabelOID'])
+        self.assertEqual("1", doc.attrib['OrderNumber'])
 
 
 class TestMdsolAttribute(unittest.TestCase):
@@ -290,15 +290,15 @@ class TestItemRef(unittest.TestCase):
         tested << MdsolAttribute("Namespace2", "Name2", "Value2")
 
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "ItemRef")
-        self.assertEquals("OID1", doc.attrib['ItemOID'])
-        self.assertEquals("1", doc.attrib['OrderNumber'])
-        self.assertEquals("3", doc.attrib['KeySequence'])
-        self.assertEquals("IMPUTE1", doc.attrib['ImputationMethodOID'])
-        self.assertEquals("AROLE", doc.attrib['Role'])
-        self.assertEquals("ROLEX", doc.attrib['RoleCodeListOID'])
-        self.assertEquals("mdsol:Attribute", doc.getchildren()[0].tag)
-        self.assertEquals("mdsol:Attribute", doc.getchildren()[1].tag)
+        self.assertEqual(doc.tag, "ItemRef")
+        self.assertEqual("OID1", doc.attrib['ItemOID'])
+        self.assertEqual("1", doc.attrib['OrderNumber'])
+        self.assertEqual("3", doc.attrib['KeySequence'])
+        self.assertEqual("IMPUTE1", doc.attrib['ImputationMethodOID'])
+        self.assertEqual("AROLE", doc.attrib['Role'])
+        self.assertEqual("ROLEX", doc.attrib['RoleCodeListOID'])
+        self.assertEqual("mdsol:Attribute", doc.getchildren()[0].tag)
+        self.assertEqual("mdsol:Attribute", doc.getchildren()[1].tag)
 
 
 class TestQuestion(unittest.TestCase):
@@ -313,8 +313,8 @@ class TestQuestion(unittest.TestCase):
     def test_build(self):
         tested = Question()(TranslatedText('How are you feeling?'))
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "Question")
-        self.assertEquals("TranslatedText", doc.getchildren()[0].tag)
+        self.assertEqual(doc.tag, "Question")
+        self.assertEqual("TranslatedText", doc.getchildren()[0].tag)
 
 
 class TestMeasurementUnitRef(unittest.TestCase):
@@ -325,9 +325,9 @@ class TestMeasurementUnitRef(unittest.TestCase):
     def test_build(self):
         tested = MeasurementUnitRef("KG", order_number=1)
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "MeasurementUnitRef")
-        self.assertEquals("KG", doc.attrib['MeasurementUnitOID'])
-        self.assertEquals("1", doc.attrib['mdsol:OrderNumber'])
+        self.assertEqual(doc.tag, "MeasurementUnitRef")
+        self.assertEqual("KG", doc.attrib['MeasurementUnitOID'])
+        self.assertEqual("1", doc.attrib['mdsol:OrderNumber'])
 
 
 class TestCodeListRef(unittest.TestCase):
@@ -338,8 +338,8 @@ class TestCodeListRef(unittest.TestCase):
     def test_build(self):
         tested = CodeListRef("SEVERITY")
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "CodeListRef")
-        self.assertEquals("SEVERITY", doc.attrib['CodeListOID'])
+        self.assertEqual(doc.tag, "CodeListRef")
+        self.assertEqual("SEVERITY", doc.attrib['CodeListOID'])
 
 
 class TestMdsolReviewGroup(unittest.TestCase):
@@ -350,8 +350,8 @@ class TestMdsolReviewGroup(unittest.TestCase):
 
 def test_build(self):
     doc = obj_to_doc(MdsolReviewGroup("CRA"))
-    self.assertEquals(doc.tag, "mdsol:ReviewGroup")
-    self.assertEquals("CRA", doc.text)
+    self.assertEqual(doc.tag, "mdsol:ReviewGroup")
+    self.assertEqual("CRA", doc.text)
 
 
 class TestMdsolLabelDef(unittest.TestCase):
@@ -376,70 +376,77 @@ class TestMdsolLabelDef(unittest.TestCase):
         self.tested << MdsolViewRestriction("DM")
 
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.tag, "mdsol:LabelDef")
-        self.assertEquals("L_AGE", doc.attrib['OID'])
-        self.assertEquals("Age Label", doc.attrib['Name'])
-        self.assertEquals("4", doc.attrib['FieldNumber'])
-        self.assertEquals("TranslatedText", doc.getchildren()[0].tag)
-        self.assertEquals("mdsol:ViewRestriction", doc.getchildren()[1].tag)
+        self.assertEqual(doc.tag, "mdsol:LabelDef")
+        self.assertEqual("L_AGE", doc.attrib['OID'])
+        self.assertEqual("Age Label", doc.attrib['Name'])
+        self.assertEqual("4", doc.attrib['FieldNumber'])
+        self.assertEqual("TranslatedText", doc.getchildren()[0].tag)
+        self.assertEqual("mdsol:ViewRestriction", doc.getchildren()[1].tag)
 
 
 class TestCheckValue(unittest.TestCase):
-
     def test_accepts_no_children(self):
         with self.assertRaises(ValueError):
             CheckValue("Test") << object()
 
-
     def test_build(self):
         doc = obj_to_doc(CheckValue(99))
-        self.assertEquals(doc.tag, "CheckValue")
-        self.assertEquals("99", doc.text)
+        self.assertEqual(doc.tag, "CheckValue")
+        self.assertEqual("99", doc.text)
 
 
 class TestRangeCheck(unittest.TestCase):
-
     def test_accepts_no_strange_children(self):
         with self.assertRaises(ValueError):
-            RangeCheck(comparator=RangeCheck.GREATER_THAN_EQUAL_TO, soft_hard=RangeCheck.SOFT) << object()
+            RangeCheck(comparator=RangeCheckComparatorType.GreaterThanEqualTo,
+                       soft_hard=RangeCheckType.Soft) << object()
 
     def test_accepts_no_strange_soft_hard(self):
         with self.assertRaises(AttributeError):
-            RangeCheck(comparator=RangeCheck.GREATER_THAN_EQUAL_TO, soft_hard="Blash")
+            RangeCheck(comparator=RangeCheckComparatorType.GreaterThanEqualTo, soft_hard="Blash")
 
     def test_accepts_no_strange_comparator(self):
         with self.assertRaises(AttributeError):
-            RangeCheck(comparator="EQ",soft_hard="Blash")
+            RangeCheck(comparator="EQ", soft_hard="Blash")
 
     def test_accepts_checkvalue(self):
-        tested = RangeCheck(comparator=RangeCheck.LESS_THAN_EQUAL_TO,soft_hard=RangeCheck.SOFT)
+        tested = RangeCheck(comparator=RangeCheckComparatorType.LessThanEqualTo, soft_hard=RangeCheckType.Soft)
         cv = CheckValue(0)
         tested << cv
         self.assertEqual(cv, tested.check_value)
 
-
     def test_accepts_measurement_unit_ref(self):
-        tested = RangeCheck(comparator=RangeCheck.GREATER_THAN_EQUAL_TO,soft_hard=RangeCheck.SOFT)
-        mr =  MeasurementUnitRef('kg')
+        tested = RangeCheck(comparator=RangeCheckComparatorType.GreaterThanEqualTo, soft_hard=RangeCheckType.Soft)
+        mr = MeasurementUnitRef('kg')
         tested << mr
         self.assertEqual(mr, tested.measurement_unit_ref)
 
     def test_build(self):
-        self.tested = RangeCheck(comparator=RangeCheck.GREATER_THAN_EQUAL_TO, soft_hard=RangeCheck.SOFT)
+        self.tested = RangeCheck(comparator=RangeCheckComparatorType.GreaterThanEqualTo, soft_hard=RangeCheckType.Soft)
         self.tested << CheckValue(0)
         self.tested << MeasurementUnitRef('kg')
 
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.tag, "RangeCheck")
-        self.assertEquals("Soft", doc.attrib['SoftHard'])
-        self.assertEquals("GE", doc.attrib['Comparator'])
-        self.assertEquals("CheckValue", doc.getchildren()[0].tag)
-        self.assertEquals("MeasurementUnitRef", doc.getchildren()[1].tag)
+        self.assertEqual("RangeCheck", doc.tag)
+        self.assertEqual("Soft", doc.attrib['SoftHard'])
+        self.assertEqual("GE", doc.attrib['Comparator'])
+        self.assertEqual("CheckValue", doc.getchildren()[0].tag)
+        self.assertEqual("MeasurementUnitRef", doc.getchildren()[1].tag)
+
+
+class TestMdsolHeaderText(unittest.TestCase):
+    def test_lang_default(self):
+        tested = MdsolHeaderText("Content", "en")
+        self.assertEqual("en", tested.lang)
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:HeaderText", doc.tag)
+        self.assertEqual("Content", doc.text)
+        self.assertEqual("en", doc.attrib['xml:lang'])
 
 
 class TestItemDef(unittest.TestCase):
     def setUp(self):
-        self.tested = ItemDef("I_AGE", "Age", DATATYPE_INTEGER, 3,
+        self.tested = ItemDef("I_AGE", "Age", DataType.Integer, 3,
                               significant_digits=3,
                               sas_field_name='SAGE',
                               sds_var_name='SVARNAME',
@@ -458,7 +465,7 @@ class TestItemDef(unittest.TestCase):
                               visual_verify=True,
                               does_not_break_signature=True,
                               acceptable_file_extensions='jpg',
-                              control_type=ItemDef.CONTROLTYPE_TEXT,
+                              control_type=ControlType.Text,
                               variable_oid='SOMETHING_DIFFERENT',
                               default_value=99,
                               origin='An origin',
@@ -472,8 +479,12 @@ class TestItemDef(unittest.TestCase):
             self.tested << object()
 
     def test_invalid_datatype(self):
-        with self.assertRaises(KeyError):
+        with self.assertRaises(AttributeError):
             ItemDef("TEST", "My Test", "TOTALLY_WRONG_DATATYPE", 10)
+
+    def test_invalid_controltype(self):
+        with self.assertRaises(AttributeError):
+            ItemDef("TEST", "My Test", DataType.Text, 10, control_type="TOTALLY_WRONG_CONTROLTYPE")
 
     def test_accepts_mdsolhelp(self):
         self.tested << MdsolHelpText("en", "Content of help")
@@ -533,7 +544,7 @@ class TestItemDef(unittest.TestCase):
         self.assertEqual(1, len(self.tested.review_groups))
 
     def test_accepts_range_check(self):
-        self.tested << RangeCheck(RangeCheck.LESS_THAN_EQUAL_TO, RangeCheck.SOFT)
+        self.tested << RangeCheck(RangeCheckComparatorType.LessThanEqualTo, RangeCheckType.Soft)
         self.assertEqual(1, len(self.tested.range_checks))
 
     def test_build(self):
@@ -545,51 +556,51 @@ class TestItemDef(unittest.TestCase):
         self.tested << MdsolEntryRestriction("CRA")
         self.tested << MdsolHeaderText("YRS")
         self.tested << MdsolReviewGroup("CRA")
-        self.tested << RangeCheck(RangeCheck.LESS_THAN_EQUAL_TO, RangeCheck.SOFT)
+        self.tested << RangeCheck(RangeCheckComparatorType.LessThanEqualTo, RangeCheckType.Soft)
 
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.tag, "ItemDef")
-        self.assertEquals("I_AGE", doc.attrib['OID'])
-        self.assertEquals("Age", doc.attrib['Name'])
-        self.assertEquals("Yes", doc.attrib['mdsol:Active'])
-        self.assertEquals("integer", doc.attrib['DataType'])
-        self.assertEquals("3", doc.attrib['Length'])
-        self.assertEquals("Text", doc.attrib['mdsol:ControlType'])
-        self.assertEquals("3", doc.attrib['SignificantDigits'])
-        self.assertEquals("SAGE", doc.attrib['SASFieldName'])
-        self.assertEquals("SVARNAME", doc.attrib['SDSVarName'])
-        self.assertEquals("AGE_YRS", doc.attrib['mdsol:SASLabel'])
-        self.assertEquals("3.0", doc.attrib['mdsol:SASFormat'])
-        self.assertEquals("A comment", doc.attrib['Comment'])
-        self.assertEquals("An origin", doc.attrib['Origin'])
-        self.assertEquals("No", doc.attrib['mdsol:QueryFutureDate'])
-        self.assertEquals("Yes", doc.attrib['mdsol:Visible'])
-        self.assertEquals("Yes", doc.attrib['mdsol:TranslationRequired'])
-        self.assertEquals("Yes", doc.attrib['mdsol:SourceDocument'])
-        self.assertEquals("No", doc.attrib['mdsol:OtherVisits'])
-        self.assertEquals("Yes", doc.attrib['mdsol:SourceDocument'])
-        self.assertEquals("Yes", doc.attrib['mdsol:QueryNonConformance'])
-        self.assertEquals("No", doc.attrib['mdsol:CanSetItemGroupDate'])
-        self.assertEquals("No", doc.attrib['mdsol:CanSetFormDate'])
-        self.assertEquals("No", doc.attrib['mdsol:CanSetStudyEventDate'])
-        self.assertEquals("No", doc.attrib['mdsol:CanSetSubjectDate'])
-        self.assertEquals("Yes", doc.attrib['mdsol:VisualVerify'])
-        self.assertEquals("Yes", doc.attrib['mdsol:DoesNotBreakSignature'])
-        self.assertEquals("SOMETHING_DIFFERENT", doc.attrib['mdsol:VariableOID'])
-        self.assertEquals("jpg", doc.attrib['mdsol:AcceptableFileExtensions'])
-        self.assertEquals("99", doc.attrib['mdsol:DefaultValue'])
-        self.assertEquals("mmm yy dd", doc.attrib['mdsol:DateTimeFormat'])
-        self.assertEquals("10", doc.attrib['mdsol:FieldNumber'])
+        self.assertEqual(doc.tag, "ItemDef")
+        self.assertEqual("I_AGE", doc.attrib['OID'])
+        self.assertEqual("Age", doc.attrib['Name'])
+        self.assertEqual("Yes", doc.attrib['mdsol:Active'])
+        self.assertEqual("integer", doc.attrib['DataType'])
+        self.assertEqual("3", doc.attrib['Length'])
+        self.assertEqual("Text", doc.attrib['mdsol:ControlType'])
+        self.assertEqual("3", doc.attrib['SignificantDigits'])
+        self.assertEqual("SAGE", doc.attrib['SASFieldName'])
+        self.assertEqual("SVARNAME", doc.attrib['SDSVarName'])
+        self.assertEqual("AGE_YRS", doc.attrib['mdsol:SASLabel'])
+        self.assertEqual("3.0", doc.attrib['mdsol:SASFormat'])
+        self.assertEqual("A comment", doc.attrib['Comment'])
+        self.assertEqual("An origin", doc.attrib['Origin'])
+        self.assertEqual("No", doc.attrib['mdsol:QueryFutureDate'])
+        self.assertEqual("Yes", doc.attrib['mdsol:Visible'])
+        self.assertEqual("Yes", doc.attrib['mdsol:TranslationRequired'])
+        self.assertEqual("Yes", doc.attrib['mdsol:SourceDocument'])
+        self.assertEqual("No", doc.attrib['mdsol:OtherVisits'])
+        self.assertEqual("Yes", doc.attrib['mdsol:SourceDocument'])
+        self.assertEqual("Yes", doc.attrib['mdsol:QueryNonConformance'])
+        self.assertEqual("No", doc.attrib['mdsol:CanSetItemGroupDate'])
+        self.assertEqual("No", doc.attrib['mdsol:CanSetFormDate'])
+        self.assertEqual("No", doc.attrib['mdsol:CanSetStudyEventDate'])
+        self.assertEqual("No", doc.attrib['mdsol:CanSetSubjectDate'])
+        self.assertEqual("Yes", doc.attrib['mdsol:VisualVerify'])
+        self.assertEqual("Yes", doc.attrib['mdsol:DoesNotBreakSignature'])
+        self.assertEqual("SOMETHING_DIFFERENT", doc.attrib['mdsol:VariableOID'])
+        self.assertEqual("jpg", doc.attrib['mdsol:AcceptableFileExtensions'])
+        self.assertEqual("99", doc.attrib['mdsol:DefaultValue'])
+        self.assertEqual("mmm yy dd", doc.attrib['mdsol:DateTimeFormat'])
+        self.assertEqual("10", doc.attrib['mdsol:FieldNumber'])
 
-        self.assertEquals("Question", doc.getchildren()[0].tag)
-        self.assertEquals("CodeListRef", doc.getchildren()[1].tag)
-        self.assertEquals("MeasurementUnitRef", doc.getchildren()[2].tag)
-        self.assertEquals("RangeCheck", doc.getchildren()[3].tag)
-        self.assertEquals("mdsol:HeaderText", doc.getchildren()[4].tag)
-        self.assertEquals("mdsol:ViewRestriction", doc.getchildren()[5].tag)
-        self.assertEquals("mdsol:EntryRestriction", doc.getchildren()[6].tag)
-        self.assertEquals("mdsol:HelpText", doc.getchildren()[7].tag)
-        self.assertEquals("mdsol:ReviewGroup", doc.getchildren()[8].tag)
+        self.assertEqual("Question", doc.getchildren()[0].tag)
+        self.assertEqual("CodeListRef", doc.getchildren()[1].tag)
+        self.assertEqual("MeasurementUnitRef", doc.getchildren()[2].tag)
+        self.assertEqual("RangeCheck", doc.getchildren()[3].tag)
+        self.assertEqual("mdsol:HeaderText", doc.getchildren()[4].tag)
+        self.assertEqual("mdsol:ViewRestriction", doc.getchildren()[5].tag)
+        self.assertEqual("mdsol:EntryRestriction", doc.getchildren()[6].tag)
+        self.assertEqual("mdsol:HelpText", doc.getchildren()[7].tag)
+        self.assertEqual("mdsol:ReviewGroup", doc.getchildren()[8].tag)
 
 
 class TestItemGroupDef(unittest.TestCase):
@@ -620,19 +631,19 @@ class TestItemGroupDef(unittest.TestCase):
         tested << MdsolLabelRef("LABEL1", 2)
 
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "ItemGroupDef")
-        self.assertEquals("DM", doc.attrib['OID'])
-        self.assertEquals("Yes", doc.attrib['Repeating'])
-        self.assertEquals("Yes", doc.attrib['IsReferenceData'])
-        self.assertEquals("Demography", doc.attrib['Name'])
-        self.assertEquals("DMSAS", doc.attrib['SASDatasetName'])
-        self.assertEquals("TESTDOMAIN", doc.attrib['Domain'])
-        self.assertEquals("TESTORIGIN", doc.attrib['Origin'])
-        self.assertEquals("TESTROLE", doc.attrib['Role'])
-        self.assertEquals("TESTPURPOSE", doc.attrib['Purpose'])
-        self.assertEquals("A comment", doc.attrib['Comment'])
-        self.assertEquals("ItemRef", doc.getchildren()[0].tag)
-        self.assertEquals("mdsol:LabelRef", doc.getchildren()[1].tag)
+        self.assertEqual(doc.tag, "ItemGroupDef")
+        self.assertEqual("DM", doc.attrib['OID'])
+        self.assertEqual("Yes", doc.attrib['Repeating'])
+        self.assertEqual("Yes", doc.attrib['IsReferenceData'])
+        self.assertEqual("Demography", doc.attrib['Name'])
+        self.assertEqual("DMSAS", doc.attrib['SASDatasetName'])
+        self.assertEqual("TESTDOMAIN", doc.attrib['Domain'])
+        self.assertEqual("TESTORIGIN", doc.attrib['Origin'])
+        self.assertEqual("TESTROLE", doc.attrib['Role'])
+        self.assertEqual("TESTPURPOSE", doc.attrib['Purpose'])
+        self.assertEqual("A comment", doc.attrib['Comment'])
+        self.assertEqual("ItemRef", doc.getchildren()[0].tag)
+        self.assertEqual("mdsol:LabelRef", doc.getchildren()[1].tag)
 
 
 class TestFormDef(unittest.TestCase):
@@ -656,18 +667,18 @@ class TestFormDef(unittest.TestCase):
         tested << MdsolEntryRestriction("CRA")
 
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "FormDef")
-        self.assertEquals("DM", doc.attrib['OID'])
-        self.assertEquals("Demog", doc.attrib['Name'])
-        self.assertEquals("Yes", doc.attrib['Repeating'])
-        self.assertEquals("2", doc.attrib['mdsol:OrderNumber'])
+        self.assertEqual(doc.tag, "FormDef")
+        self.assertEqual("DM", doc.attrib['OID'])
+        self.assertEqual("Demog", doc.attrib['Name'])
+        self.assertEqual("Yes", doc.attrib['Repeating'])
+        self.assertEqual("2", doc.attrib['mdsol:OrderNumber'])
         # Would not see LinkFormOID and LinkStudyEventOID together, they are mutually exclusive. Just for coverage.
-        self.assertEquals("FRM1", doc.attrib['mdsol:LinkFormOID'])
-        self.assertEquals("EVT1", doc.attrib['mdsol:LinkStudyEventOID'])
-        self.assertEquals("ItemGroupRef", doc.getchildren()[0].tag)
-        self.assertEquals("mdsol:HelpText", doc.getchildren()[1].tag)
-        self.assertEquals("mdsol:ViewRestriction", doc.getchildren()[2].tag)
-        self.assertEquals("mdsol:EntryRestriction", doc.getchildren()[3].tag)
+        self.assertEqual("FRM1", doc.attrib['mdsol:LinkFormOID'])
+        self.assertEqual("EVT1", doc.attrib['mdsol:LinkStudyEventOID'])
+        self.assertEqual("ItemGroupRef", doc.getchildren()[0].tag)
+        self.assertEqual("mdsol:HelpText", doc.getchildren()[1].tag)
+        self.assertEqual("mdsol:ViewRestriction", doc.getchildren()[2].tag)
+        self.assertEqual("mdsol:EntryRestriction", doc.getchildren()[3].tag)
 
 
 class TestDecode(unittest.TestCase):
@@ -686,8 +697,8 @@ class TestDecode(unittest.TestCase):
         tested = Decode()
         tested << TranslatedText("Yes")
         doc = obj_to_doc(tested)
-        self.assertEquals("Decode", doc.tag)
-        self.assertEquals("TranslatedText", doc.getchildren()[0].tag)
+        self.assertEqual("Decode", doc.tag)
+        self.assertEqual("TranslatedText", doc.getchildren()[0].tag)
 
 
 class TestCodeListItem(unittest.TestCase):
@@ -706,22 +717,22 @@ class TestCodeListItem(unittest.TestCase):
         tested = CodeListItem("Y")
         tested << Decode()
         doc = obj_to_doc(tested)
-        self.assertEquals("CodeListItem", doc.tag)
-        self.assertEquals("", doc.get('mdsol:Specify', ''))
-        self.assertEquals("", doc.get('mdsol:OrderNumber', ''))
-        self.assertEquals("Y", doc.attrib['CodedValue'])
-        self.assertEquals("Decode", doc.getchildren()[0].tag)
+        self.assertEqual("CodeListItem", doc.tag)
+        self.assertEqual("", doc.get('mdsol:Specify', ''))
+        self.assertEqual("", doc.get('mdsol:OrderNumber', ''))
+        self.assertEqual("Y", doc.attrib['CodedValue'])
+        self.assertEqual("Decode", doc.getchildren()[0].tag)
 
     def test_builder_order_specify(self):
         """XML produced with optional params set"""
         tested = CodeListItem("Y", order_number=1, specify=True)
         tested << Decode()
         doc = obj_to_doc(tested)
-        self.assertEquals("CodeListItem", doc.tag)
-        self.assertEquals("Yes", doc.attrib['mdsol:Specify'])
-        self.assertEquals("1", doc.attrib['mdsol:OrderNumber'])
-        self.assertEquals("Y", doc.attrib['CodedValue'])
-        self.assertEquals("Decode", doc.getchildren()[0].tag)
+        self.assertEqual("CodeListItem", doc.tag)
+        self.assertEqual("Yes", doc.attrib['mdsol:Specify'])
+        self.assertEqual("1", doc.attrib['mdsol:OrderNumber'])
+        self.assertEqual("Y", doc.attrib['CodedValue'])
+        self.assertEqual("Decode", doc.getchildren()[0].tag)
 
 
 class TestCodeList(unittest.TestCase):
@@ -729,27 +740,268 @@ class TestCodeList(unittest.TestCase):
 
     def test_cannot_accept_non_codelistitem(self):
         with self.assertRaises(ValueError):
-            CodeList("CL1", "Codelist1", DATATYPE_INTEGER) << object()
+            CodeList("CL1", "Codelist1", DataType.Integer) << object()
 
     def test_invalid_datatype(self):
         with self.assertRaises(ValueError):
-            CodeList("CL1","Codelist1", "IncorrectDataType")
+            CodeList("CL1", "Codelist1", "IncorrectDataType")
 
     def test_accepts_codelistitem(self):
-        tested = CodeList("CL1", "Codelist1", DATATYPE_INTEGER)
+        tested = CodeList("CL1", "Codelist1", DataType.Integer)
         cl1 = CodeListItem("1")
         tested.add(cl1)
         self.assertEqual(cl1, tested.codelist_items[0])
 
     def test_builder(self):
         """XML produced"""
-        tested = CodeList("CL_YN", "YesNo", DATATYPE_STRING, sas_format_name="YESNO_CL")
+        tested = CodeList("CL_YN", "YesNo", DataType.String, sas_format_name="YESNO_CL")
         tested << CodeListItem("Y")
         doc = obj_to_doc(tested)
-        self.assertEquals("CodeList", doc.tag)
-        self.assertEquals(DATATYPE_STRING, doc.attrib['DataType'])
-        self.assertEquals("YESNO_CL", doc.attrib['SASFormatName'])
-        self.assertEquals("CodeListItem", doc.getchildren()[0].tag)
+        self.assertEqual("CodeList", doc.tag)
+        self.assertEqual(DataType.String.value, doc.attrib['DataType'])
+        self.assertEqual("YESNO_CL", doc.attrib['SASFormatName'])
+        self.assertEqual("CodeListItem", doc.getchildren()[0].tag)
+
+
+class TestConfirmationMessage(unittest.TestCase):
+    def test_build(self):
+        cm = MdsolConfirmationMessage("Form saved.")
+        doc = obj_to_doc(cm)
+        self.assertEqual("mdsol:ConfirmationMessage", doc.tag)
+        self.assertEqual("Form saved.", doc.text)
+
+    def test_lang_set(self):
+        cm = MdsolConfirmationMessage("Form saved.", lang="en")
+        doc = obj_to_doc(cm)
+        self.assertEqual("en", doc.attrib['xml:lang'])
+
+
+class TestMdsolCheckAction(unittest.TestCase):
+    """Test extensions to ODM for Edit Checks Steps in Rave"""
+
+    def test_build(self):
+        tested = MdsolCheckAction(
+            field_oid="Field",
+            variable_oid="TheVAR",
+            form_oid="The Form",
+            form_repeat_number=1,
+            folder_oid="The Folder",
+            folder_repeat_number=2,
+            record_position=3,
+            check_action_type=ActionType.SetDataPoint,
+            check_string="CString",  # Knowing which of these to use for each action type is
+            check_script="CScript",  # the trick. Best to look in an Architect Loader Spreadsheet
+            check_options="COptions")  # to get an idea
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:CheckAction", doc.tag)
+        self.assertEqual("The Folder", doc.attrib['FolderOID'])
+        self.assertEqual("The Form", doc.attrib['FormOID'])
+        self.assertEqual("Field", doc.attrib['FieldOID'])
+        self.assertEqual("TheVAR", doc.attrib['VariableOID'])
+        self.assertEqual("1", doc.attrib['FormRepeatNumber'])
+        self.assertEqual("2", doc.attrib['FolderRepeatNumber'])
+        self.assertEqual("3", doc.attrib['RecordPosition'])
+        self.assertEqual("CString", doc.attrib['String'])
+        self.assertEqual("CScript", doc.attrib['Script'])
+        self.assertEqual("COptions", doc.attrib['Options'])
+        self.assertEqual(ActionType.SetDataPoint.value, doc.attrib['Type'])
+
+    def test_invalid_action(self):
+        with self.assertRaises(AttributeError):
+            MdsolCheckAction(check_action_type='bad_name')
+
+
+class TestMdsolCheckStep(unittest.TestCase):
+    """Test extensions to ODM for Edit Checks Steps in Rave"""
+
+    def test_build(self):
+        tested = MdsolCheckStep(data_format="$1", static_value="1")
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:CheckStep", doc.tag)
+        self.assertEqual("$1", doc.attrib['DataFormat'])
+        self.assertEqual("1", doc.attrib['StaticValue'])
+        # No function param
+        self.assertEqual("", doc.attrib.get('Function', ''))
+
+    def test_build_function(self):
+        tested = MdsolCheckStep(function=StepType.Add)
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:CheckStep", doc.tag)
+        self.assertEqual(StepType.Add.value, doc.attrib['Function'])
+        # No data format param
+        self.assertEqual("", doc.attrib.get('DataFormat', ''))
+
+    def test_build_datastep(self):
+        tested = MdsolCheckStep(variable_oid="VAROID", field_oid="FIELDOID",
+                                form_oid="MyForm",
+                                folder_oid="MyFolder",
+                                record_position=0, form_repeat_number=2, folder_repeat_number=3,
+                                logical_record_position="MaxBySubject")
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:CheckStep", doc.tag)
+        self.assertEqual("VAROID", doc.attrib['VariableOID'])
+        self.assertEqual("FIELDOID", doc.attrib['FieldOID'])
+        self.assertEqual("MyForm", doc.attrib['FormOID'])
+        self.assertEqual("MyFolder", doc.attrib['FolderOID'])
+        self.assertEqual("0", doc.attrib['RecordPosition'])
+        self.assertEqual("2", doc.attrib['FormRepeatNumber'])
+        self.assertEqual("3", doc.attrib['FolderRepeatNumber'])
+        self.assertEqual("MaxBySubject", doc.attrib['LogicalRecordPosition'])
+        # No data format param
+        self.assertEqual("", doc.attrib.get('DataFormat', ''))
+        # No function param
+        self.assertEqual("", doc.attrib.get('Function', ''))
+
+    def test_build_custom_function(self):
+        tested = MdsolCheckStep(custom_function="AlwaysTrue*")
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:CheckStep", doc.tag)
+        self.assertEqual("AlwaysTrue*", doc.attrib['CustomFunction'])
+        # No data format param
+        self.assertEqual("", doc.attrib.get('DataFormat', ''))
+        # No function param
+        self.assertEqual("", doc.attrib.get('Function', ''))
+
+    def test_invalid_function(self):
+        with self.assertRaises(AttributeError):
+            MdsolCheckStep(function='bad_name')
+
+
+class TestMdsolEditCheckDef(unittest.TestCase):
+    """Test extensions to ODM for Edit Checks in Rave"""
+
+    def test_build(self):
+        tested = MdsolEditCheckDef("CHECK1")
+
+        tested << MdsolCheckStep(data_format="$1", static_value="1")
+        tested << MdsolCheckAction()
+
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:EditCheckDef", doc.tag)
+        self.assertEqual("TRUE", doc.attrib['Active'])
+        self.assertEqual("CHECK1", doc.attrib['OID'])
+        self.assertEqual("FALSE", doc.attrib['NeedsRetesting'])
+        self.assertEqual("FALSE", doc.attrib['BypassDuringMigration'])
+        self.assertEqual("mdsol:CheckStep", doc.getchildren()[0].tag)
+        self.assertEqual("mdsol:CheckAction", doc.getchildren()[1].tag)
+
+    def test_cannot_accept_non_check_or_action_child(self):
+        with self.assertRaises(ValueError):
+            MdsolEditCheckDef("OID") << object()
+
+    def test_accepts_check_step(self):
+        tested = MdsolEditCheckDef("CHECK1")
+        cs = MdsolCheckStep(data_format="$1", static_value="1")
+        tested << cs
+        self.assertEqual(cs, tested.check_steps[0])
+
+    def test_accepts_check_action(self):
+        tested = MdsolEditCheckDef("CHECK1")
+        ca = MdsolCheckAction()
+        tested << ca
+        self.assertEqual(ca, tested.check_actions[0])
+
+
+class TestMdsolDerivationStep(unittest.TestCase):
+    """Test extensions to ODM for Derivation Steps in Rave"""
+
+    def test_build(self):
+        tested = MdsolDerivationStep(data_format="$1", value="1")
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:DerivationStep", doc.tag)
+        self.assertEqual("$1", doc.attrib['DataFormat'])
+        self.assertEqual("1", doc.attrib['Value'])
+        # No function param
+        self.assertEqual("", doc.attrib.get('Function', ''))
+
+    def test_build_function(self):
+        tested = MdsolDerivationStep(function=StepType.Add)
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:DerivationStep", doc.tag)
+        self.assertEqual(StepType.Add.value, doc.attrib['Function'])
+        # No data format param
+        self.assertEqual("", doc.attrib.get('DataFormat', ''))
+
+    def test_build_datastep(self):
+        tested = MdsolDerivationStep(variable_oid="VAROID", field_oid="FIELDOID",
+                                     form_oid="VFORM",
+                                     folder_oid="MyFolder",
+                                     record_position=0, form_repeat_number=2, folder_repeat_number=3,
+                                     logical_record_position="MaxBySubject")
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:DerivationStep", doc.tag)
+        self.assertEqual("VAROID", doc.attrib['VariableOID'])
+        self.assertEqual("FIELDOID", doc.attrib['FieldOID'])
+        self.assertEqual("VFORM", doc.attrib['FormOID'])
+        self.assertEqual("MyFolder", doc.attrib['FolderOID'])
+        self.assertEqual("0", doc.attrib['RecordPosition'])
+        self.assertEqual("2", doc.attrib['FormRepeatNumber'])
+        self.assertEqual("3", doc.attrib['FolderRepeatNumber'])
+        self.assertEqual("MaxBySubject", doc.attrib['LogicalRecordPosition'])
+        # No data format param
+        self.assertEqual("", doc.attrib.get('DataFormat', ''))
+        # No function param
+        self.assertEqual("", doc.attrib.get('Function', ''))
+
+    def test_build_custom_function(self):
+        tested = MdsolDerivationStep(custom_function="AlwaysTrue*")
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:DerivationStep", doc.tag)
+        self.assertEqual("AlwaysTrue*", doc.attrib['CustomFunction'])
+        # No data format param
+        self.assertEqual("", doc.attrib.get('DataFormat', ''))
+        # No function param
+        self.assertEqual("", doc.attrib.get('Function', ''))
+
+    def test_invalid_function(self):
+        with self.assertRaises(AttributeError):
+            # StepType.IsPresent not valid for DerivationStep
+            MdsolDerivationStep(function=StepType.IsPresent)
+
+
+class TestMdsolDerivationDef(unittest.TestCase):
+    """Test extensions to ODM for Derivations in Rave"""
+
+    def test_build(self):
+        tested = MdsolDerivationDef("AGE",
+                                    variable_oid="VAROID", field_oid="FIELDOID",
+                                    form_oid="MyForm",
+                                    folder_oid="MyFolder",
+                                    record_position=0, form_repeat_number=2, folder_repeat_number=3,
+                                    logical_record_position="MaxBySubject",
+                                    all_variables_in_fields=True,
+                                    all_variables_in_folders=True)
+        doc = obj_to_doc(tested)
+        tested << MdsolDerivationStep(function=StepType.Age)
+
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:DerivationDef", doc.tag)
+        self.assertEqual("TRUE", doc.attrib['Active'])
+        self.assertEqual("AGE", doc.attrib['OID'])
+        self.assertEqual("FALSE", doc.attrib['NeedsRetesting'])
+        self.assertEqual("FALSE", doc.attrib['BypassDuringMigration'])
+        self.assertEqual("TRUE", doc.attrib['AllVariablesInFolders'])
+        self.assertEqual("TRUE", doc.attrib['AllVariablesInFields'])
+        self.assertEqual("VAROID", doc.attrib['VariableOID'])
+        self.assertEqual("FIELDOID", doc.attrib['FieldOID'])
+        self.assertEqual("MyForm", doc.attrib['FormOID'])
+        self.assertEqual("MyFolder", doc.attrib['FolderOID'])
+        self.assertEqual("0", doc.attrib['RecordPosition'])
+        self.assertEqual("2", doc.attrib['FormRepeatNumber'])
+        self.assertEqual("3", doc.attrib['FolderRepeatNumber'])
+        self.assertEqual("MaxBySubject", doc.attrib['LogicalRecordPosition'])
+
+        self.assertEqual("mdsol:DerivationStep", doc.getchildren()[0].tag)
+
+    def test_cannot_accept_any_child(self):
+        with self.assertRaises(ValueError):
+            MdsolDerivationDef("OID") << object()
+
+    def test_accepts_derivation_step(self):
+        tested = MdsolDerivationDef("AGE")
+        ds = MdsolDerivationStep(function=StepType.Age)
+        tested << ds
+        self.assertEqual(ds, tested.derivation_steps[0])
 
 
 class TestMetaDataVersion(unittest.TestCase):
@@ -769,6 +1021,26 @@ class TestMetaDataVersion(unittest.TestCase):
         tested = MetaDataVersion("OID", "NAME")(sed)
         self.assertEqual(sed, tested.study_event_defs[0])
 
+    def test_can_accept_confirmation_message(self):
+        cm = MdsolConfirmationMessage("Form saved", lang="eng")
+        tested = MetaDataVersion("OID", "NAME")(cm)
+        self.assertEqual(cm, tested.confirmation_message)
+
+    def test_can_accept_edit_check_def(self):
+        ec = MdsolEditCheckDef("CHECK1")
+        tested = MetaDataVersion("OID", "NAME")(ec)
+        self.assertEqual(ec, tested.edit_checks[0])
+
+    def test_can_accept_derivation_def(self):
+        dd = MdsolDerivationDef("DEV1")
+        tested = MetaDataVersion("OID", "NAME")(dd)
+        self.assertEqual(dd, tested.derivations[0])
+
+    def test_can_accept_custom_function_def(self):
+        cf = MdsolCustomFunctionDef("DEV1", "return true;", language=MdsolCustomFunctionDef.C_SHARP)
+        tested = MetaDataVersion("OID", "NAME")(cf)
+        self.assertEqual(cf, tested.custom_functions[0])
+
     def test_builder(self):
         """XML produced"""
         tested = MetaDataVersion("OID", "NAME", description="A description",
@@ -781,26 +1053,34 @@ class TestMetaDataVersion(unittest.TestCase):
         tested << StudyEventDef("OID", "Name", False, StudyEventDef.SCHEDULED)
         tested << FormDef("FORM_OID", "FORM_Name")
         tested << ItemGroupDef("IG_DEMO", "Demography")
-        tested << ItemDef("ID_AGE", "Demography", DATATYPE_INTEGER, 3)
-        tested << CodeList("C_YESNO", "Yes No", DATATYPE_STRING)
+        tested << ItemDef("ID_AGE", "Demography", DataType.Integer, 3)
+        tested << CodeList("C_YESNO", "Yes No", DataType.String)
         tested << MdsolLabelDef("LABEL1", "first label")
+        tested << MdsolConfirmationMessage("Form has been submitted!")
+        tested << MdsolCustomFunctionDef("AlwaysTrue*", "return true;")
+        tested << MdsolEditCheckDef("DM01")
+        tested << MdsolDerivationDef("AGE")
 
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "MetaDataVersion")
-        self.assertEquals("OID", doc.attrib['OID'])
-        self.assertEquals("NAME", doc.attrib['Name'])
-        self.assertEquals("A description", doc.attrib['Description'])
-        self.assertEquals("DEFAULT", doc.attrib['mdsol:DefaultMatrixOID'])
-        self.assertEquals("I confirm.", doc.attrib['mdsol:SignaturePrompt'])
-        self.assertEquals("DM", doc.attrib['mdsol:PrimaryFormOID'])
-        self.assertEquals("Yes", doc.attrib['mdsol:DeleteExisting'])
-        self.assertEquals("Protocol", doc.getchildren()[0].tag)
-        self.assertEquals("StudyEventDef", doc.getchildren()[1].tag)
-        self.assertEquals("FormDef", doc.getchildren()[2].tag)
-        self.assertEquals("ItemGroupDef", doc.getchildren()[3].tag)
-        self.assertEquals("ItemDef", doc.getchildren()[4].tag)
-        self.assertEquals("CodeList", doc.getchildren()[5].tag)
-        self.assertEquals("mdsol:LabelDef", doc.getchildren()[6].tag)
+        self.assertEqual(doc.tag, "MetaDataVersion")
+        self.assertEqual("OID", doc.attrib['OID'])
+        self.assertEqual("NAME", doc.attrib['Name'])
+        self.assertEqual("A description", doc.attrib['Description'])
+        self.assertEqual("DEFAULT", doc.attrib['mdsol:DefaultMatrixOID'])
+        self.assertEqual("I confirm.", doc.attrib['mdsol:SignaturePrompt'])
+        self.assertEqual("DM", doc.attrib['mdsol:PrimaryFormOID'])
+        self.assertEqual("Yes", doc.attrib['mdsol:DeleteExisting'])
+        self.assertEqual("Protocol", doc.getchildren()[0].tag)
+        self.assertEqual("StudyEventDef", doc.getchildren()[1].tag)
+        self.assertEqual("FormDef", doc.getchildren()[2].tag)
+        self.assertEqual("ItemGroupDef", doc.getchildren()[3].tag)
+        self.assertEqual("ItemDef", doc.getchildren()[4].tag)
+        self.assertEqual("CodeList", doc.getchildren()[5].tag)
+        self.assertEqual("mdsol:ConfirmationMessage", doc.getchildren()[6].tag)
+        self.assertEqual("mdsol:LabelDef", doc.getchildren()[7].tag)
+        self.assertEqual("mdsol:EditCheckDef", doc.getchildren()[8].tag)
+        self.assertEqual("mdsol:DerivationDef", doc.getchildren()[9].tag)
+        self.assertEqual("mdsol:CustomFunctionDef", doc.getchildren()[10].tag)
 
 
 class TestStudy(unittest.TestCase):
@@ -868,11 +1148,11 @@ class TestStudy(unittest.TestCase):
             MetaDataVersion("OID", "NAME")
         )
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.tag, "Study")
-        self.assertEquals(doc.attrib['mdsol:ProjectType'], "GlobalLibrary Volume")
-        self.assertEquals(doc.getchildren()[0].tag, "GlobalVariables")
-        self.assertEquals(doc.getchildren()[1].tag, "BasicDefinitions")
-        self.assertEquals(doc.getchildren()[2].tag, "MetaDataVersion")
+        self.assertEqual(doc.tag, "Study")
+        self.assertEqual(doc.attrib['mdsol:ProjectType'], "GlobalLibrary Volume")
+        self.assertEqual(doc.getchildren()[0].tag, "GlobalVariables")
+        self.assertEqual(doc.getchildren()[1].tag, "BasicDefinitions")
+        self.assertEqual(doc.getchildren()[2].tag, "MetaDataVersion")
 
 
 if __name__ == '__main__':

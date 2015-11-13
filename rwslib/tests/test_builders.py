@@ -24,6 +24,28 @@ class TestInheritance(unittest.TestCase):
             NewObj() << object()
 
 
+class TestAttributeSetters(unittest.TestCase):
+
+    class TestElem(ODMElement):
+        """Test class with a bad __lshift__ implementation"""
+        def __init__(self):
+            self.user = None
+            self.locations = []
+
+        def __lshift__(self, other):
+            self.set_single_attribute(other, UserRef, "xxxuser")   #Incorrect spelling of user attribute
+            self.set_list_attribute(other, LocationRef, "xxxlocations")   #Incorrect spelling of location attribute
+
+    def test_single_attribute_misspelling(self):
+        tested = TestAttributeSetters.TestElem()
+        with self.assertRaises(AttributeError):
+            tested << UserRef("Fred")
+
+    def test_list_attribute_misspelling(self):
+        tested = TestAttributeSetters.TestElem()
+        with self.assertRaises(AttributeError):
+            tested << LocationRef("Site 22")
+
 class TestUserRef(unittest.TestCase):
     def test_accepts_no_children(self):
         with self.assertRaises(ValueError):
@@ -35,7 +57,7 @@ class TestUserRef(unittest.TestCase):
         doc = obj_to_doc(tested)
 
         self.assertEqual(doc.attrib['UserOID'],"Fred")
-        self.assertEquals(doc.tag,"UserRef")
+        self.assertEqual(doc.tag,"UserRef")
 
 class TestLocationRef(unittest.TestCase):
     def test_accepts_no_children(self):
@@ -48,7 +70,7 @@ class TestLocationRef(unittest.TestCase):
         doc = obj_to_doc(tested)
 
         self.assertEqual(doc.attrib['LocationOID'], "Gainesville")
-        self.assertEquals(doc.tag, "LocationRef")
+        self.assertEqual(doc.tag, "LocationRef")
 
 class TestReasonForChange(unittest.TestCase):
     def test_accepts_no_children(self):
@@ -61,7 +83,7 @@ class TestReasonForChange(unittest.TestCase):
         doc = obj_to_doc(tested)
 
         self.assertEqual("Testing 1..2..3", doc.text)
-        self.assertEquals(doc.tag, "ReasonForChange")
+        self.assertEqual(doc.tag, "ReasonForChange")
 
 class TestDateTimeStamp(unittest.TestCase):
     def test_accepts_no_children(self):
@@ -74,14 +96,14 @@ class TestDateTimeStamp(unittest.TestCase):
         doc = obj_to_doc(tested)
 
         self.assertEqual(dt_to_iso8601(dt), doc.text)
-        self.assertEquals(doc.tag, "DateTimeStamp")
+        self.assertEqual(doc.tag, "DateTimeStamp")
 
     def test_builder_with_string(self):
         dt = "2009-02-04T14:10:32-05:00"
         tested = DateTimeStamp(dt)
         doc = obj_to_doc(tested)
         self.assertEqual(dt, doc.text)
-        self.assertEquals(doc.tag, "DateTimeStamp")
+        self.assertEqual(doc.tag, "DateTimeStamp")
 
 
 class TestAuditRecord(unittest.TestCase):
@@ -121,14 +143,14 @@ class TestAuditRecord(unittest.TestCase):
 
     def test_builder(self):
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.tag, "AuditRecord")
-        self.assertEquals(AuditRecord.EDIT_DATA_MANAGEMENT, doc.attrib["EditPoint"])
-        self.assertEquals("No", doc.attrib["UsedImputationMethod"])
-        self.assertEquals("No", doc.attrib["mdsol:IncludeFileOID"])
-        self.assertEquals("UserRef", doc.getchildren()[0].tag)
-        self.assertEquals("LocationRef", doc.getchildren()[1].tag)
-        self.assertEquals("DateTimeStamp", doc.getchildren()[2].tag)
-        self.assertEquals("ReasonForChange", doc.getchildren()[3].tag)
+        self.assertEqual(doc.tag, "AuditRecord")
+        self.assertEqual(AuditRecord.EDIT_DATA_MANAGEMENT, doc.attrib["EditPoint"])
+        self.assertEqual("No", doc.attrib["UsedImputationMethod"])
+        self.assertEqual("No", doc.attrib["mdsol:IncludeFileOID"])
+        self.assertEqual("UserRef", doc.getchildren()[0].tag)
+        self.assertEqual("LocationRef", doc.getchildren()[1].tag)
+        self.assertEqual("DateTimeStamp", doc.getchildren()[2].tag)
+        self.assertEqual("ReasonForChange", doc.getchildren()[3].tag)
 
     def test_no_user_ref(self):
         """Test with no user ref should fail on build with a ValueError"""
@@ -164,6 +186,11 @@ class TestItemData(unittest.TestCase):
         self.assertEqual(tested.lock, None)
         self.assertEqual(tested.freeze, None)
         self.assertEqual(tested.verify, None)
+
+    def test_only_accepts_itemdata(self):
+        """Test that an ItemData will not accept any old object"""
+        with self.assertRaises(ValueError):
+            self.tested << {"Field1" : "ValueC"}
 
     def test_isnull_not_set(self):
         """Isnull should not be set where we have a value not in '', None"""
@@ -206,8 +233,8 @@ class TestItemData(unittest.TestCase):
         self.assertEqual(doc.attrib['mdsol:Verify'],"Yes")
         self.assertEqual(doc.attrib['mdsol:Lock'],"Yes")
         self.assertEqual(doc.attrib['mdsol:Freeze'],"No")
-        self.assertEquals(doc.tag,"ItemData")
-        self.assertEquals("AuditRecord",doc.getchildren()[0].tag)
+        self.assertEqual(doc.tag,"ItemData")
+        self.assertEqual("AuditRecord",doc.getchildren()[0].tag)
 
     def test_transaction_type(self):
         tested = self.tested
@@ -246,7 +273,7 @@ class TestItemGroupData(unittest.TestCase):
 
     def test_children(self):
         """Test there are 2 children"""
-        self.assertEquals(2, len(self.tested.items))
+        self.assertEqual(2, len(self.tested.items))
 
     def test_two_same_invalid(self):
         """Test adding a duplicate field causes error"""
@@ -267,24 +294,24 @@ class TestItemGroupData(unittest.TestCase):
 
     def test_builders_basic(self):
         doc = obj_to_doc(self.tested,"TESTFORM")
-        self.assertEquals(doc.attrib["ItemGroupOID"],"TESTFORM")
-        self.assertEquals(len(doc),2)
-        self.assertEquals(doc.tag,"ItemGroupData")
+        self.assertEqual(doc.attrib["ItemGroupOID"],"TESTFORM")
+        self.assertEqual(len(doc),2)
+        self.assertEqual(doc.tag,"ItemGroupData")
 
     def test_transaction_type(self):
         """Test transaction type inserted if set"""
         self.tested.transaction_type = 'Context'
         doc = obj_to_doc(self.tested,"TESTFORM")
-        self.assertEquals(doc.attrib["TransactionType"],"Context")
+        self.assertEqual(doc.attrib["TransactionType"],"Context")
 
     def test_whole_item_group(self):
         """mdsol:Submission should be wholeitemgroup or SpecifiedItemsOnly"""
         doc = obj_to_doc(self.tested,"TESTFORM")
-        self.assertEquals(doc.attrib["mdsol:Submission"],"SpecifiedItemsOnly")
+        self.assertEqual(doc.attrib["mdsol:Submission"],"SpecifiedItemsOnly")
 
         self.tested.whole_item_group = True
         doc = obj_to_doc(self.tested,"TESTFORM")
-        self.assertEquals(doc.attrib["mdsol:Submission"],"WholeItemGroup")
+        self.assertEqual(doc.attrib["mdsol:Submission"],"WholeItemGroup")
 
 
 class TestFormData(unittest.TestCase):
@@ -331,15 +358,15 @@ class TestFormData(unittest.TestCase):
 
     def test_builders_basic(self):
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.attrib["FormOID"], "TESTFORM_A")
-        self.assertEquals(len(doc), 3)
-        self.assertEquals(doc.tag, "FormData")
+        self.assertEqual(doc.attrib["FormOID"], "TESTFORM_A")
+        self.assertEqual(len(doc), 3)
+        self.assertEqual(doc.tag, "FormData")
 
     def test_transaction_type(self):
         """Test transaction type inserted if set"""
         self.tested.transaction_type = 'Update'
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.attrib["TransactionType"], self.tested.transaction_type)
+        self.assertEqual(doc.attrib["TransactionType"], self.tested.transaction_type)
 
     def test_invalid_transaction_type_direct_assign(self):
         """Test transaction type will not allow you to set to invalid choice"""
@@ -356,7 +383,7 @@ class TestFormData(unittest.TestCase):
             )
        )
         doc = obj_to_doc(tested)
-        self.assertEquals(doc.attrib["FormRepeatKey"],"9")
+        self.assertEqual(doc.attrib["FormRepeatKey"],"9")
 
 
 class TestStudyEventData(unittest.TestCase):
@@ -378,13 +405,13 @@ class TestStudyEventData(unittest.TestCase):
         """Test transaction type inserted if set"""
         self.tested.transaction_type = 'Update'
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.attrib["TransactionType"],self.tested.transaction_type)
+        self.assertEqual(doc.attrib["TransactionType"],self.tested.transaction_type)
 
     def test_builders_basic(self):
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.attrib["StudyEventOID"],"VISIT_1")
-        self.assertEquals(len(doc),1)
-        self.assertEquals(doc.tag,"StudyEventData")
+        self.assertEqual(doc.attrib["StudyEventOID"],"VISIT_1")
+        self.assertEqual(len(doc),1)
+        self.assertEqual(doc.tag,"StudyEventData")
 
     def test_only_add_formdata_once(self):
         """Test that an FormData object can only be added once"""
@@ -433,10 +460,10 @@ class TestSubjectData(unittest.TestCase):
 
     def test_basic(self):
         """Test there are 3 children"""
-        self.assertEquals("SITE1", self.tested.sitelocationoid)
-        self.assertEquals("SUBJECT1", self.tested.subject_key)
+        self.assertEqual("SITE1", self.tested.sitelocationoid)
+        self.assertEqual("SUBJECT1", self.tested.subject_key)
         # Default transaction type
-        self.assertEquals("Update", self.tested.transaction_type)
+        self.assertEqual("Update", self.tested.transaction_type)
 
     def test_invalid_transaction_type_direct_assign(self):
         """Test transaction type will not allow you to set to invalid choice"""
@@ -446,7 +473,7 @@ class TestSubjectData(unittest.TestCase):
 
     def test_children(self):
         """Test there are 3 children"""
-        self.assertEquals(1, len(self.tested.study_events))
+        self.assertEqual(1, len(self.tested.study_events))
 
     def test_invalid_transaction_type(self):
         """According to docs does not permit upserts"""
@@ -459,8 +486,8 @@ class TestSubjectData(unittest.TestCase):
         """XML produced"""
         doc = obj_to_doc(self.tested)
         # Test default transaction tyoe
-        self.assertEquals(doc.attrib["TransactionType"], "Update")
-        self.assertEquals(doc.tag, "SubjectData")
+        self.assertEqual(doc.attrib["TransactionType"], "Update")
+        self.assertEqual(doc.tag, "SubjectData")
 
     def test_only_add_studyeventdata_once(self):
         """Test that a StudyEventData object can only be added once"""
@@ -498,8 +525,8 @@ class TestClinicalData(unittest.TestCase):
 
     def test_basic(self):
         """Test there are 3 children"""
-        self.assertEquals("STUDY1", self.tested.projectname)
-        self.assertEquals("DEV", self.tested.environment)
+        self.assertEqual("STUDY1", self.tested.projectname)
+        self.assertEqual("DEV", self.tested.environment)
 
     def test_only_accepts_subjectdata(self):
         """Test that only SubjectData can be inserted"""
@@ -517,7 +544,7 @@ class TestClinicalData(unittest.TestCase):
     def test_builder(self):
         """XML produced"""
         doc = obj_to_doc(self.tested)
-        self.assertEquals(doc.tag,"ClinicalData")
+        self.assertEqual(doc.tag,"ClinicalData")
 
 
 class TestODM(unittest.TestCase):
@@ -545,34 +572,54 @@ class TestODM(unittest.TestCase):
     def test_basic(self):
         """Basic tests"""
         # If no fileoid is given, a unique id is generated
-        self.assertEquals(True,self.tested.fileoid is not None)
-        self.assertEquals("My test message", self.tested.description)
+        self.assertEqual(True,self.tested.fileoid is not None)
+        self.assertEqual("My test message", self.tested.description)
 
     def test_assign_fileoid(self):
         """Test if you assign a fileoid it keeps it"""
         tested = ODM("MY TEST SYSTEM", fileoid="F1")
-        self.assertEquals("F1", tested.fileoid)
+        self.assertEqual("F1", tested.fileoid)
 
-    def test_only_accepts_clinicaldata(self):
-        """Test that only ClinicalData can be inserted"""
+    def test_only_accepts_valid_children(self):
+        """Test that only ClinicalData or Study can be inserted"""
         def do():
             self.tested << ItemData("Field1", "ValueC")
         self.assertRaises(ValueError,do)
 
+    def test_accepts_clinicaldata_and_study(self):
+        """Test that accepts clinicaldata"""
+        tested = ODM("MY TEST SYSTEM", fileoid="F1")
+        cd = ClinicalData("Project1","DEV")
+        study = Study("PROJ1",project_type=Study.PROJECT)
+        tested << cd
+        tested << study
+        self.assertEqual(study,tested.study)
+        self.assertEqual(cd, tested.clinical_data)
+
     def test_getroot(self):
         """XML produced"""
         doc = self.tested.getroot()
-        self.assertEquals(doc.tag,"ODM")
-        self.assertEquals(doc.attrib["Originator"], "MY TEST SYSTEM")
-        self.assertEquals(doc.attrib["Description"], self.tested.description)
+        self.assertEqual(doc.tag,"ODM")
+        self.assertEqual(doc.attrib["Originator"], "MY TEST SYSTEM")
+        self.assertEqual(doc.attrib["Description"], self.tested.description)
+        self.assertEqual("ClinicalData", doc.getchildren()[0].tag)
+
+    def test_getroot_study(self):
+        """XML produced with a study child"""
+        tested = ODM("MY TEST SYSTEM", fileoid="F1")
+        study = Study("PROJ1",project_type=Study.PROJECT)
+        tested << study
+        doc = tested.getroot()
+        self.assertEqual(doc.tag,"ODM")
+        self.assertEqual("Study", doc.getchildren()[0].tag)
 
     def test_str_well_formed(self):
         """Make an XML string from the object, parse it to ensure it's well formed"""
         doc = ET.fromstring(str(self.tested))
         NS_ODM = '{http://www.cdisc.org/ns/odm/v1.3}'
-        self.assertEquals(doc.tag,NS_ODM + "ODM")
-        self.assertEquals(doc.attrib["Originator"], "MY TEST SYSTEM")
-        self.assertEquals(doc.attrib["Description"], self.tested.description)
+        self.assertEqual(doc.tag,NS_ODM + "ODM")
+        self.assertEqual(doc.attrib["Originator"], "MY TEST SYSTEM")
+        self.assertEqual(doc.attrib["Description"], self.tested.description)
 
 
 if __name__ == '__main__':
