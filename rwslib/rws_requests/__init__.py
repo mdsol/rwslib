@@ -376,7 +376,7 @@ class PostDataRequest(RWSAuthorizedPostRequest):
 
 class ODMDatasetBase(RWSAuthorizedGetRequest):
     KNOWN_QUERY_OPTIONS = ['versionitem', 'rawsuffix', 'codelistsuffix',
-                           'decodesuffix', 'stdsuffix']
+                           'decodesuffix', 'stdsuffix', 'start']
 
     def checkParams(self):
         check_dataset_type(self.dataset_type)
