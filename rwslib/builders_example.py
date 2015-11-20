@@ -8,7 +8,7 @@ def example_clinical_data(study_name, environment):
 
     odm = ODM("test system")(
        ClinicalData("Mediflex", "DEV")(
-          SubjectData("MDSOL", "IJS TEST3", transaction_type="Insert")(
+          SubjectData("MDSOL", "IJS TEST4", transaction_type="Insert")(
              StudyEventData("SUBJECT")(
                 FormData("EN", transaction_type="Update")(
                    ItemGroupData()(
@@ -21,7 +21,9 @@ def example_clinical_data(study_name, environment):
                                             LocationRef("MDSOL"),
                                             ReasonForChange("Data Entry Error"),
                                             DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80))
-                            )
+                            ),
+                            MdsolQuery(value="Subject intials should be 2 chars only.", recipient="Site from System",
+                                       status=QueryStatusType.Open)
                       ),
                       ItemData("SUBJID", '001')
                    )
@@ -210,7 +212,7 @@ if __name__ == '__main__':
     r = RWSConnection('innovate', account['username'], account['password'])
 
 
-    if True: # MetaData
+    if False: # MetaData
         projectname = 'TESTSTUDY'
         odm_definition = example_metadata(projectname, "Draft1")
         request = PostMetadataRequest(projectname, str(odm_definition))
