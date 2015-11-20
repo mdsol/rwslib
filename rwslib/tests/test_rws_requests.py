@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 
 __author__ = 'glow'
 
@@ -16,7 +17,7 @@ from rwslib.rws_requests import StudySubjectsRequest, check_dataset_type, Subjec
     GlobalLibraryVersionRequest, GlobalLibraryVersionsRequest, GlobalLibraryDraftsRequest, \
     GlobalLibrariesRequest, StudyVersionRequest, StudyVersionsRequest, StudyDraftsRequest, \
     MetadataStudiesRequest, ClinicalStudiesRequest, CacheFlushRequest, DiagnosticsRequest, \
-    BuildVersionRequest
+    BuildVersionRequest, ODMDatasetBase
 
 
 class TestStudySubjectsRequest(unittest.TestCase):
@@ -174,6 +175,28 @@ class TestSubjectDatasetRequest(unittest.TestCase):
         self.assertEqual("Dataset type not 'regular' or 'raw' is pineapple",
                          str(exc.exception))
 
+    def test_create_start_using_datetime(self):
+        """We can pass a datetime instance as the start argument"""
+        jan = datetime.datetime(year=2012, month=12, day=1, hour=12, minute=12, second=23)
+        t = self.create_request_object(dataset_type="raw", formoid="DM", start=jan)
+        self.assertEqual("Mediflex", t.project_name)
+        self.assertEqual("Prod", t.environment_name)
+        self.assertEqual("studies/Mediflex(Prod)/subjects/1001/datasets/raw/DM?start=2012-12-01T12%3A12%3A23", t.url_path())
+
+    def test_create_start_using_string_datetime(self):
+        """We can pass a string (iso8601) instance as the start argument"""
+        t = self.create_request_object(dataset_type="raw", formoid="DM", start="2012-12-01T12:12:23")
+        self.assertEqual("Mediflex", t.project_name)
+        self.assertEqual("Prod", t.environment_name)
+        self.assertEqual("studies/Mediflex(Prod)/subjects/1001/datasets/raw/DM?start=2012-12-01T12%3A12%3A23", t.url_path())
+
+    def test_create_start_using_string_date(self):
+        """We can pass a string (iso8601) instance as the start argument"""
+        t = self.create_request_object(dataset_type="raw", formoid="DM", start="2012-12-01")
+        self.assertEqual("Mediflex", t.project_name)
+        self.assertEqual("Prod", t.environment_name)
+        self.assertEqual("studies/Mediflex(Prod)/subjects/1001/datasets/raw/DM?start=2012-12-01T00%3A00%3A00", t.url_path())
+
 
 class TestVersionDatasetRequest(unittest.TestCase):
     def create_request_object(self, **kwargs):
@@ -224,6 +247,28 @@ class TestVersionDatasetRequest(unittest.TestCase):
             t = self.create_request_object(dataset_type="pineapple")
         self.assertEqual("Dataset type not 'regular' or 'raw' is pineapple",
                         str(exc.exception))
+
+    def test_create_start_using_datetime(self):
+        """We can pass a datetime instance as the start argument"""
+        jan = datetime.datetime(year=2012, month=12, day=1, hour=12, minute=12, second=23)
+        t = self.create_request_object(dataset_type="raw", formoid="DM", start=jan)
+        self.assertEqual("Mediflex", t.project_name)
+        self.assertEqual("Prod", t.environment_name)
+        self.assertEqual("studies/Mediflex(Prod)/versions/1001/datasets/raw/DM?start=2012-12-01T12%3A12%3A23", t.url_path())
+
+    def test_create_start_using_string_datetime(self):
+        """We can pass a string (iso8601) instance as the start argument"""
+        t = self.create_request_object(dataset_type="raw", formoid="DM", start="2012-12-01T12:12:23")
+        self.assertEqual("Mediflex", t.project_name)
+        self.assertEqual("Prod", t.environment_name)
+        self.assertEqual("studies/Mediflex(Prod)/versions/1001/datasets/raw/DM?start=2012-12-01T12%3A12%3A23", t.url_path())
+
+    def test_create_start_using_string_date(self):
+        """We can pass a string (iso8601) instance as the start argument"""
+        t = self.create_request_object(dataset_type="raw", formoid="DM", start="2012-12-01")
+        self.assertEqual("Mediflex", t.project_name)
+        self.assertEqual("Prod", t.environment_name)
+        self.assertEqual("studies/Mediflex(Prod)/versions/1001/datasets/raw/DM?start=2012-12-01T00%3A00%3A00", t.url_path())
 
 
 class TestStudyDatasetRequest(unittest.TestCase):
@@ -281,6 +326,29 @@ class TestStudyDatasetRequest(unittest.TestCase):
             t = self.create_request_object(dataset_type="pineapple")
         self.assertEqual("Dataset type not 'regular' or 'raw' is pineapple",
                          str(exc.exception))
+
+    def test_create_start_using_datetime(self):
+        """We can pass a datetime instance as the start argument"""
+        jan = datetime.datetime(year=2012, month=12, day=1, hour=12, minute=12, second=23)
+        t = self.create_request_object(dataset_type="raw", formoid="DM", start=jan)
+        self.assertEqual("Mediflex", t.project_name)
+        self.assertEqual("Prod", t.environment_name)
+        self.assertEqual("studies/Mediflex(Prod)/datasets/raw/DM?start=2012-12-01T12%3A12%3A23", t.url_path())
+
+    def test_create_start_using_string_datetime(self):
+        """We can pass a string (iso8601) instance as the start argument"""
+        t = self.create_request_object(dataset_type="raw", formoid="DM", start="2012-12-01T12:12:23")
+        self.assertEqual("Mediflex", t.project_name)
+        self.assertEqual("Prod", t.environment_name)
+        self.assertEqual("studies/Mediflex(Prod)/datasets/raw/DM?start=2012-12-01T12%3A12%3A23", t.url_path())
+
+    def test_create_start_using_string_date(self):
+        """We can pass a string (iso8601) instance as the start argument"""
+        t = self.create_request_object(dataset_type="raw", formoid="DM", start="2012-12-01")
+        self.assertEqual("Mediflex", t.project_name)
+        self.assertEqual("Prod", t.environment_name)
+        self.assertEqual("studies/Mediflex(Prod)/datasets/raw/DM?start=2012-12-01T00%3A00%3A00", t.url_path())
+
 
 class TestPostDataRequest(unittest.TestCase):
     def test_post_data_request_response(self):
