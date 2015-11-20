@@ -195,7 +195,7 @@ class TestSubjectDatasetRequest(unittest.TestCase):
         t = self.create_request_object(dataset_type="raw", formoid="DM", start="2012-12-01")
         self.assertEqual("Mediflex", t.project_name)
         self.assertEqual("Prod", t.environment_name)
-        self.assertEqual("studies/Mediflex(Prod)/subjects/1001/datasets/raw/DM?start=2012-12-01T00%3A00%3A00",
+        self.assertEqual("studies/Mediflex(Prod)/subjects/1001/datasets/raw/DM?start=2012-12-01",
                          t.url_path())
 
 
@@ -269,7 +269,7 @@ class TestVersionDatasetRequest(unittest.TestCase):
         t = self.create_request_object(dataset_type="raw", formoid="DM", start="2012-12-01")
         self.assertEqual("Mediflex", t.project_name)
         self.assertEqual("Prod", t.environment_name)
-        self.assertEqual("studies/Mediflex(Prod)/versions/1001/datasets/raw/DM?start=2012-12-01T00%3A00%3A00", t.url_path())
+        self.assertEqual("studies/Mediflex(Prod)/versions/1001/datasets/raw/DM?start=2012-12-01", t.url_path())
 
 
 class TestStudyDatasetRequest(unittest.TestCase):
@@ -348,7 +348,7 @@ class TestStudyDatasetRequest(unittest.TestCase):
         t = self.create_request_object(dataset_type="raw", formoid="DM", start="2012-12-01")
         self.assertEqual("Mediflex", t.project_name)
         self.assertEqual("Prod", t.environment_name)
-        self.assertEqual("studies/Mediflex(Prod)/datasets/raw/DM?start=2012-12-01T00%3A00%3A00", t.url_path())
+        self.assertEqual("studies/Mediflex(Prod)/datasets/raw/DM?start=2012-12-01", t.url_path())
 
 
 class TestPostDataRequest(unittest.TestCase):
