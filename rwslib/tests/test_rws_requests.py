@@ -692,6 +692,32 @@ class TestBuildVersionRequest(unittest.TestCase):
         self.assertEqual("version/build", t.url_path())
 
 
+class TestODMDatasetBase(unittest.TestCase):
+    def test_KNOWN_QUERY_OPTIONS_versionitem(self):
+        """We check if the 'versionitem' keyword is in the KNOWN_QUERY_OPTIONS"""
+        self.assertTrue("versionitem" in ODMDatasetBase.KNOWN_QUERY_OPTIONS)
+
+    def test_KNOWN_QUERY_OPTIONS_rawsuffix(self):
+        """We check if the 'rawsuffix' keyword is in the KNOWN_QUERY_OPTIONS"""
+        self.assertTrue("rawsuffix" in ODMDatasetBase.KNOWN_QUERY_OPTIONS)
+
+    def test_KNOWN_QUERY_OPTIONS_codelistsuffix(self):
+        """We check if the 'codelistsuffix' keyword is in the KNOWN_QUERY_OPTIONS"""
+        self.assertTrue("codelistsuffix" in ODMDatasetBase.KNOWN_QUERY_OPTIONS)
+
+    def test_KNOWN_QUERY_OPTIONS_decodesuffix(self):
+        """We check if the 'decodesuffix' keyword is in the KNOWN_QUERY_OPTIONS"""
+        self.assertTrue("decodesuffix" in ODMDatasetBase.KNOWN_QUERY_OPTIONS)
+
+    def test_KNOWN_QUERY_OPTIONS_stdsuffix(self):
+        """We check if the 'stdsuffix' keyword is in the KNOWN_QUERY_OPTIONS"""
+        self.assertTrue("stdsuffix" in ODMDatasetBase.KNOWN_QUERY_OPTIONS)
+
+    def test_KNOWN_QUERY_OPTIONS_start(self):
+        """We check if the 'start' keyword is in the KNOWN_QUERY_OPTIONS"""
+        self.assertTrue("start" in ODMDatasetBase.KNOWN_QUERY_OPTIONS)
+
+
 
 class TimeoutTest(unittest.TestCase):
     """
