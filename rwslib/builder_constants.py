@@ -15,6 +15,15 @@ class DataType(enum.Enum):
     String = 'string'  # Used only by codelists
 
 
+class QueryStatusType(enum.Enum):
+    """MdsolQuery action type"""
+    Open = "Open"
+    Cancelled = "Cancelled"
+    Answered = "Answered"
+    Forwarded = "Forwarded"
+    Closed = "Closed"
+
+
 class StepType(enum.Enum):
     """Edit/Derivation step types"""
     CustomFunction = "CustomFunction"
@@ -56,6 +65,7 @@ class StepType(enum.Enum):
     Age = "Age"
     StringAdd = "StringAdd"
     Space = "Space"
+
 
 ALL_STEPS = [StepType.CustomFunction,
              StepType.IsEmpty,
@@ -152,6 +162,7 @@ class ActionType(enum.Enum):
     SetSubjectRequiresSignature = "SetSubjectRequiresSignature"
     SetDynamicSearchList = "SetDynamicSearchList"
 
+
 ALL_ACTIONS = [
     ActionType.OpenQuery,
     ActionType.RequireReview,
@@ -162,7 +173,7 @@ ALL_ACTIONS = [
     ActionType.PlaceSticky,
     ActionType.AddForm,
     ActionType.AddMatrix,
-    ActionType.MrgMatrix ,
+    ActionType.MrgMatrix,
     ActionType.OldMrgMatrix,
     ActionType.SetNonconformant,
     ActionType.SendMessage,
@@ -190,9 +201,11 @@ class RangeCheckComparatorType(enum.Enum):
     LessThanEqualTo = 'LE'
     GreaterThanEqualTo = 'GE'
 
+
 class RangeCheckType(enum.Enum):
     Soft = 'Soft'
     Hard = 'Hard'
+
 
 class ControlType(enum.Enum):
     CheckBox = 'CheckBox'
