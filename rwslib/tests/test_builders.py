@@ -173,6 +173,36 @@ class TestAuditRecord(unittest.TestCase):
             doc = obj_to_doc(self.tested)
             self.assertIn("DateTimeStamp", err.exception.message)
 
+class TestMdsolQuery(unittest.TestCase):
+    """Test extension MdsolQuery"""
+    def get_tested(self):
+        return MdsolQuery(status=QueryStatusType.Open, value="Data missing", query_repeat_key=123,
+                            recipient="Site from System", requires_response=True)
+
+    def test_basic(self):
+        tested = self.get_tested()
+        self.assertEqual("Data missing",tested.value)
+        self.assertEqual(123,tested.query_repeat_key)
+        self.assertEqual(QueryStatusType.Open,tested.status)
+        self.assertEqual("Site from System",tested.recipient)
+        self.assertEqual(True,tested.requires_response)
+
+    def test_builder(self):
+        tested = self.get_tested()
+        tested.response = "Done"
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:Query", doc.tag)
+        self.assertEqual("Yes", doc.attrib['RequiresResponse'])
+        self.assertEqual("Site from System", doc.attrib['Recipient'])
+        self.assertEqual("123", doc.attrib['QueryRepeatKey'])
+        self.assertEqual("Data missing", doc.attrib['Value'])
+        self.assertEqual("Done", doc.attrib['Response'])
+
+    def test_invalid_status_value(self):
+        """Status must come from QueryStatusType"""
+        with self.assertRaises(AttributeError):
+            MdsolQuery(status='A test')
+
 
 class TestItemData(unittest.TestCase):
     """Test ItemData classes"""
@@ -191,6 +221,12 @@ class TestItemData(unittest.TestCase):
         """Test that an ItemData will not accept any old object"""
         with self.assertRaises(ValueError):
             self.tested << {"Field1" : "ValueC"}
+
+    def test_accepts_query(self):
+        """Test that an ItemData will accept a query"""
+        query = MdsolQuery()
+        self.tested << query
+        self.assertEqual(query, self.tested.queries[0])
 
     def test_isnull_not_set(self):
         """Isnull should not be set where we have a value not in '', None"""
@@ -226,6 +262,8 @@ class TestItemData(unittest.TestCase):
             ReasonForChange("Data Entry Error"),
             DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80))
         )
+        tested << MdsolQuery()
+
         doc = obj_to_doc(tested)
 
         self.assertEqual(doc.attrib['ItemOID'],"FIELDA")
@@ -235,6 +273,7 @@ class TestItemData(unittest.TestCase):
         self.assertEqual(doc.attrib['mdsol:Freeze'],"No")
         self.assertEqual(doc.tag,"ItemData")
         self.assertEqual("AuditRecord",doc.getchildren()[0].tag)
+        self.assertEqual("mdsol:Query",doc.getchildren()[1].tag)
 
     def test_transaction_type(self):
         tested = self.tested

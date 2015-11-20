@@ -15,6 +15,14 @@ class DataType(enum.Enum):
     String = 'string'  # Used only by codelists
 
 
+class QueryStatusType(enum.Enum):
+    """MdsolQuery action type"""
+    Open = "Open"
+    Cancelled = "Cancelled"
+    Answered = "Answered"
+    Forwarded = "Forwarded"
+    Closed = "Closed"
+
 class StepType(enum.Enum):
     """Edit/Derivation step types"""
     CustomFunction = "CustomFunction"

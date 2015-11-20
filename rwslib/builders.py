@@ -274,6 +274,56 @@ class TransactionalElement(ODMElement):
         self._transaction_type = value
 
 
+class MdsolQuery(ODMElement):
+    """MdsolQuery extension element for Queries at item level only"""
+
+    def __init__(self, value=None, query_repeat_key=None, recipient=None, status=None, requires_response=None,
+                 response=None):
+        self.value = value
+        self.query_repeat_key = query_repeat_key
+        self.recipient = recipient
+        self._status = None
+        self.status = status
+        self.requires_response = requires_response
+        self.response = response
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, value):
+        if value is not None:
+            if not isinstance(value, QueryStatusType):
+                raise AttributeError("%s action type is invalid in mdsol:Query." % (value,))
+        self._status = value
+
+    def build(self, builder):
+        params = {}
+
+        if self.value is not None:
+            params['Value'] = str(self.value)
+
+        if self.query_repeat_key is not None:
+            params['QueryRepeatKey'] = str(self.query_repeat_key)
+
+        if self.recipient is not None:
+            params['Recipient'] = str(self.recipient)
+
+        if self.status is not None:
+            params['Status'] = self.status.value
+
+        if self.requires_response is not None:
+            params['RequiresResponse'] = bool_to_yes_no(self.requires_response)
+
+        # When closing a query
+        if self.response is not None:
+            params['Response'] = str(self.response)
+
+        builder.start("mdsol:Query", params)
+        builder.end("mdsol:Query")
+
+
 class ItemData(TransactionalElement):
     """Models the ODM ItemData object"""
     ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert', 'Context', 'Remove']
@@ -288,6 +338,7 @@ class ItemData(TransactionalElement):
         self.freeze = freeze
         self.verify = verify
         self.audit_record = None
+        self.queries = []
 
     def build(self, builder):
         """Build XML by appending to builder
@@ -318,12 +369,16 @@ class ItemData(TransactionalElement):
         builder.start("ItemData", params)
         if self.audit_record is not None:
             self.audit_record.build(builder)
+
+        for query in self.queries:
+            query.build(builder)
         builder.end("ItemData")
 
     def __lshift__(self, other):
-        if not isinstance(other, AuditRecord):
-            raise ValueError("ItemData object can only receive AuditRecord object")
+        if not isinstance(other, (AuditRecord, MdsolQuery,)):
+            raise ValueError("ItemData object can only receive AuditRecord or MdsolQuery objects")
         self.set_single_attribute(other, AuditRecord, 'audit_record')
+        self.set_list_attribute(other, MdsolQuery, 'queries')
         return other
 
 
@@ -1770,6 +1825,7 @@ class MdsolCheckAction(ODMElement):
     Check Action modeled after check action in Architect Loader spreadsheet.
     Do not use directly, use appropriate sub-class.
     """
+
     def __init__(self,
                  variable_oid=None,
                  field_oid=None,
