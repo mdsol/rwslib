@@ -35,7 +35,7 @@ def format_date_argument(date_element):
         if 'T' in date_element:
             _date = datetime.datetime.strptime(date_element, "%Y-%m-%dT%H:%M:%S")
         else:
-            _date = datetime.datetime.strptime(date_element, "%Y-%m-%d").date()
+            _date = datetime.datetime.strptime(date_element, "%Y-%m-%d")
     else:
         _date = date_element
     return _date.isoformat()
