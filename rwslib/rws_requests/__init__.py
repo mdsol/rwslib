@@ -7,6 +7,7 @@ as appropriate.
 TODO: Note that might want to make the Request objects responsible for deciding whether they are get, post, patch etc.
 
 """
+import datetime
 
 from rwslib.rwsobjects import RWSResponse, RWSStudies, RWSStudyMetadataVersions, RWSSubjects, \
     RWSPostResponse
@@ -21,6 +22,23 @@ def check_dataset_type(dataset_type):
     if dataset_type.lower() not in ['regular', 'raw']:
         raise ValueError("Dataset type not 'regular' or 'raw' is %s" % dataset_type)
 
+
+def format_date_argument(date_element):
+    """
+    Take a date as either a datetime.date/datetime or a string and return it as a
+     iso8601 formatted value
+    :param date_element: passed argument
+    :return:
+    """
+    if not isinstance(date_element, (datetime.datetime, datetime.date,)):
+        # TODO:
+        if 'T' in date_element:
+            _date = datetime.datetime.strptime(date_element, "%Y-%m-%dT%H:%M:%S")
+        else:
+            _date = datetime.datetime.strptime(date_element, "%Y-%m-%d").date()
+    else:
+        _date = date_element
+    return _date.isoformat()
 
 # -------------------------------------------------------------------------------------------------------
 # Utility functions
@@ -380,7 +398,6 @@ class ODMDatasetBase(RWSAuthorizedGetRequest):
 
     def checkParams(self):
         check_dataset_type(self.dataset_type)
-        # TODO: Check start is an iso8601 date.
         # https://bitbucket.org/micktwomey/pyiso8601
 
     def _querystring(self):
@@ -391,7 +408,14 @@ class ODMDatasetBase(RWSAuthorizedGetRequest):
         for key in self.KNOWN_QUERY_OPTIONS:
             val = getattr(self, key)
             if val is not None:
-                kw[key] = val
+                if key == 'start':
+                    # special case the date formatting
+                    # this will raise a ValueError
+                    # if the date format is a string and not one of
+                    # YYYY-mm-ddTHH:MM:SS or YYYY-mm-dd
+                    kw[key] = format_date_argument(val)
+                else:
+                    kw[key] = val
         return kw
 
     def _studyname_environment(self):
