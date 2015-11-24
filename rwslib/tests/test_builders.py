@@ -449,6 +449,7 @@ class TestStudyEventData(unittest.TestCase):
     def test_builders_basic(self):
         doc = obj_to_doc(self.tested)
         self.assertEqual(doc.attrib["StudyEventOID"],"VISIT_1")
+        self.assertIsNone(doc.attrib.get("StudyEventRepeatKey",None))
         self.assertEqual(len(doc),1)
         self.assertEqual(doc.tag,"StudyEventData")
 
