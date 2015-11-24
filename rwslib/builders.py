@@ -339,6 +339,7 @@ class ItemData(TransactionalElement):
         self.verify = verify
         self.audit_record = None
         self.queries = []
+        self.measurement_unit_ref = None
 
     def build(self, builder):
         """Build XML by appending to builder
@@ -367,16 +368,23 @@ class ItemData(TransactionalElement):
             params['mdsol:Verify'] = bool_to_yes_no(self.verify)
 
         builder.start("ItemData", params)
+
+
         if self.audit_record is not None:
             self.audit_record.build(builder)
+
+        # Measurement unit ref must be after audit record or RWS complains
+        if self.measurement_unit_ref is not None:
+            self.measurement_unit_ref.build(builder)
 
         for query in self.queries:
             query.build(builder)
         builder.end("ItemData")
 
     def __lshift__(self, other):
-        if not isinstance(other, (AuditRecord, MdsolQuery,)):
-            raise ValueError("ItemData object can only receive AuditRecord or MdsolQuery objects")
+        if not isinstance(other, (MeasurementUnitRef, AuditRecord, MdsolQuery,)):
+            raise ValueError("ItemData object can only receive MeasurementUnitRef, AuditRecord or MdsolQuery objects")
+        self.set_single_attribute(other, MeasurementUnitRef, 'measurement_unit_ref')
         self.set_single_attribute(other, AuditRecord, 'audit_record')
         self.set_list_attribute(other, MdsolQuery, 'queries')
         return other

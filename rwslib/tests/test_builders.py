@@ -228,6 +228,12 @@ class TestItemData(unittest.TestCase):
         self.tested << query
         self.assertEqual(query, self.tested.queries[0])
 
+    def test_accepts_measurement_unit_ref(self):
+        """Test that an ItemData will accept a measurement unit ref"""
+        mur = MeasurementUnitRef("Celsius")
+        self.tested << mur
+        self.assertEqual(mur, self.tested.measurement_unit_ref)
+
     def test_isnull_not_set(self):
         """Isnull should not be set where we have a value not in '', None"""
         doc = obj_to_doc(self.tested)
@@ -263,6 +269,8 @@ class TestItemData(unittest.TestCase):
             DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80))
         )
         tested << MdsolQuery()
+        tested << MeasurementUnitRef("Celsius")
+
 
         doc = obj_to_doc(tested)
 
@@ -273,7 +281,8 @@ class TestItemData(unittest.TestCase):
         self.assertEqual(doc.attrib['mdsol:Freeze'],"No")
         self.assertEqual(doc.tag,"ItemData")
         self.assertEqual("AuditRecord",doc.getchildren()[0].tag)
-        self.assertEqual("mdsol:Query",doc.getchildren()[1].tag)
+        self.assertEqual("MeasurementUnitRef",doc.getchildren()[1].tag)
+        self.assertEqual("mdsol:Query",doc.getchildren()[2].tag)
 
     def test_transaction_type(self):
         tested = self.tested
