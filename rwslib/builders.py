@@ -472,7 +472,7 @@ class StudyEventData(TransactionalElement):
     def __init__(self, study_event_oid, transaction_type="Update", study_event_repeat_key=None):
         super(self.__class__, self).__init__(transaction_type)
         self.study_event_oid = study_event_oid
-        self.study_event_repeat_key = str(study_event_repeat_key)
+        self.study_event_repeat_key = study_event_repeat_key
         self.forms = []
 
     def __lshift__(self, other):
