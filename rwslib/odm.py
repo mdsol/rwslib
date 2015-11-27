@@ -15,7 +15,7 @@ if __name__ == '__main__':
     print(rave.send_request(VersionRequest()))
 
     audits = rave.send_request(AuditRecordsRequest('Mediflex','Dev',startid=4000000,per_page=10000))
-    print rave.next_link #Get headers, next and last entries?
+    print rave.next_link # Get headers, next and last entries?
     #print audits
     while rave.next_link <> None:
         rave.next(AuditRecordsRequest('Mediflex','Dev'))

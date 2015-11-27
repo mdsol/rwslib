@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'isparks'
 
 import unittest
@@ -7,12 +8,12 @@ class TestParse(unittest.TestCase):
 
     def test_parse_with_bom(self):
         """Test parser can throw away BOM"""
-        text = """\xef\xbb\xbf<?xml version="1.0" encoding="utf-8"?><ODM/>"""
+        text = u"""\xef\xbb\xbf<?xml version="1.0" encoding="utf-8"?><ODM/>"""
         self.assertEqual("ODM",rwsobjects.parseXMLString(text).tag)
 
     def test_parse_without_bom(self):
         """Test parser can throw away BOM"""
-        text = """<?xml version="1.0" encoding="utf-8"?><ODM/>"""
+        text = u"""<?xml version="1.0" encoding="utf-8"?><ODM/>"""
         self.assertEqual("ODM",rwsobjects.parseXMLString(text).tag)
 
     def test_parse_empty_string(self):
