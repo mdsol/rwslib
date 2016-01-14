@@ -411,7 +411,7 @@ The SubjectKey can be either a Subject ID or a UUID depending on the value of Su
      </SubjectData>
     </ClinicalData>
 
-May include link::
+May include links::
 
     <ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111">
      <SubjectData SubjectKey="1111">
@@ -461,7 +461,7 @@ May include link::
 
         self.active = None   # SubjectActive
         self.deleted = None  # Deleted
-        self.link = None     # Link if requested
+        self.links = []      # Link if requested
 
         # Optional properties, only if status included
         for prop in RWSSubjectListItem.STATUS_PROPERTIES:
@@ -496,8 +496,8 @@ May include link::
         self.locationoid = e_siteref.get('LocationOID')
 
         e_links = e_subjectdata.findall(MEDI_NS + 'Link')
-        if e_links != []:
-            self.link = e_links[0].get(XLINK_NS + 'href')
+        for e_link in e_links:
+            self.links.append(e_link.get(XLINK_NS + 'href'))
 
         decodes = {'yes': True, 'no': False, '': None}
         for prop in RWSSubjectListItem.STATUS_PROPERTIES:

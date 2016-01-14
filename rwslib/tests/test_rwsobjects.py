@@ -177,7 +177,7 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(True, subjects[0].touched)
         self.assertEqual(False, subjects[0].overdue)
         self.assertEqual(None, subjects[1].overdue) # Example where status was not asked for.
-        self.assertEqual(None, subjects[1].link)    # Example where link was not asked for
+        self.assertEqual(0, len(subjects[1].links))    # Example where link was not asked for
         self.assertEqual(True, subjects[2].incomplete)
         self.assertEqual(text,str(subjects))
         self.assertEqual("1", subjects[0].subject_name)
@@ -249,9 +249,9 @@ class TestRWSSubjects(unittest.TestCase):
 
         subjects = rwsobjects.RWSSubjects(text)
 
-        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=1234", subjects[0].link)
-        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=5678", subjects[1].link)
-        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=9012", subjects[2].link)
+        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=1234", subjects[0].links[0])
+        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=5678", subjects[1].links[0])
+        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=9012", subjects[2].links[0])
 
 
 class TestMetaDataVersions(unittest.TestCase):

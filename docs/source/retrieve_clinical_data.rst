@@ -76,7 +76,7 @@ each representing key information about a subject. This does not include clinica
 +===============================================+===================================================================================+
 | status={True|False}                           | If True, extracts status information at the subject level. Default = False        |
 +-----------------------------------------------+-----------------------------------------------------------------------------------+
-| links={True|False}                            | If True, includes a "deep link" (URL) to the subject page in Rave. Default = False|
+| links={True|False}                            | If True, includes "deep link"(s) (URL) to the subject page in Rave.Default = False|
 +-----------------------------------------------+-----------------------------------------------------------------------------------+
 | include={inactive|deleted|inactiveAndDeleted} | Include inactive subjects, deleted subjects or both? By default these subjects are|
 |                                               | omitted.                                                                          |
