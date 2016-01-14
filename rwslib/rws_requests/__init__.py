@@ -323,7 +323,7 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
     INCLUDE_OPTIONS = ['inactive', 'deleted', 'inactiveAndDeleted']
 
     def __init__(self, project_name, environment_name, status=False, include=None,
-                 subject_key_type='SubjectName'):
+                 subject_key_type='SubjectName', links=False):
         """
         If status == True then ?status=all
         if include then include parameter is also added to query string
@@ -332,6 +332,7 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
         self.project_name = project_name
         self.environment_name = environment_name
         self.status = status
+        self.links = links
         self.include = None
         self.subject_key_type = subject_key_type
         # make sure the value for SubjectKeyType makes sense.
@@ -350,6 +351,9 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
         kw = {}
         if self.status:
             kw['status'] = 'all'
+
+        if self.links:
+            kw['links'] = 'all'
 
         if self.include is not None:
             kw['include'] = self.include
