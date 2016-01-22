@@ -576,6 +576,15 @@ class TestClinicalData(unittest.TestCase):
         """Test there are 3 children"""
         self.assertEqual("STUDY1", self.tested.projectname)
         self.assertEqual("DEV", self.tested.environment)
+        # Test default MetadataVersionOID
+        self.assertEqual("1", self.tested.metadata_version_oid)
+
+
+    def test_metadata_version_oid(self):
+        self.tested.metadata_version_oid = '2'
+        doc = obj_to_doc(self.tested)
+        self.assertEqual(doc.attrib["MetaDataVersionOID"],self.tested.metadata_version_oid)
+
 
     def test_only_accepts_subjectdata(self):
         """Test that only SubjectData can be inserted"""
