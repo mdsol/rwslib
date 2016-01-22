@@ -551,9 +551,10 @@ class SubjectData(TransactionalElement):
 class ClinicalData(ODMElement):
     """Models the ODM ClinicalData object"""
 
-    def __init__(self, projectname, environment):
+    def __init__(self, projectname, environment, metadata_version_oid="1"):
         self.projectname = projectname
         self.environment = environment
+        self.metadata_version_oid = metadata_version_oid
         self.subject_data = None
 
     def __lshift__(self, other):
@@ -565,7 +566,7 @@ class ClinicalData(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(MetaDataVersionOID='1',
+        params = dict(MetaDataVersionOID=self.metadata_version_oid,
                       StudyOID="%s (%s)" % (self.projectname, self.environment,),
                       )
 
