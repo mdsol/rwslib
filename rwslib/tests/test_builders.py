@@ -555,14 +555,13 @@ class TestSubjectData(unittest.TestCase):
     def test_accepts_auditrecord(self):
         """Test that AuditRecord can be inserted"""
         ar = AuditRecord(used_imputation_method=False,
-                                identifier='ABC1',
-                                include_file_oid=False)(
-                                            UserRef('test_user'),
-                                            LocationRef('test_site'),
-                                            ReasonForChange("Testing"),
-                                            DateTimeStamp(datetime.now())
-
-                                )
+                         identifier='ABC1',
+                         include_file_oid=False)(
+                            UserRef('test_user'),
+                            LocationRef('test_site'),
+                            ReasonForChange("Testing"),
+                            DateTimeStamp(datetime.now())
+                         )
         self.tested << ar
         self.assertEqual(self.tested.audit_record, ar)
 
