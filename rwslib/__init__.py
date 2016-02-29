@@ -26,7 +26,7 @@ class AuthorizationException(Exception):
 class RWSConnection(object):
     """A connection to RWS"""
 
-    def __init__(self, domain, username=None, password=None, auth=None):
+    def __init__(self, domain, username=None, password=None, auth=None, virtual_dir='RaveWebServices'):
         """Create a connection to Rave
 
           If the domain does not start with http then it is assumed to be the name of the medidata
@@ -42,7 +42,7 @@ class RWSConnection(object):
         if domain.lower().startswith('http'):
             self.domain = domain
         else:
-            self.domain = 'https://%s.mdsol.com' % domain
+            self.domain = make_url('https://%s.mdsol.com', domain)
 
         self.auth = None
         if auth is not None:
@@ -52,7 +52,7 @@ class RWSConnection(object):
             self.auth = (username, password,)
 
 
-        self.base_url = self.domain + '/RaveWebServices'
+        self.base_url = make_url(domain, virtual_dir)
 
         # Keep track of results of last request so users can get if they need.
         self.last_result = None
