@@ -369,7 +369,6 @@ class ItemData(TransactionalElement):
 
         builder.start("ItemData", params)
 
-
         if self.audit_record is not None:
             self.audit_record.build(builder)
 
@@ -521,12 +520,16 @@ class SubjectData(TransactionalElement):
         self.subject_key = subject_key
         self.subject_key_type = subject_key_type
         self.study_events = []  # Can have collection
+        self.audit_record = None
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, StudyEventData):
-            raise ValueError("SubjectData object can only receive StudyEventData object")
+        if not isinstance(other, (StudyEventData, AuditRecord,)):
+            raise ValueError("SubjectData object can only receive StudyEventData or AuditRecord object")
+
         self.set_list_attribute(other, StudyEventData, 'study_events')
+        self.set_single_attribute(other, AuditRecord, 'audit_record')
+
         return other
 
     def build(self, builder):
@@ -539,21 +542,26 @@ class SubjectData(TransactionalElement):
 
         builder.start("SubjectData", params)
 
+        # Ask children
+        if self.audit_record is not None:
+            self.audit_record.build(builder)
+
         builder.start("SiteRef", {'LocationOID': self.sitelocationoid})
         builder.end("SiteRef")
 
-        # Ask children
         for event in self.study_events:
             event.build(builder)
+
         builder.end("SubjectData")
 
 
 class ClinicalData(ODMElement):
     """Models the ODM ClinicalData object"""
 
-    def __init__(self, projectname, environment):
+    def __init__(self, projectname, environment, metadata_version_oid="1"):
         self.projectname = projectname
         self.environment = environment
+        self.metadata_version_oid = metadata_version_oid
         self.subject_data = None
 
     def __lshift__(self, other):
@@ -565,7 +573,7 @@ class ClinicalData(ODMElement):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(MetaDataVersionOID='1',
+        params = dict(MetaDataVersionOID=self.metadata_version_oid,
                       StudyOID="%s (%s)" % (self.projectname, self.environment,),
                       )
 

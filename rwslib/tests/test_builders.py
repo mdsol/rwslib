@@ -521,7 +521,7 @@ class TestSubjectData(unittest.TestCase):
         self.assertRaises(AttributeError, do)
 
     def test_children(self):
-        """Test there are 3 children"""
+        """Test there is 1 child"""
         self.assertEqual(1, len(self.tested.study_events))
 
     def test_invalid_transaction_type(self):
@@ -546,11 +546,24 @@ class TestSubjectData(unittest.TestCase):
             self.tested << sed
         self.assertRaises(ValueError,do)
 
-    def test_only_accepts_studyeventdata(self):
-        """Test that only StudyEventData can be inserted"""
+    def test_does_not_accept_all_elements(self):
+        """Test that,for example, ItemData cannot be accepted"""
         def do():
             self.tested << ItemData("Field1", "ValueC")
         self.assertRaises(ValueError, do)
+
+    def test_accepts_auditrecord(self):
+        """Test that AuditRecord can be inserted"""
+        ar = AuditRecord(used_imputation_method=False,
+                         identifier='ABC1',
+                         include_file_oid=False)(
+                            UserRef('test_user'),
+                            LocationRef('test_site'),
+                            ReasonForChange("Testing"),
+                            DateTimeStamp(datetime.now())
+                         )
+        self.tested << ar
+        self.assertEqual(self.tested.audit_record, ar)
 
 
 class TestClinicalData(unittest.TestCase):
@@ -576,6 +589,15 @@ class TestClinicalData(unittest.TestCase):
         """Test there are 3 children"""
         self.assertEqual("STUDY1", self.tested.projectname)
         self.assertEqual("DEV", self.tested.environment)
+        # Test default MetadataVersionOID
+        self.assertEqual("1", self.tested.metadata_version_oid)
+
+
+    def test_metadata_version_oid(self):
+        self.tested.metadata_version_oid = '2'
+        doc = obj_to_doc(self.tested)
+        self.assertEqual(doc.attrib["MetaDataVersionOID"],self.tested.metadata_version_oid)
+
 
     def test_only_accepts_subjectdata(self):
         """Test that only SubjectData can be inserted"""
