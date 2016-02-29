@@ -144,7 +144,7 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(3, len(subjects))
         self.assertEqual(True, subjects[0].touched)
         self.assertEqual(False, subjects[0].overdue)
-        self.assertEqual(None, subjects[1].overdue) #Example where status was not asked for.
+        self.assertEqual(None, subjects[1].overdue)  # Example where status was not asked for.
         self.assertEqual(True, subjects[2].incomplete)
         self.assertEqual(text,str(subjects))
 
@@ -176,7 +176,8 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(3, len(subjects))
         self.assertEqual(True, subjects[0].touched)
         self.assertEqual(False, subjects[0].overdue)
-        self.assertEqual(None, subjects[1].overdue) #Example where status was not asked for.
+        self.assertEqual(None, subjects[1].overdue) # Example where status was not asked for.
+        self.assertEqual(0, len(subjects[1].links))    # Example where link was not asked for
         self.assertEqual(True, subjects[2].incomplete)
         self.assertEqual(text,str(subjects))
         self.assertEqual("1", subjects[0].subject_name)
@@ -220,6 +221,38 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual("0A663F39", subjects[0].subjectkey)
         self.assertEqual("0076F9FE", subjects[1].subjectkey)
         self.assertEqual("B8CFE69E", subjects[2].subjectkey)
+
+    def test_parse_with_links(self):
+        """
+        Populate subject.link with URL when provided
+        """
+        text = """<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
+  <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+    <SubjectData SubjectKey="0A663F39" mdsol:SubjectName="1" mdsol:SubjectKeyType="SubjectUUID" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="No" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
+      <SiteRef LocationOID="TESTSITE"/>
+      <mdsol:Link xlink:type="simple" xlink:href="http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=1234" />
+    </SubjectData>
+  </ClinicalData>
+  <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+    <SubjectData SubjectKey="0076F9FE" mdsol:SubjectName="2" mdsol:SubjectKeyType="SubjectUUID">
+      <SiteRef LocationOID="TESTSITE"/>
+      <mdsol:Link xlink:type="simple" xlink:href="http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=5678" />
+    </SubjectData>
+  </ClinicalData>
+  <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
+    <SubjectData SubjectKey="B8CFE69E" mdsol:SubjectName="3" mdsol:SubjectKeyType="SubjectUUID" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="Yes" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
+      <SiteRef LocationOID="TESTSITE"/>
+      <mdsol:Link xlink:type="simple" xlink:href="http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=9012" />
+    </SubjectData>
+  </ClinicalData>
+</ODM>"""
+
+        subjects = rwsobjects.RWSSubjects(text)
+
+        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=1234", subjects[0].links[0])
+        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=5678", subjects[1].links[0])
+        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=9012", subjects[2].links[0])
+
 
 class TestMetaDataVersions(unittest.TestCase):
     """Test MetaDataVersions"""
