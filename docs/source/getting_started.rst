@@ -72,6 +72,23 @@ rwslib provides several sets of syamdard request types arranged into python unit
 * ``odm_adapter_requests.py`` contains requests related to the ODM Adapter datasets added in Rave 2013.3.0
 
 
+Overriding default domain name and virtual directory
+-----------------------------------------------------
+
+For convenience rwslib defaults the domain name to end with 'mdsol.com' and the virtual directory to be 'RaveWebServices':
+
+    >>> from rwslib import RWSConnection
+    >>> rws = RWSConnection('innovate')
+    >>> rws.base_url
+    'https://innovate.mdsol.com/RaveWebServices'
+
+The default values will work for most Rave URLs but you can override them if necessary:
+
+    >>> from rwslib import RWSConnection
+    >>> rws = RWSConnection('http://10.0.1.20', virtual_dir='RWS')
+    >>> rws.base_url
+    'http://10.0.1.20/RWS'
+
 Authentication
 --------------
 
