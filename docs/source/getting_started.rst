@@ -82,7 +82,7 @@ For convenience rwslib defaults the domain name to end with 'mdsol.com' and the 
     >>> rws.base_url
     'https://innovate.mdsol.com/RaveWebServices'
 
-The default values will work for most Rave URLs but you can over-ride them if necessary:
+The default values will work for most Rave URLs but you can override them if necessary:
 
     >>> from rwslib import RWSConnection
     >>> rws = RWSConnection('http://10.0.1.20', virtual_dir='RWS')
