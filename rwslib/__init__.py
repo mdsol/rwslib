@@ -2,7 +2,7 @@
 
 __title__ = 'rwslib'
 __author__ = 'Ian Sparks (isparks@mdsol.com)'
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2016 Medidata Solutions Inc'
 
@@ -42,7 +42,7 @@ class RWSConnection(object):
         if domain.lower().startswith('http'):
             self.domain = domain
         else:
-            self.domain = make_url('https://%s.mdsol.com', domain)
+            self.domain = 'https://%s.mdsol.com' % domain
 
         self.auth = None
         if auth is not None:
@@ -52,7 +52,7 @@ class RWSConnection(object):
             self.auth = (username, password,)
 
 
-        self.base_url = make_url(domain, virtual_dir)
+        self.base_url = make_url(self.domain, virtual_dir)
 
         # Keep track of results of last request so users can get if they need.
         self.last_result = None
