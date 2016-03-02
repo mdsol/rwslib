@@ -51,6 +51,24 @@ class VersionTest(unittest.TestCase):
 
         self.assertRaises(requests.ConnectionError, do)
 
+    """Test with only mdsol sub-domain"""
+    @httpretty.activate
+    def test_sub_domain(self):
+        """A simple test, patching the get request so that it does not hit a website"""
+
+        httpretty.register_uri(
+            httpretty.GET, "https://innovate.mdsol.com/RaveWebServices/version",
+            status=200,
+            body="1.0.0")
+
+        #Now my test
+        rave = rwslib.RWSConnection('innovate')
+        v = rave.send_request(rwslib.rws_requests.VersionRequest())
+
+        self.assertEqual(v, '1.0.0')
+        self.assertEqual(rave.domain, "https://innovate.mdsol.com")
+        self.assertEqual(rave.last_result.status_code,200)
+
 
     """Test for overriding the virtual directory"""
     @httpretty.activate
