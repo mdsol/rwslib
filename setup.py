@@ -16,6 +16,8 @@ if sys.argv[-1] == 'publish':
 packages = [
     'rwslib',
     'rwslib.rws_requests',
+    'rwslib.extras',
+    'rwslib.extras.audit_event'
 ]
 
 rwsinit = open('rwslib/__init__.py').read()
@@ -44,6 +46,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: PyPy',
     ),
 )

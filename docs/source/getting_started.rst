@@ -28,7 +28,7 @@ Before you can do any work with rwslib you must create a connection to a Rave in
 through the RWSConnection object::
 
     >>> from rwslib import RWSConnection
-    >>> rws = RWSConnection('innovate', 'my_username','my_password')
+    >>> rws = RWSConnection('innovate')
 
 Note that the first parameter to the RWSConnection is the name of the url you wish to connect to. A url
 that does not start with "http" is assumed to be the sub-domain of mdsol.com. In the example above "innovate"
@@ -37,7 +37,7 @@ is treated as ``https://innovate.mdsol.com.``
 If you wish to override this behaviour, supply a base URL that includes http or https at the start of
 the url::
 
-    >>> rws = RWSConnection('http://192.168.1.99', 'my_username','my_password')
+    >>> rws = RWSConnection('http://192.168.1.99')
 
 It is important to understand that an RWSConnection is not a persistent connection to Rave, it is simply
 a convenience class for making calls to RWS endpoints.
@@ -51,7 +51,7 @@ rwslib provides a set of request classes. To make a request, create an instance 
 RWSConnection ``send_request`` method::
 
     >>> from rwslib import RWSConnection
-    >>> rws = RWSConnection('innovate', 'my_username','my_password')
+    >>> rws = RWSConnection('innovate')
     >>> from rwslib.rws_requests import VersionRequest
     >>> rws.send_request(VersionRequest())
     1.8.0
@@ -72,21 +72,61 @@ rwslib provides several sets of syamdard request types arranged into python unit
 * ``odm_adapter_requests.py`` contains requests related to the ODM Adapter datasets added in Rave 2013.3.0
 
 
+Overriding default domain name and virtual directory
+-----------------------------------------------------
+
+For convenience rwslib defaults the domain name to end with 'mdsol.com' and the virtual directory to be 'RaveWebServices':
+
+    >>> from rwslib import RWSConnection
+    >>> rws = RWSConnection('innovate')
+    >>> rws.base_url
+    'https://innovate.mdsol.com/RaveWebServices'
+
+The default values will work for most Rave URLs but you can override them if necessary:
+
+    >>> from rwslib import RWSConnection
+    >>> rws = RWSConnection('http://10.0.1.20', virtual_dir='RWS')
+    >>> rws.base_url
+    'http://10.0.1.20/RWS'
+
 Authentication
 --------------
 
-Most requests require authentication. There are some that do not, ``VersionRequest()`` is one of those that does not
-require authentication so this is also valid::
+Most requests require authentication. Requests can be authenticated through Basic Authentication by providing a
+Rave (not iMedidata) username and password:
 
     >>> from rwslib import RWSConnection
-    >>> from rwslib.rws_requests import VersionRequest
-    >>> rws = RWSConnection('https://innovate.mdsol.com')
+    >>> from rwslib.rws_requests import MetadataStudiesRequest
+    >>> rws = RWSConnection('https://innovate.mdsol.com', "raveusername","ravepassword")
+    >>>
+    >>> # Make an authenticated request to Rave
+    >>> rws.send_request(MetadataStudiesRequest())
 
-    >>> #Get the rave version from rws
-    >>> rws.send_request(VersionRequest())
-    1.8.0
+Alternatively you can make a request using MAuth credentials. MAuth is Medidata's API authentication mechanism. MAuth
+credentials consist of an App UUID representing the application making the request and a Private Key, representing
+it's proof that it is who it says it is. These two are used with MAuth to sign requests.
 
-Generally you will want to provide credentials to authenticate with Rave.
+Medidata provides the requests_mauth library which provides MAuth signing capabilities for accessing Medidata API's
+via MAuth:
+
+
+    >>> from requests_mauth import MAuth
+    >>> from rwslib import RWSConnection
+    >>> from rwslib.rws_requests import MetadataStudiesRequest
+    >>>
+    >>> app_id = '635r8aib-21e9-6b5f-867e-bk2358ub2784'
+    >>> key = open('private_key_file','r').read()
+    >>>
+    >>> rws = RWSConnection('https://innovate.mdsol.com', auth=MAuth(app_id, key))
+    >>>
+    >>> # Make an authenticated request to Rave
+    >>> rws.send_request(MetadataStudiesRequest())
+
+A set of MAuth credentials are associated with a user in Rave just as with Basic Authentication, requests are
+performed in the context of this users rights and permissions. However, a user account associated with MAuth
+App ID does not have password expiry so MAuth is a better approach to long-term integrations with Rave URLs.
+
+Note that an MAuth AppID can be associated with multiple Rave URLs but only one user per URL.
 
 
 Timeouts

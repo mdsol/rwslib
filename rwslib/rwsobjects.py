@@ -4,6 +4,7 @@ from lxml import etree
 
 MEDI_NS = '{http://www.mdsol.com/ns/odm/metadata}'
 ODM_NS = '{http://www.cdisc.org/ns/odm/v1.3}'
+XLINK_NS = '{http://www.w3.org/1999/xlink}'
 
 
 def getEnvironmentFromNameAndProtocol(studyname, protocolname):
@@ -27,12 +28,18 @@ def parseXMLString(xml):
 
     # Remove BOM if it exists (different requests seem to have different BOMs)
     unichr_captured = ''
+
     if not xml.strip():
-        return ''
+        return u''
+
     while xml[0] != u'<':
         unichr_captured += xml[0]
         xml = xml[1:]
-    return etree.fromstring(xml.encode('utf-8'))
+    parser = etree.XMLParser(ns_clean=True, collect_ids=False, huge_tree=True)
+    try:
+        return etree.fromstring(xml.encode('utf-8'), parser=parser)
+    except etree.XMLSyntaxError:
+        raise Exception(xml)
 
 
 class RWSException(Exception):
@@ -404,7 +411,14 @@ The SubjectKey can be either a Subject ID or a UUID depending on the value of Su
      </SubjectData>
     </ClinicalData>
 
+May include links::
 
+    <ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111">
+     <SubjectData SubjectKey="1111">
+        <SiteRef LocationOID="335566"/>
+        <mdsol:Link xlink:type="simple" xlink:href="http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=849" />
+     </SubjectData>
+    </ClinicalData>
     """
     STATUS_PROPERTIES = ["Overdue",
                          "Touched",
@@ -445,8 +459,9 @@ The SubjectKey can be either a Subject ID or a UUID depending on the value of Su
         self.subjectkeytype = None
         self.locationoid = None
 
-        self.active = None  # SubjectActive
+        self.active = None   # SubjectActive
         self.deleted = None  # Deleted
+        self.links = []      # Link if requested
 
         # Optional properties, only if status included
         for prop in RWSSubjectListItem.STATUS_PROPERTIES:
@@ -480,6 +495,10 @@ The SubjectKey can be either a Subject ID or a UUID depending on the value of Su
         e_siteref = e_subjectdata.findall(ODM_NS + 'SiteRef')[0]
         self.locationoid = e_siteref.get('LocationOID')
 
+        e_links = e_subjectdata.findall(MEDI_NS + 'Link')
+        for e_link in e_links:
+            self.links.append(e_link.get(XLINK_NS + 'href'))
+
         decodes = {'yes': True, 'no': False, '': None}
         for prop in RWSSubjectListItem.STATUS_PROPERTIES:
             val = e_subjectdata.get(MEDI_NS + prop, "").lower()
@@ -492,7 +511,7 @@ The SubjectKey can be either a Subject ID or a UUID depending on the value of Su
         return self
 
 
-class RWSSubjects(list, ODMDoc):  # I hate multi-inheritance generally.
+class RWSSubjects(list, ODMDoc):
     """
 Represents a list of subjects::
 
@@ -504,15 +523,18 @@ Represents a list of subjects::
          <ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111">
             <SubjectData SubjectKey="000001">
                <SiteRef LocationOID="BP001"/>
+               <mdsol:Link xlink:type="simple" xlink:href="http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=849" />
             </SubjectData>
          </ClinicalData>
 
          <ClinicalData StudyOID="Fixitol(Dev)" MetaDataVersionOID="1111">
              <SubjectData SubjectKey="1111">
                 <SiteRef LocationOID="335566"/>
+                <mdsol:Link xlink:type="simple" xlink:href="http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=849" />
              </SubjectData>
          </ClinicalData>
     </ODM>
+
     """
 
     def __init__(self, xml):

@@ -93,6 +93,7 @@ class TestVersionFoldersRequest(unittest.TestCase):
         self.assertEqual("datasets/VersionFolders.odm?studyoid=%s" % quote(t.studyoid),
                          t.url_path())
 
+
 class TestAuditRecordsRequest(unittest.TestCase):
     def create_request_object(self,
                               project_name="Mediflex",
