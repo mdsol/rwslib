@@ -1,4 +1,4 @@
-Contrinuting to rwslib
+Contributing to rwslib
 ======================
 
 Thank you for considering contributing to rwslib.
