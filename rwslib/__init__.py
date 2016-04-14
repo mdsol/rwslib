@@ -122,7 +122,10 @@ class RWSConnection(object):
             if '<h2>HTTP Error 401.0 - Unauthorized</h2>' in r.text:
                 raise RWSException("Unauthorized.", r.text)
 
-            if r.headers.get('content-type') == "text/xml":
+            # Check if the content_type is text/xml.  Use startswith
+            # in case the charset is also specified:
+            #  content-type: text/xml; charset=utf-8
+            if r.headers.get('content-type').startswith("text/xml"):
                 # XML response
                 if r.text.startswith('<Response'):
                     error = RWSErrorResponse(r.text)
