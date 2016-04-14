@@ -4,3 +4,4 @@ httpretty
 tox
 six
 enum34
+mock
