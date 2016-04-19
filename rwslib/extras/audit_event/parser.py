@@ -3,32 +3,33 @@ __author__ = 'isparks'
 
 from lxml import etree
 import datetime
-from .context import *
+from rwslib.extras.audit_event.context import (Context, Subject, Event,
+                                                Form, ItemGroup, Item,
+                                                Query, Review, Comment,
+                                                ProtocolDeviation)
 
-# Python 3
-try:
-    long(1)
-except NameError:
-    long = int
 
 try:
     basestring
 except NameError:
     #  3
-    basestring = (str,bytes)
+    basestring = (str, bytes)
 
 # Constants
 ODM_NS = '{http://www.cdisc.org/ns/odm/v1.3}'
 MDSOL_NS = '{http://www.mdsol.com/ns/odm/metadata}'
+
 
 # Some constant-making helpers
 def odm(value):
     """Value prefix with ODM Namespace"""
     return "{0}{1}".format(ODM_NS, value)
 
+
 def mdsol(value):
     """Value prefix with mdsol Namespace"""
     return "{0}{1}".format(MDSOL_NS, value)
+
 
 def yes_no_none(value):
     """Convert Yes/No/None to True/False/None"""
@@ -38,12 +39,13 @@ def yes_no_none(value):
     # Yes = True, anything else false
     return value.lower() == 'yes'
 
-def make_long(value, missing=-1):
+
+def make_int(value, missing=-1):
     """Convert string value to long, '' to missing"""
     if isinstance(value, basestring):
         if not value.strip():
             return missing
-    return long(value)
+    return int(value)
 
 # Defaults
 DEFAULT_TRANSACTION_TYPE = u'Upsert'
@@ -76,7 +78,7 @@ A_SUBJECT_STATUS = mdsol('Status')
 A_PROTCOL_DEVIATION_REPEAT_KEY = 'ProtocolDeviationRepeatKey'
 A_CLASS = 'Class'  # PV
 A_CODE = 'Code'  # PV
-A_REVIEWED = 'Reviewed' #Reviews
+A_REVIEWED = 'Reviewed'  # Reviews
 A_GROUP_NAME = 'GroupName'
 A_COMMENT_REPEAT_KEY = 'CommentRepeatKey'
 A_INSTANCE_NAME = mdsol('InstanceName')
@@ -110,16 +112,17 @@ STATE_SOURCE_ID = 1
 STATE_DATETIME = 2
 STATE_REASON_FOR_CHANGE = 3
 
-#Signature elements have some of the same elements as Audits. Tells us which we are collecting
+# Signature elements have some of the same elements as Audits. Tells us which we are collecting
 AUDIT_REF_STATE = 0
 SIGNATURE_REF_STATE = 1
+
 
 class ODMTargetParser(object):
     """A SAX-style lxml Target parser class"""
 
     def __init__(self, handler):
 
-        #Handler, object that deals with emitting entries etc
+        # Handler, object that deals with emitting entries etc
         self.handler = handler
 
         # Context holds the current set of values we are building up, ready to emit
@@ -138,7 +141,7 @@ class ODMTargetParser(object):
 
         self.count += 1
 
-        #event_name = 'on_{0}'.format(self.context.subcategory.lower())
+        # event_name = 'on_{0}'.format(self.context.subcategory.lower())
         event_name = self.context.subcategory
         if hasattr(self.handler, event_name):
             getattr(self.handler, event_name)(self.context)
@@ -161,7 +164,7 @@ class ODMTargetParser(object):
                 attrib.get(A_TRANSACTION_TYPE, DEFAULT_TRANSACTION_TYPE),
             )
         elif tag == E_USER_REF:
-            #Set the Signature or audit-record value depending on state
+            # Set the Signature or audit-record value depending on state
             self.get_parent_element().user_oid = attrib.get(A_USER_OID)
 
         elif tag == E_SOURCE_ID:
@@ -174,8 +177,8 @@ class ODMTargetParser(object):
             self.state = STATE_REASON_FOR_CHANGE
 
         elif tag == E_LOCATION_REF:
-          #Set the Signature or audit-record value depending on state
-          self.get_parent_element().location_oid = attrib.get(A_LOCATION_OID)
+            # Set the Signature or audit-record value depending on state
+            self.get_parent_element().location_oid = attrib.get(A_LOCATION_OID)
 
         elif tag == E_STUDY_EVENT_DATA:
             self.context.event = Event(
@@ -187,7 +190,8 @@ class ODMTargetParser(object):
             )
 
         elif tag == E_FORM_DATA:
-            self.context.form = Form(attrib.get(A_FORM_OID),
+            self.context.form = Form(
+                attrib.get(A_FORM_OID),
                 int(attrib.get(A_FORM_REPEAT_KEY, 0)),
                 attrib.get(A_TRANSACTION_TYPE, None),
                 attrib.get(A_DATAPAGE_NAME, None),
@@ -207,12 +211,12 @@ class ODMTargetParser(object):
                 yes_no_none(attrib.get(A_FREEZE, None)),
                 yes_no_none(attrib.get(A_VERIFY, None)),
                 yes_no_none(attrib.get(A_LOCK, None)),
-                attrib.get(A_TRANSACTION_TYPE , None)
+                attrib.get(A_TRANSACTION_TYPE, None)
             )
 
         elif tag == E_QUERY:
             self.context.query = Query(
-                make_long(attrib.get(A_QUERY_REPEAT_KEY,-1)),
+                make_int(attrib.get(A_QUERY_REPEAT_KEY, -1)),
                 attrib.get(A_STATUS),
                 attrib.get(A_RESPONSE, None),
                 attrib.get(A_RECIPIENT),
@@ -221,7 +225,7 @@ class ODMTargetParser(object):
 
         elif tag == E_PROTOCOL_DEVIATION:
             self.context.protocol_deviation = ProtocolDeviation(
-                make_long(attrib.get(A_PROTCOL_DEVIATION_REPEAT_KEY,-1)),
+                make_int(attrib.get(A_PROTCOL_DEVIATION_REPEAT_KEY, -1)),
                 attrib.get(A_CODE),
                 attrib.get(A_CLASS),
                 attrib.get(A_STATUS),
@@ -261,7 +265,7 @@ class ODMTargetParser(object):
     def data(self, data):
         """Called for text between tags"""
         if self.state == STATE_SOURCE_ID:
-            self.context.audit_record.source_id = long(data)  # Audit ids can be 64 bits
+            self.context.audit_record.source_id = int(data)  # Audit ids can be 64 bits
         elif self.state == STATE_DATETIME:
             dt = datetime.datetime.strptime(data, "%Y-%m-%dT%H:%M:%S")
             self.get_parent_element().datetimestamp = dt
@@ -272,6 +276,7 @@ class ODMTargetParser(object):
     def close(self):
         self.context = None
         return self.count
+
 
 def parse(data, eventer):
     """Parse the XML data, firing events from the eventer"""
