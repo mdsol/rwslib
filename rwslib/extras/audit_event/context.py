@@ -8,7 +8,7 @@ class ContextBase(object):
     """Base class"""
 
     def __repr__(self):
-        vals = dict((k, v) for k, v in self.__dict__.iteritems() if v is not None)
+        vals = dict((k, v) for k, v in self.__dict__.items() if v is not None)
         return "{0}({1})".format(self.__class__.__name__, str(vals))
 
 
