@@ -16,7 +16,7 @@ class TestEventer(object):
         pass
 
 
-class OdmAdapterTaseCase(unittest.TestCase):
+class ODMAdapterTaseCase(unittest.TestCase):
 
     def setUp(self):
         pass
