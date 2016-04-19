@@ -3,7 +3,7 @@ import unittest
 from rwslib.extras.audit_event.context import ContextBase
 
 
-class ContextBaseTaseCase(unittest.TestCase):
+class ContextBaseTestCase(unittest.TestCase):
 
     def setUp(self):
         pass
