@@ -9,4 +9,4 @@ class ContextBaseTaseCase(unittest.TestCase):
         pass
 
     def test_repr(self):
-        assert ContextBase().__repr__(), ''
+        self.assertEqual(ContextBase().__repr__(), 'ContextBase({})')
