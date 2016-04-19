@@ -9,12 +9,6 @@ from rwslib.extras.audit_event.context import (Context, Subject, Event,
                                                 ProtocolDeviation)
 
 
-# Python 3
-try:
-    long(1)
-except NameError:
-    long = int
-
 try:
     basestring
 except NameError:
@@ -46,12 +40,12 @@ def yes_no_none(value):
     return value.lower() == 'yes'
 
 
-def make_long(value, missing=-1):
+def make_int(value, missing=-1):
     """Convert string value to long, '' to missing"""
     if isinstance(value, basestring):
         if not value.strip():
             return missing
-    return long(value)
+    return int(value)
 
 # Defaults
 DEFAULT_TRANSACTION_TYPE = u'Upsert'
@@ -222,7 +216,7 @@ class ODMTargetParser(object):
 
         elif tag == E_QUERY:
             self.context.query = Query(
-                make_long(attrib.get(A_QUERY_REPEAT_KEY, -1)),
+                make_int(attrib.get(A_QUERY_REPEAT_KEY, -1)),
                 attrib.get(A_STATUS),
                 attrib.get(A_RESPONSE, None),
                 attrib.get(A_RECIPIENT),
@@ -231,7 +225,7 @@ class ODMTargetParser(object):
 
         elif tag == E_PROTOCOL_DEVIATION:
             self.context.protocol_deviation = ProtocolDeviation(
-                make_long(attrib.get(A_PROTCOL_DEVIATION_REPEAT_KEY, -1)),
+                make_int(attrib.get(A_PROTCOL_DEVIATION_REPEAT_KEY, -1)),
                 attrib.get(A_CODE),
                 attrib.get(A_CLASS),
                 attrib.get(A_STATUS),
@@ -271,7 +265,7 @@ class ODMTargetParser(object):
     def data(self, data):
         """Called for text between tags"""
         if self.state == STATE_SOURCE_ID:
-            self.context.audit_record.source_id = long(data)  # Audit ids can be 64 bits
+            self.context.audit_record.source_id = int(data)  # Audit ids can be 64 bits
         elif self.state == STATE_DATETIME:
             dt = datetime.datetime.strptime(data, "%Y-%m-%dT%H:%M:%S")
             self.get_parent_element().datetimestamp = dt

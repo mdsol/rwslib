@@ -11,12 +11,6 @@ except ImportError:
 from rwslib.extras.audit_event.parser import parse
 import logging
 
-# Python 3
-try:
-    long(1)
-except NameError:
-    long = int
-
 
 class ODMAdapter(object):
     """A self-contained data fetcher and parser using a RWSConnection and an event class provided by the user"""
@@ -33,7 +27,7 @@ class ODMAdapter(object):
         if link:
             link = link['url']
             p = urlparse(link)
-            start_id = long(parse_qs(p.query)['startid'][0])
+            start_id = int(parse_qs(p.query)['startid'][0])
             return start_id
 
         return None
