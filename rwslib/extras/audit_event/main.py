@@ -2,12 +2,7 @@
 __author__ = 'isparks'
 
 from rwslib.rws_requests.odm_adapter import AuditRecordsRequest
-
-try:
-    from urlparse import urlparse, parse_qs
-except ImportError:
-    from urllib.parse import urlparse, parse_qs
-
+from six.moves.urllib.parse import urlparse, parse_qs
 from rwslib.extras.audit_event.parser import parse
 import logging
 
