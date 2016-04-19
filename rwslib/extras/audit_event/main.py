@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 __author__ = 'isparks'
 
-from rwslib import RWSConnection
 from rwslib.rws_requests.odm_adapter import AuditRecordsRequest
-from urlparse import urlparse, parse_qs
-from parser import parse
+
+try:
+    from urlparse import urlparse, parse_qs
+except:
+    from urllib.parse import urlparse, parse_qs
+
+from rwslib.extras.audit_event.parser import parse
 import logging
 
 
@@ -17,14 +21,13 @@ class ODMAdapter(object):
         self.environment = environment
         self.start_id = 0
 
-
     def get_next_start_id(self):
         """If link for next result set has been passed, extract it and get the next set start id"""
-        link = self.rws_connection.last_result.links.get("next",None)
+        link = self.rws_connection.last_result.links.get("next", None)
         if link:
             link = link['url']
             p = urlparse(link)
-            start_id = long(parse_qs(p.query)['startid'][0])
+            start_id = int(parse_qs(p.query)['startid'][0])
             return start_id
 
         return None
@@ -34,17 +37,17 @@ class ODMAdapter(object):
         self.start_id = start_id
         while max_pages == -1 or (page < max_pages):
 
-            req = AuditRecordsRequest(self.study,self.environment, startid=self.start_id, per_page=per_page)
+            req = AuditRecordsRequest(self.study, self.environment, startid=self.start_id, per_page=per_page)
             try:
-                #Get the ODM data
+                # Get the ODM data
                 odm = self.rws_connection.send_request(req, **kwargs)
-                #Check if we were passed the next startid
-                #Need to do this immediately because subsequent parsing might include other calls to RWS
+                # Check if we were passed the next startid
+                # Need to do this immediately because subsequent parsing might include other calls to RWS
                 self.start_id = self.get_next_start_id()
-                #Send it for parsing
+                # Send it for parsing
                 parse(odm, self.eventer)
                 page += 1
-            except Exception, e:
+            except Exception as e:
                 logging.error(e.message)
 
             if not self.start_id:
