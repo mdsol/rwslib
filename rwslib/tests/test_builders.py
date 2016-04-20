@@ -23,6 +23,9 @@ class TestInheritance(unittest.TestCase):
             # Exercise __lshift__
             NewObj() << object()
 
+class TestString(unittest.TestCase):
+    def test_to_string(self):
+        self.assertEqual('<UserRef UserOID="test" />',str(UserRef("test")))
 
 class TestAttributeSetters(unittest.TestCase):
 

@@ -90,6 +90,12 @@ class ODMElement(object):
             self << child
         return self
 
+    def __str__(self):
+        """Return string representation"""
+        builder = ET.TreeBuilder()
+        self.build(builder)
+        return ET.tostring(builder.close(),encoding='utf-8')
+
     def set_single_attribute(self, other, trigger_klass, property_name):
         """Used to set guard the setting of an attribute which is singular and can't be set twice"""
 
