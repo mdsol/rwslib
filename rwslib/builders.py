@@ -1371,7 +1371,8 @@ class ItemDef(ODMElement):
     VALID_DATATYPES = [DataType.Text, DataType.Integer, DataType.Float, DataType.Date,
                        DataType.DateTime, DataType.Time]
 
-    def __init__(self, oid, name, datatype, length,
+    def __init__(self, oid, name, datatype,
+                 length=None,
                  significant_digits=None,
                  sas_field_name=None,
                  sds_var_name=None,
@@ -1409,6 +1410,13 @@ class ItemDef(ODMElement):
         if control_type is not None:
             if not isinstance(control_type, ControlType):
                 raise AttributeError("{0} is not a valid Control Type".format(control_type))
+
+        if length is None:
+            if datatype in [DataType.DateTime, DataType.Time, DataType.Date]:
+                # Default this
+                length = len(date_time_format)
+            else:
+                raise AttributeError('length must be set for all datatypes except Date/Time types')
 
         self.datatype = datatype
         self.length = length
