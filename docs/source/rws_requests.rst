@@ -114,3 +114,37 @@ Example::
     >>> response.istransactionsucessful
     True
 
+
+.. _configurabledatasetrequest_request:
+.. index:: ConfigurableDatasetRequest
+
+ConfigurableDatasetRequest()
+----------------------------
+
+Authorization is required for this method call.
+
+Returns the text result of calling::
+
+    https://{ host }/RaveWebServices/datasets/{dataset_name}(.{dataset_format})?{params}
+
+
+Sends a Configurable Dataset request to RWS.  The `dataset_format` argument is optional and is only required if the
+corresponding configurable dataset requires it.  The primary use case of this is as an abstract class that the user
+can subclass for their particular Configurable Dataset; the implemented class could such as validation of the
+requested `dataset_format` against the list of formats accepted by the configurable dataset or by overloading the
+`result` method to parse the raw response content (e.g. return a pre-parsed JSON response or a `csv.reader`).
+Returns a :class:`rwsobjects.RWSResponse` object:
+
+Example::
+
+    >>> from rwslib import RWSConnection
+    >>> from rwslib.rws_requests import ConfigurableDatasetRequest
+    >>> r = RWSConnection('innovate', 'username', 'password')  #Authorization REQUIRED
+    >>> response = r.send_request(ConfigurableDatasetRequest('SomeRequest', dataset_format='csv', params=dict(start='2012-02-01')))
+    >>> response.text
+    DataPageID,DataPointID,LastUpdated
+    1234,4321,2012-12-01T12:33:00
+    4334,1234,2012-12-02T12:33:00
+    ...
+
+
