@@ -4,9 +4,6 @@ from unittest import TestCase
 from six.moves.urllib.parse import urlparse, parse_qsl, unquote_plus
 from rwslib.rws_requests import ConfigurableDatasetRequest
 
-"""
-https://epro-validation.imedidata.net/cv-rave-upgrade-1.mdsol.com/RaveWebServices/datasets/ePRO.json?subjectid=45838&locale=eng&app_instance_uuid=822d6920-61c2-11e2-bcfd-0800200c9a66"""
-
 
 class Url(object):
     """
