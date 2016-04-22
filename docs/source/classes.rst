@@ -21,6 +21,7 @@ Class Reference
 .. autoclass:: StudyDatasetRequest
 .. autoclass:: SubjectDatasetRequest
 .. autoclass:: VersionDatasetRequest
+.. autoclass:: ConfigurableDatasetRequest
 
 .. module:: rwslib.rwsobjects
 
