@@ -535,7 +535,9 @@ class ConfigurableDatasetRequest(RWSAuthorizedGetRequest):
                  dataset_format='',
                  params={}):
         """
-        Create a new Configurable Dataset Requesy
+        Create a new Configurable Dataset Request        // Start an asynchronous task to sync the datastore
+        new SyncTask().execute(userID);
+
         :param dataset_name: Name for the dataset
         :type dataset_name: str
         :param dataset_format: Format for the dataset
