@@ -5,6 +5,7 @@ import unittest
 from rwslib.extras.audit_event import parser
 import datetime
 
+
 class ParserTestCaseBase(unittest.TestCase):
 
     def setUp(self):
@@ -64,18 +65,18 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual("SubjectCreated",sc.subcategory)
-        self.assertEqual("MOVE-2014(DEV)",sc.study_oid)
-        self.assertEqual(2867,sc.metadata_version)
-        self.assertEqual("01",sc.subject.name)
-        self.assertEqual("538bdc4d-78b7-4ff9-a59c-3d13c8d8380b",sc.subject.key)
-        self.assertEqual(6434193,sc.audit_record.source_id)
-        self.assertEqual(None,sc.audit_record.reason_for_change)
-        self.assertEqual(datetime.datetime(2014,8,13,10,40,6),sc.audit_record.datetimestamp)
-        self.assertEqual("1001",sc.audit_record.location_oid)
-        self.assertEqual("isparks",sc.audit_record.user_oid)
+        self.assertEqual("SubjectCreated", sc.subcategory)
+        self.assertEqual("MOVE-2014(DEV)", sc.study_oid)
+        self.assertEqual(2867, sc.metadata_version)
+        self.assertEqual("01", sc.subject.name)
+        self.assertEqual("538bdc4d-78b7-4ff9-a59c-3d13c8d8380b", sc.subject.key)
+        self.assertEqual(6434193, sc.audit_record.source_id)
+        self.assertEqual(None, sc.audit_record.reason_for_change)
+        self.assertEqual(datetime.datetime(2014, 8, 13, 10, 40, 6), sc.audit_record.datetimestamp)
+        self.assertEqual("1001", sc.audit_record.location_oid)
+        self.assertEqual("isparks", sc.audit_record.user_oid)
 
-        #Check the SubjectCreated event fired
+        # Check the SubjectCreated event fired
         self.assertEqual(1, self.eventer.subjects_created)
 
     def test_data_entered(self):
@@ -107,15 +108,15 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual("EnteredWithChangeCode",sc.subcategory)
-        self.assertEqual("VISIT1[1]",sc.event.repeat_key)
-        self.assertEqual("Upsert",sc.item.transaction_type)
-        self.assertEqual("VISIT",sc.form.oid)
-        self.assertEqual(1,sc.form.repeat_key)
-        self.assertEqual("VISIT",sc.itemgroup.oid)
-        self.assertEqual("7 Aug 2014",sc.item.value)
-        self.assertEqual("VISIT.VISITDAT",sc.item.oid)
-        self.assertEqual("Data Entry Error",sc.audit_record.reason_for_change)
+        self.assertEqual("EnteredWithChangeCode", sc.subcategory)
+        self.assertEqual("VISIT1[1]", sc.event.repeat_key)
+        self.assertEqual("Upsert", sc.item.transaction_type)
+        self.assertEqual("VISIT", sc.form.oid)
+        self.assertEqual(1, sc.form.repeat_key)
+        self.assertEqual("VISIT", sc.itemgroup.oid)
+        self.assertEqual("7 Aug 2014", sc.item.value)
+        self.assertEqual("VISIT.VISITDAT", sc.item.oid)
+        self.assertEqual("Data Entry Error", sc.audit_record.reason_for_change)
 
     def test_query(self):
         """Test data entered with queries"""
@@ -146,11 +147,11 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual("QueryOpen",sc.subcategory)
-        self.assertEqual(5606,sc.query.repeat_key)
-        self.assertEqual("Data is required.  Please complete.",sc.query.value)
-        self.assertEqual("Open",sc.query.status)
-        self.assertEqual("Site from System",sc.query.recipient)
+        self.assertEqual("QueryOpen", sc.subcategory)
+        self.assertEqual(5606, sc.query.repeat_key)
+        self.assertEqual("Data is required.  Please complete.", sc.query.value)
+        self.assertEqual("Open", sc.query.status)
+        self.assertEqual("Site from System", sc.query.recipient)
 
     def test_comment(self):
         """Test data entered with comment"""
@@ -181,11 +182,11 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual("CommentAdd",sc.subcategory)
-        self.assertEqual(2,sc.comment.repeat_key)
+        self.assertEqual("CommentAdd", sc.subcategory)
+        self.assertEqual(2, sc.comment.repeat_key)
         com = "This subject is now able to be randomized. Please navigate to the Randomization form to randomize the subject."
-        self.assertEqual(com,sc.comment.value)
-        self.assertEqual("Insert",sc.comment.transaction_type)
+        self.assertEqual(com, sc.comment.value)
+        self.assertEqual("Insert", sc.comment.transaction_type)
 
     def test_instance_name_changed(self):
         """ObjectNameChanged subcategory for changes of Instance names"""
@@ -208,12 +209,11 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual("ObjectNameChanged",sc.subcategory)
-        self.assertEqual("Upsert",sc.event.transaction_type)
-        self.assertEqual("UNSCHEDULED[1]",sc.event.repeat_key)
-        self.assertEqual("Unscheduled Visit 22 Aug 2013",sc.event.instance_name)
+        self.assertEqual("ObjectNameChanged", sc.subcategory)
+        self.assertEqual("Upsert", sc.event.transaction_type)
+        self.assertEqual("UNSCHEDULED[1]", sc.event.repeat_key)
+        self.assertEqual("Unscheduled Visit 22 Aug 2013", sc.event.instance_name)
         self.assertIsNone(sc.event.instance_overdue)
-
 
     def test_datapage_name_changed(self):
         """ObjectNameChanged subcategory for changes of datapage names"""
@@ -238,11 +238,10 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual("ObjectNameChanged",sc.subcategory)
-        self.assertEqual("Upsert",sc.form.transaction_type)
-        self.assertEqual(1,sc.form.repeat_key)
-        self.assertEqual("Vital signs",sc.form.datapage_name)
-
+        self.assertEqual("ObjectNameChanged", sc.subcategory)
+        self.assertEqual("Upsert", sc.form.transaction_type)
+        self.assertEqual(1, sc.form.repeat_key)
+        self.assertEqual("Vital signs", sc.form.datapage_name)
 
     def test_instance_overdue(self):
         """When instance overdue date is set"""
@@ -266,12 +265,11 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual("InstanceOverdue",sc.subcategory)
-        self.assertEqual("Upsert",sc.event.transaction_type)
-        self.assertEqual("WEEK_03[1]",sc.event.repeat_key)
-        self.assertEqual("9/3/2013 12:00:00 AM",sc.event.instance_overdue)
+        self.assertEqual("InstanceOverdue", sc.subcategory)
+        self.assertEqual("Upsert", sc.event.transaction_type)
+        self.assertEqual("WEEK_03[1]", sc.event.repeat_key)
+        self.assertEqual("9/3/2013 12:00:00 AM", sc.event.instance_overdue)
         self.assertIsNone(sc.event.instance_name)
-
 
     def test_protocol_deviation(self):
         """Protocol deviation creation"""
@@ -302,14 +300,13 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual("CreatePD",sc.subcategory)
-        self.assertEqual("Insert",sc.protocol_deviation.transaction_type)
-        self.assertEqual("Body Mass Index is out of the prescribed range of LT 20 or GT 30",sc.protocol_deviation.value)
-        self.assertEqual("Open",sc.protocol_deviation.status)
-        self.assertEqual("Incl/Excl Criteria not met",sc.protocol_deviation.klass)
-        self.assertEqual(218,sc.protocol_deviation.repeat_key)
-        self.assertEqual("Deviation",sc.protocol_deviation.code)
-
+        self.assertEqual("CreatePD", sc.subcategory)
+        self.assertEqual("Insert", sc.protocol_deviation.transaction_type)
+        self.assertEqual("Body Mass Index is out of the prescribed range of LT 20 or GT 30", sc.protocol_deviation.value)
+        self.assertEqual("Open", sc.protocol_deviation.status)
+        self.assertEqual("Incl/Excl Criteria not met", sc.protocol_deviation.klass)
+        self.assertEqual(218, sc.protocol_deviation.repeat_key)
+        self.assertEqual("Deviation", sc.protocol_deviation.code)
 
     def test_review(self):
         """Test for reviews"""
@@ -339,9 +336,9 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual("Review",sc.subcategory)
+        self.assertEqual("Review", sc.subcategory)
         self.assertTrue(sc.review.reviewed)
-        self.assertEqual("Data Management",sc.review.group_name)
+        self.assertEqual("Data Management", sc.review.group_name)
 
     def test_verify(self):
         """Test data verification"""
@@ -370,8 +367,7 @@ class ParserTestCase(ParserTestCaseBase):
 
         sc = self.context
 
-        self.assertEqual(True,sc.item.verify)
-
+        self.assertEqual(True, sc.item.verify)
 
     def test_signature(self):
         """Test signatures"""
@@ -404,10 +400,45 @@ class ParserTestCase(ParserTestCaseBase):
         sc = self.context
 
         self.assertEqual("ValidESigCredential", sc.subcategory)
-        self.assertEqual("5",sc.signature.oid)
-        self.assertEqual("1001",sc.signature.location_oid)
-        self.assertEqual("mwissner.INV@gmail.com",sc.signature.user_oid)
-        self.assertEqual(datetime.datetime(2013,8,29,16,11,31), sc.signature.datetimestamp)
+        self.assertEqual("5", sc.signature.oid)
+        self.assertEqual("1001", sc.signature.location_oid)
+        self.assertEqual("mwissner.INV@gmail.com", sc.signature.user_oid)
+        self.assertEqual(datetime.datetime(2013, 8, 29, 16, 11, 31), sc.signature.datetimestamp)
+
+    def test_form_datapage_id(self):
+        """Test data entered with folder refs, reasons for change etc"""
+
+        self.parse(u"""<?xml version="1.0" encoding="UTF-8"?>
+<ODM xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" ODMVersion="1.3" FileType="Transactional" FileOID="4d690eda-4f08-48d1-af26-3bab40f6118f" CreationDateTime="2014-11-04T16:37:05">
+  <ClinicalData StudyOID="MOVE-2014(DEV)" MetaDataVersionOID="2867" mdsol:AuditSubCategoryName="EnteredWithChangeCode">
+    <SubjectData SubjectKey="538bdc4d-78b7-4ff9-a59c-3d13c8d8380b" mdsol:SubjectKeyType="SubjectUUID" mdsol:SubjectName="01">
+      <SiteRef LocationOID="1001" />
+      <StudyEventData StudyEventOID="VISIT1" StudyEventRepeatKey="VISIT1[1]">
+        <FormData FormOID="VISIT" FormRepeatKey="1" mdsol:DataPageId="123">
+          <ItemGroupData ItemGroupOID="VISIT">
+            <ItemData ItemOID="VISIT.VISITDAT" TransactionType="Upsert" Value="7 Aug 2014">
+              <AuditRecord>
+                <UserRef UserOID="isparks" />
+                <LocationRef LocationOID="1001" />
+                <DateTimeStamp>2014-08-13T10:53:57</DateTimeStamp>
+                <ReasonForChange>Data Entry Error</ReasonForChange>
+                <SourceID>6434227</SourceID>
+              </AuditRecord>
+            </ItemData>
+          </ItemGroupData>
+        </FormData>
+      </StudyEventData>
+    </SubjectData>
+  </ClinicalData>
+  </ODM>""".encode('ascii'))
+
+        sc = self.context
+
+        self.assertEqual("EnteredWithChangeCode", sc.subcategory)
+        self.assertEqual("VISIT1[1]", sc.event.repeat_key)
+        self.assertEqual("Upsert", sc.item.transaction_type)
+        self.assertEqual("VISIT", sc.form.oid)
+        self.assertEqual(123, sc.form.datapage_id)
 
 if __name__ == '__main__':
     unittest.main()
