@@ -196,7 +196,7 @@ class ODMTargetParser(object):
                 int(attrib.get(A_FORM_REPEAT_KEY, 0)),
                 attrib.get(A_TRANSACTION_TYPE, None),
                 attrib.get(A_DATAPAGE_NAME, None),
-                attrib.get(A_DATAPAGE_ID, None),
+                make_int(attrib.get(A_DATAPAGE_ID, -1)),
             )
 
         elif tag == E_ITEM_GROUP_DATA:
