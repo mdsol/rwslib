@@ -84,6 +84,7 @@ A_COMMENT_REPEAT_KEY = 'CommentRepeatKey'
 A_INSTANCE_NAME = mdsol('InstanceName')
 A_INSTANCE_OVERDUE = mdsol('InstanceOverdue')
 A_DATAPAGE_NAME = mdsol('DataPageName')
+A_DATAPAGE_ID = mdsol('DataPageId')
 A_SIGNATURE_OID = 'SignatureOID'
 
 
@@ -195,6 +196,7 @@ class ODMTargetParser(object):
                 int(attrib.get(A_FORM_REPEAT_KEY, 0)),
                 attrib.get(A_TRANSACTION_TYPE, None),
                 attrib.get(A_DATAPAGE_NAME, None),
+                make_int(attrib.get(A_DATAPAGE_ID, -1)),
             )
 
         elif tag == E_ITEM_GROUP_DATA:
