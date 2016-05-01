@@ -45,6 +45,8 @@ def make_int(value, missing=-1):
     if isinstance(value, basestring):
         if not value.strip():
             return missing
+    elif value is None:
+        return missing
     return int(value)
 
 # Defaults
@@ -63,6 +65,7 @@ A_ITEM_OID = 'ItemOID'
 A_VALUE = 'Value'
 A_STUDYEVENT_OID = 'StudyEventOID'
 A_STUDYEVENT_REPEAT_KEY = 'StudyEventRepeatKey'
+A_RECORD_ID = mdsol('RecordId')
 A_FORM_OID = 'FormOID'
 A_FORM_REPEAT_KEY = 'FormRepeatKey'
 A_ITEMGROUP_OID = 'ItemGroupOID'
@@ -81,6 +84,7 @@ A_CODE = 'Code'  # PV
 A_REVIEWED = 'Reviewed'  # Reviews
 A_GROUP_NAME = 'GroupName'
 A_COMMENT_REPEAT_KEY = 'CommentRepeatKey'
+A_INSTANCE_ID = mdsol('InstanceId')
 A_INSTANCE_NAME = mdsol('InstanceName')
 A_INSTANCE_OVERDUE = mdsol('InstanceOverdue')
 A_DATAPAGE_NAME = mdsol('DataPageName')
@@ -161,7 +165,7 @@ class ODMTargetParser(object):
             self.context.subject = Subject(
                 attrib.get(A_SUBJECT_KEY),
                 attrib.get(A_SUBJECT_NAME),
-                attrib.get(A_SUBJECT_STATUS, None),
+                attrib.get(A_SUBJECT_STATUS),
                 attrib.get(A_TRANSACTION_TYPE, DEFAULT_TRANSACTION_TYPE),
             )
         elif tag == E_USER_REF:
@@ -185,17 +189,18 @@ class ODMTargetParser(object):
             self.context.event = Event(
                 attrib.get(A_STUDYEVENT_OID),
                 attrib.get(A_STUDYEVENT_REPEAT_KEY),
-                attrib.get(A_TRANSACTION_TYPE, None),
-                attrib.get(A_INSTANCE_NAME, None),
-                attrib.get(A_INSTANCE_OVERDUE, None),
+                attrib.get(A_TRANSACTION_TYPE),
+                attrib.get(A_INSTANCE_NAME),
+                attrib.get(A_INSTANCE_OVERDUE),
+                make_int(attrib.get(A_INSTANCE_ID), -1)
             )
 
         elif tag == E_FORM_DATA:
             self.context.form = Form(
                 attrib.get(A_FORM_OID),
                 int(attrib.get(A_FORM_REPEAT_KEY, 0)),
-                attrib.get(A_TRANSACTION_TYPE, None),
-                attrib.get(A_DATAPAGE_NAME, None),
+                attrib.get(A_TRANSACTION_TYPE),
+                attrib.get(A_DATAPAGE_NAME),
                 make_int(attrib.get(A_DATAPAGE_ID, -1)),
             )
 
@@ -203,26 +208,27 @@ class ODMTargetParser(object):
             self.context.itemgroup = ItemGroup(
                 attrib.get(A_ITEMGROUP_OID),
                 int(attrib.get(A_ITEMGROUP_REPEAT_KEY, 0)),
-                attrib.get(A_TRANSACTION_TYPE, None)
+                attrib.get(A_TRANSACTION_TYPE),
+                make_int(attrib.get(A_RECORD_ID, -1)),
             )
 
         elif tag == E_ITEM_DATA:
             self.context.item = Item(
                 attrib.get(A_ITEM_OID),
-                attrib.get(A_VALUE, None),
-                yes_no_none(attrib.get(A_FREEZE, None)),
-                yes_no_none(attrib.get(A_VERIFY, None)),
-                yes_no_none(attrib.get(A_LOCK, None)),
-                attrib.get(A_TRANSACTION_TYPE, None)
+                attrib.get(A_VALUE),
+                yes_no_none(attrib.get(A_FREEZE)),
+                yes_no_none(attrib.get(A_VERIFY)),
+                yes_no_none(attrib.get(A_LOCK)),
+                attrib.get(A_TRANSACTION_TYPE)
             )
 
         elif tag == E_QUERY:
             self.context.query = Query(
                 make_int(attrib.get(A_QUERY_REPEAT_KEY, -1)),
                 attrib.get(A_STATUS),
-                attrib.get(A_RESPONSE, None),
+                attrib.get(A_RESPONSE),
                 attrib.get(A_RECIPIENT),
-                attrib.get(A_VALUE, None)  # Optional, depends on status
+                attrib.get(A_VALUE)  # Optional, depends on status
             )
 
         elif tag == E_PROTOCOL_DEVIATION:
@@ -231,27 +237,27 @@ class ODMTargetParser(object):
                 attrib.get(A_CODE),
                 attrib.get(A_CLASS),
                 attrib.get(A_STATUS),
-                attrib.get(A_VALUE, None),
-                attrib.get(A_TRANSACTION_TYPE, None)
+                attrib.get(A_VALUE),
+                attrib.get(A_TRANSACTION_TYPE)
             )
 
         elif tag == E_REVIEW:
             self.context.review = Review(
-                attrib.get(A_GROUP_NAME, None),
-                yes_no_none(attrib.get(A_REVIEWED, None)),
+                attrib.get(A_GROUP_NAME),
+                yes_no_none(attrib.get(A_REVIEWED)),
             )
         elif tag == E_COMMENT:
             self.context.comment = Comment(
-                attrib.get(A_COMMENT_REPEAT_KEY, None),
-                attrib.get(A_VALUE, None),
-                attrib.get(A_TRANSACTION_TYPE, None)
+                attrib.get(A_COMMENT_REPEAT_KEY),
+                attrib.get(A_VALUE),
+                attrib.get(A_TRANSACTION_TYPE)
 
             )
         elif tag == E_SIGNATURE:
             self.ref_state = SIGNATURE_REF_STATE
 
         elif tag == E_SIGNATURE_REF:
-            self.context.signature.oid = attrib.get(A_SIGNATURE_OID, None)
+            self.context.signature.oid = attrib.get(A_SIGNATURE_OID)
 
     def end(self, tag):
         """Detect end of element"""

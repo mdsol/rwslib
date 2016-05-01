@@ -67,25 +67,24 @@ class ContextContainer(ContextBase):
 
 
 class Event(ContextContainer):
-    def __init__(self, oid, repeat_key, transaction_type, instance_name, instance_overdue):
-        self.oid = oid
-        self.repeat_key = repeat_key
-        self.transaction_type = transaction_type
+    def __init__(self, oid, repeat_key, transaction_type, instance_name, instance_overdue, instance_id):
+        ContextContainer.__init__(self, oid, repeat_key, transaction_type)
         self.instance_name = instance_name
         self.instance_overdue = instance_overdue
+        self.instance_id = instance_id
 
 
 class Form(ContextContainer):
     def __init__(self, oid, repeat_key, transaction_type, datapage_name, datapage_id):
-        self.oid = oid
-        self.repeat_key = repeat_key
-        self.transaction_type = transaction_type
+        ContextContainer.__init__(self, oid, repeat_key, transaction_type)
         self.datapage_name = datapage_name
         self.datapage_id = datapage_id
 
 
 class ItemGroup(ContextContainer):
-    pass
+    def __init__(self, oid, repeat_key, transaction_type, record_id):
+        ContextContainer.__init__(self, oid, repeat_key, transaction_type)
+        self.record_id = record_id
 
 
 class Item(ContextBase):
