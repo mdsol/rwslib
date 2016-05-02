@@ -6,6 +6,17 @@ from rwslib.extras.audit_event import parser
 import datetime
 
 
+class TestUtils(unittest.TestCase):
+    """Tests of utilities in the parser unit"""
+    def test_make_int(self):
+        self.assertEqual(-1, parser.make_int(None))
+        self.assertEqual(-1, parser.make_int(''))
+        self.assertEqual(5, parser.make_int('5'))
+
+        with self.assertRaises(ValueError):
+            self.assertEqual(-1, parser.make_int('five'))
+
+
 class ParserTestCaseBase(unittest.TestCase):
 
     def setUp(self):
@@ -84,27 +95,27 @@ class ParserTestCase(ParserTestCaseBase):
 
         self.parse(u"""<?xml version="1.0" encoding="UTF-8"?>
 <ODM xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" ODMVersion="1.3" FileType="Transactional" FileOID="4d690eda-4f08-48d1-af26-3bab40f6118f" CreationDateTime="2014-11-04T16:37:05">
-  <ClinicalData StudyOID="MOVE-2014(DEV)" MetaDataVersionOID="2867" mdsol:AuditSubCategoryName="EnteredWithChangeCode">
-    <SubjectData SubjectKey="538bdc4d-78b7-4ff9-a59c-3d13c8d8380b" mdsol:SubjectKeyType="SubjectUUID" mdsol:SubjectName="01">
-      <SiteRef LocationOID="1001" />
-      <StudyEventData StudyEventOID="VISIT1" StudyEventRepeatKey="VISIT1[1]">
-        <FormData FormOID="VISIT" FormRepeatKey="1">
-          <ItemGroupData ItemGroupOID="VISIT">
-            <ItemData ItemOID="VISIT.VISITDAT" TransactionType="Upsert" Value="7 Aug 2014">
-              <AuditRecord>
-                <UserRef UserOID="isparks" />
-                <LocationRef LocationOID="1001" />
-                <DateTimeStamp>2014-08-13T10:53:57</DateTimeStamp>
-                <ReasonForChange>Data Entry Error</ReasonForChange>
-                <SourceID>6434227</SourceID>
-              </AuditRecord>
-            </ItemData>
-          </ItemGroupData>
-        </FormData>
-      </StudyEventData>
-    </SubjectData>
-  </ClinicalData>
-  </ODM>""".encode('ascii'))
+   <ClinicalData StudyOID="MOVE-2014(DEV)" MetaDataVersionOID="2867" mdsol:AuditSubCategoryName="EnteredWithChangeCode">
+      <SubjectData SubjectKey="538bdc4d-78b7-4ff9-a59c-3d13c8d8380b" mdsol:SubjectKeyType="SubjectUUID" mdsol:SubjectName="01">
+         <SiteRef LocationOID="1001" />
+         <StudyEventData StudyEventOID="VISIT1" StudyEventRepeatKey="VISIT1[1]" mdsol:InstanceId="227392">
+            <FormData FormOID="VISIT" FormRepeatKey="1" mdsol:DataPageId="853098">
+               <ItemGroupData ItemGroupOID="VISIT" mdsol:RecordId="1693434">
+                  <ItemData ItemOID="VISIT.VISITDAT" TransactionType="Upsert" Value="7 Aug 2014">
+                     <AuditRecord>
+                        <UserRef UserOID="isparks" />
+                        <LocationRef LocationOID="1001" />
+                        <DateTimeStamp>2014-08-13T10:53:57</DateTimeStamp>
+                        <ReasonForChange>Data Entry Error</ReasonForChange>
+                        <SourceID>6434227</SourceID>
+                     </AuditRecord>
+                  </ItemData>
+               </ItemGroupData>
+            </FormData>
+         </StudyEventData>
+      </SubjectData>
+   </ClinicalData>
+</ODM>""".encode('ascii'))
 
         sc = self.context
 
@@ -117,6 +128,9 @@ class ParserTestCase(ParserTestCaseBase):
         self.assertEqual("7 Aug 2014", sc.item.value)
         self.assertEqual("VISIT.VISITDAT", sc.item.oid)
         self.assertEqual("Data Entry Error", sc.audit_record.reason_for_change)
+        self.assertEqual(227392, sc.event.instance_id)
+        self.assertEqual(853098, sc.form.datapage_id)
+        self.assertEqual(1693434, sc.itemgroup.record_id)
 
     def test_query(self):
         """Test data entered with queries"""
