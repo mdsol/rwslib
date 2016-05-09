@@ -54,7 +54,7 @@ RWSConnection ``send_request`` method::
     >>> rws = RWSConnection('innovate')
     >>> from rwslib.rws_requests import VersionRequest
     >>> rws.send_request(VersionRequest())
-    1.8.0
+    u'1.8.0'
 
 The result you get back from send_request will depend on the request type since Request objects have the chance to
 process the text values returned from Rave. ``VersionRequest()`` returns a string value but other request types may
@@ -174,7 +174,7 @@ were sent, what URL was called etc.
     >>> rws = RWSConnection('innovate')
     >>> #Get the rave version from rws
     >>> rws.send_request(VersionRequest())
-    1.8.0
+    u'1.8.0'
     >>> rws.last_result.url
     https://innovate.mdsol.com/RaveWebServices/version
     >>> rws.last_result.status_code
@@ -182,7 +182,7 @@ were sent, what URL was called etc.
     >>> rws.last_result.headers['content-type']
     text/plain; charset=utf-8
     >>> rws.last_result.text
-    1.8.0
+    u'1.8.0'
 
 ``last_result`` is a `Requests <http://docs.python-requests.org/>`_ object. Please see that library for more
 information on all the properties that can be returned there.
@@ -202,7 +202,7 @@ in it's ``request_time`` attribute.
     >>> rws = RWSConnection('innovate')
     >>> #Get the rave version from rws
     >>> rws.send_request(VersionRequest())
-    1.8.0
+    u'1.8.0'
     >>> #Get the elapsed time in seconds to process the previous request
     >>> rws.request_time
     0.760736942291

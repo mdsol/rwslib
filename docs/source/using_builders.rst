@@ -132,7 +132,8 @@ following example creates the same document as above::
 The builder creates a number of ODM properties including CreationDateTime, FileOID (a random identifier), FileType and
 all namespace declarations.
 
-## Metadata Builders
+Metadata Builders
+-----------------
 
 Builders also exist for creating Metadata ODM files::
 
