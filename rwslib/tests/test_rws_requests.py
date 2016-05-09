@@ -17,7 +17,7 @@ from rwslib.rws_requests import StudySubjectsRequest, check_dataset_type, Subjec
     GlobalLibraryVersionRequest, GlobalLibraryVersionsRequest, GlobalLibraryDraftsRequest, \
     GlobalLibrariesRequest, StudyVersionRequest, StudyVersionsRequest, StudyDraftsRequest, \
     MetadataStudiesRequest, ClinicalStudiesRequest, CacheFlushRequest, DiagnosticsRequest, \
-    BuildVersionRequest, ODMDatasetBase
+    BuildVersionRequest, CodeNameRequest
 
 
 class TestStudySubjectsRequest(unittest.TestCase):
@@ -759,6 +759,17 @@ class TestBuildVersionRequest(unittest.TestCase):
         """We evaluate the path for BuildVersionRequest"""
         t = self.create_request_object()
         self.assertEqual("version/build", t.url_path())
+
+
+class TestnRequest(unittest.TestCase):
+    def create_request_object(self):
+        t = CodeNameRequest()
+        return t
+
+    def test_computed_url(self):
+        """We evaluate the path for CodeNameVersionRequest"""
+        t = self.create_request_object()
+        self.assertEqual("version/codename", t.url_path())
 
 
 class TimeoutTest(unittest.TestCase):

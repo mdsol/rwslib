@@ -129,11 +129,25 @@ class BuildVersionRequest(RWSGetRequest):
         return make_url('version', 'build')
 
 
+class CodeNameRequest(RWSGetRequest):
+    """Return the RWS version codename"""
+
+    def url_path(self):
+        return make_url('version', 'codename')
+
+
 class DiagnosticsRequest(RWSGetRequest):
     """Return the RWS build version number"""
 
     def url_path(self):
         return make_url('diagnostics')
+
+
+class TwoHundredRequest(RWSGetRequest):
+    """Return RWS MAuth information"""
+
+    def url_path(self):
+        return make_url('twohundred')
 
 
 class CacheFlushRequest(RWSAuthorizedGetRequest):
