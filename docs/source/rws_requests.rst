@@ -103,6 +103,27 @@ Example::
     u'OK'
 
 
+.. _twohundred_request:
+.. index:: TwoHundredRequest
+
+TowHundredRequest()
+-------------------
+
+Returns the html result of calling::
+
+    https://{ host }/RaveWebServices/twohundred
+
+Returns a 200 response code and a html document that contains information about the MAuth configuration of Rave
+Web Services on this url.
+
+Example::
+
+    >>> from rwslib import RWSConnection
+    >>> from rwslib.rws_requests import TwoHundredRequest
+    >>> r = RWSConnection('innovate') #Authorization optional
+    >>> r.send_request(TwoHundredRequest())
+    u'<!DOCTYPE html>\r\n<html>\r\n<head><script.....
+
 
 .. _cacheflush_request:
 .. index:: CacheFlushRequest

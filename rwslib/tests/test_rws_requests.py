@@ -17,7 +17,7 @@ from rwslib.rws_requests import StudySubjectsRequest, check_dataset_type, Subjec
     GlobalLibraryVersionRequest, GlobalLibraryVersionsRequest, GlobalLibraryDraftsRequest, \
     GlobalLibrariesRequest, StudyVersionRequest, StudyVersionsRequest, StudyDraftsRequest, \
     MetadataStudiesRequest, ClinicalStudiesRequest, CacheFlushRequest, DiagnosticsRequest, \
-    BuildVersionRequest, CodeNameRequest
+    BuildVersionRequest, CodeNameRequest, TwoHundredRequest
 
 
 class TestStudySubjectsRequest(unittest.TestCase):
@@ -740,36 +740,32 @@ class TestCacheFlushRequest(unittest.TestCase):
 
 
 class TestDiagnosticsRequest(unittest.TestCase):
-    def create_request_object(self):
-        t = DiagnosticsRequest()
-        return t
 
     def test_computed_url(self):
         """We evaluate the path for DiagnosticsRequest"""
-        t = self.create_request_object()
+        t = DiagnosticsRequest()
         self.assertEqual("diagnostics", t.url_path())
 
 
 class TestBuildVersionRequest(unittest.TestCase):
-    def create_request_object(self):
-        t = BuildVersionRequest()
-        return t
 
     def test_computed_url(self):
         """We evaluate the path for BuildVersionRequest"""
-        t = self.create_request_object()
+        t = BuildVersionRequest()
         self.assertEqual("version/build", t.url_path())
 
 
-class TestnRequest(unittest.TestCase):
-    def create_request_object(self):
-        t = CodeNameRequest()
-        return t
-
+class TestCodeNameRequest(unittest.TestCase):
     def test_computed_url(self):
         """We evaluate the path for CodeNameVersionRequest"""
-        t = self.create_request_object()
+        t = CodeNameRequest()
         self.assertEqual("version/codename", t.url_path())
+
+class TestTwoHundredRequest(unittest.TestCase):
+    def test_computed_url(self):
+        """We evaluate the path for TwoHundredRequest"""
+        t = TwoHundredRequest()
+        self.assertEqual("twohundred", t.url_path())
 
 
 class TimeoutTest(unittest.TestCase):
