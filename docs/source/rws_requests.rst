@@ -36,7 +36,7 @@ Example::
     >>> from rwslib.rws_requests import VersionRequest
     >>> r = RWSConnection('innovate', 'username', 'password')  #Authorization optional
     >>> r.send_request(VersionRequest())
-    1.8.0
+    u'1.15.0'
 
 
 .. _buildversion_request:
@@ -57,8 +57,29 @@ Example::
     >>> from rwslib.rws_requests import BuildVersionRequest
     >>> r = RWSConnection('innovate', 'username', 'password')  #Authorization optional
     >>> r.send_request(BuildVersionRequest())
-    5.6.5.12
+    u'5.6.5.213'
 
+
+
+.. _codename_request:
+.. index:: CodeNameRequest
+
+CodeNameRequest()
+-----------------
+
+Returns the text result of calling::
+
+    https://{ host }/RaveWebServices/version/codename
+
+Returns a 200 response code and the internal code name of the RWS version.
+
+Example::
+
+    >>> from rwslib import RWSConnection
+    >>> from rwslib.rws_requests import CodeNameRequest
+    >>> r = RWSConnection('innovate')  #Authorization optional
+    >>> r.send_request(CodeNameRequest())
+    u'Uakari'
 
 
 .. _diagnostics_request:
@@ -69,7 +90,7 @@ DiagnosticsRequest()
 
 Returns the text result of calling::
 
-    https://{ host }/RaveWebServices/version/build
+    https://{ host }/RaveWebServices/diagnostics
 
 Returns a 200 response code and the text *OK* if RWS self-checks pass.
 
@@ -79,8 +100,29 @@ Example::
     >>> from rwslib.rws_requests import DiagnosticsRequest
     >>> r = RWSConnection('innovate', 'username', 'password')  #Authorization optional
     >>> r.send_request(DiagnosticsRequest())
-    OK
+    u'OK'
 
+
+.. _twohundred_request:
+.. index:: TwoHundredRequest
+
+TowHundredRequest()
+-------------------
+
+Returns the html result of calling::
+
+    https://{ host }/RaveWebServices/twohundred
+
+Returns a 200 response code and a html document that contains information about the MAuth configuration of Rave
+Web Services on this url.
+
+Example::
+
+    >>> from rwslib import RWSConnection
+    >>> from rwslib.rws_requests import TwoHundredRequest
+    >>> r = RWSConnection('innovate') #Authorization optional
+    >>> r.send_request(TwoHundredRequest())
+    u'<!DOCTYPE html>\r\n<html>\r\n<head><script.....
 
 
 .. _cacheflush_request:
