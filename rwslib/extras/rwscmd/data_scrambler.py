@@ -71,13 +71,13 @@ class Scramble():
 
     def scramble_int(self, length):
         """Return random integer up to specified number of digits"""
-        return str(fake.random_number(int(length)))
+        return str(fake.random_number(length))
 
 
     def scramble_float(self, length, sd=0):
         """Return random float in specified format"""
         if sd == 0:
-            return str(fake.random_number(int(length)))
+            return str(fake.random_number(length))
         else:
             return str(fake.pyfloat(length-sd, sd, positive=True))
 
@@ -92,9 +92,9 @@ class Scramble():
         return fake.time(pattern=format)
 
 
-    def scramble_string(self, l):
+    def scramble_string(self, length):
         """Return random string"""
-        return fake.text(l) if l > 5 else ''.join([fake.random_letter() for n in range(0, l)])
+        return fake.text(length) if length > 5 else ''.join([fake.random_letter() for n in range(0, length)])
 
 
     def scramble_value(self, value):
@@ -153,7 +153,7 @@ class Scramble():
             for el in elem.iter(E_ODM.CODELIST_REF.value):
                 codelist = el.get(A_ODM.CODELIST_OID.value)
 
-            length = 1 if not A_ODM.LENGTH in elem else elem.get(A_ODM.LENGTH.value)
+            length = 1 if not A_ODM.LENGTH in elem else int(elem.get(A_ODM.LENGTH.value))
 
             if A_ODM.SIGNIFICANT_DIGITS.value in elem.keys():
                 sd = elem.get(A_ODM.SIGNIFICANT_DIGITS.value)

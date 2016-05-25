@@ -41,10 +41,10 @@ class TestDuckTyping(unittest.TestCase):
 
     def test_ducktype(self):
         """Test duck typing integers"""
-        for value, type in self.values.iteritems():
+        for value, expected_type in self.values.iteritems():
             rave_type, _ = data_scrambler.typeof_rave_data(value)
-            self.assertEqual(type, rave_type,
-                            msg='{0} should be of type {1} not {2}'.format(value, type, rave_type))
+            self.assertEqual(expected_type, rave_type,
+                            msg='{0} should be of type {1} not {2}'.format(value, expected_type, rave_type))
 
 
 class TestBasicScrambling(unittest.TestCase):
