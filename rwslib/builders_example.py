@@ -11,6 +11,14 @@ def example_clinical_data(study_name, environment):
           SubjectData("MDSOL", "IJS TEST4", transaction_type="Insert")(
              StudyEventData("SUBJECT")(
                 FormData("EN", transaction_type="Update")(
+                   # Although Signature is ODM1.3.1 RWS does not support it inbound currently
+                   # RWSBuilders do support outbound generation of Signature at FormData level
+                   # Signature()(
+                   #    UserRef("isparks"),
+                   #    LocationRef("MDSOL"),
+                   #    SignatureRef("APPROVED"),
+                   #    DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80))
+                   # ),
                    ItemGroupData()(
                       ItemData("SUBJINIT", "AAA")(
                             AuditRecord(edit_point=AuditRecord.EDIT_DATA_MANAGEMENT,
@@ -22,7 +30,7 @@ def example_clinical_data(study_name, environment):
                                             ReasonForChange("Data Entry Error"),
                                             DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80))
                             ),
-                            MdsolQuery(value="Subject intials should be 2 chars only.", recipient="Site from System",
+                            MdsolQuery(value="Subject initials should be 2 chars only.", recipient="Site from System",
                                        status=QueryStatusType.Open)
                       ),
                       ItemData("SUBJID", '001')

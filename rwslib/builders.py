@@ -145,6 +145,15 @@ class LocationRef(ODMElement):
         builder.end("LocationRef")
 
 
+class SignatureRef(ODMElement):
+    def __init__(self, oid):
+        self.oid = oid
+
+    def build(self, builder):
+        builder.start("SignatureRef", dict(SignatureOID=self.oid))
+        builder.end("SignatureRef")
+
+
 class ReasonForChange(ODMElement):
     def __init__(self, reason):
         self.reason = reason
@@ -166,6 +175,47 @@ class DateTimeStamp(ODMElement):
         else:
             builder.data(self.date_time)
         builder.end("DateTimeStamp")
+
+
+class Signature(ODMElement):
+    def __init__(self):
+        self.user_ref = None
+        self.location_ref = None
+        self.signature_ref = None
+        self.date_time_stamp = None
+
+    def build(self, builder):
+        builder.start("Signature", {})
+
+        if self.user_ref is None:
+            raise ValueError("User Reference not set.")
+        self.user_ref.build(builder)
+
+        if self.location_ref is None:
+            raise ValueError("Location Reference not set.")
+        self.location_ref.build(builder)
+
+        if self.signature_ref is None:
+            raise ValueError("Signature Reference not set.")
+        self.signature_ref.build(builder)
+
+        if self.date_time_stamp is None:
+            raise ValueError("DateTime not set.")
+        self.date_time_stamp.build(builder)
+
+        builder.end("Signature")
+
+    def __lshift__(self, other):
+        if not isinstance(other, (UserRef, LocationRef, SignatureRef, DateTimeStamp,)):
+            raise ValueError("Signature cannot accept a child element of type %s" % other.__class__.__name__)
+
+        # Order is important, apparently
+        self.set_single_attribute(other, UserRef, 'user_ref')
+        self.set_single_attribute(other, LocationRef, 'location_ref')
+        self.set_single_attribute(other, SignatureRef, 'signature_ref')
+        self.set_single_attribute(other, DateTimeStamp, 'date_time_stamp')
+        return other
+
 
 
 class AuditRecord(ODMElement):
@@ -449,12 +499,15 @@ class FormData(TransactionalElement):
         self.formoid = formoid
         self.form_repeat_key = form_repeat_key
         self.itemgroups = []
+        self.signature = None
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, ItemGroupData):
-            raise ValueError("FormData object can only receive ItemGroupData object")
+        if not isinstance(other, (Signature, ItemGroupData)):
+            raise ValueError(
+                "FormData object can only receive ItemGroupData or Signature objects (not '{}')".format(other))
         self.set_list_attribute(other, ItemGroupData, 'itemgroups')
+        self.set_single_attribute(other, Signature, 'signature')
         return other
 
     def build(self, builder):
@@ -475,6 +528,10 @@ class FormData(TransactionalElement):
         # Ask children
         for itemgroup in self.itemgroups:
             itemgroup.build(builder, self.formoid)
+
+        if self.signature is not None:
+            self.signature.build(builder)
+
         builder.end("FormData")
 
 
