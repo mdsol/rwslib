@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
+
 __author__ = 'anewbigging'
 
-import click
 from rwslib import RWSConnection
 from rwslib.rws_requests import *
 from rwslib.rwsobjects import RWSException
 import requests
 from requests.auth import HTTPBasicAuth
-from odmutils import *
 from lxml import etree
-from data_scrambler import Scramble
 from functools import partial
+from rwslib.extras.rwscmd.odmutils import xml_pretty_print, E_ODM, A_ODM
+from rwslib.extras.rwscmd.data_scrambler import Scramble
+import click
 
 GET_DATA_DATASET = 'rwscmd_getdata.odm'
 
 
 @click.group()
 @click.option('--username', '-u', prompt=True, envvar='RWSCMD_USERNAME', help='Rave login')
-@click.option('--password', '-p',  prompt=True, hide_input=True, envvar='RWSCMD_PASSWORD', help='Rave password')
+@click.option('--password', '-p', prompt=True, hide_input=True, envvar='RWSCMD_PASSWORD', help='Rave password')
 @click.option('--virtual_dir', default=None, envvar='RWSCMD_VIRTUAL_DIR',
               help='RWS virtual directory, defaults to RaveWebServices')
 @click.option('--raw/--list', default=False,
@@ -46,14 +47,14 @@ def get_data(ctx, study, environment, subject):
     """Call rwscmd_getdata custom dataset to retrieve currently enterable, empty fields"""
     studyoid = study + '(' + environment + ')'
     path = "datasets/" + GET_DATA_DATASET + "?StudyOID=" + studyoid + "&SubjectKey=" + subject + \
-        "&IncludeIDs=0&IncludeValues=0"
+           "&IncludeIDs=0&IncludeValues=0"
     url = make_url(ctx.obj['RWS'].base_url, path)
 
     if ctx.obj['VERBOSE']:
         click.echo('Getting data list')
-    resp = requests.get(url, auth=HTTPBasicAuth(ctx.obj['USERNAME'],  ctx.obj['PASSWORD']))
+    resp = requests.get(url, auth=HTTPBasicAuth(ctx.obj['USERNAME'], ctx.obj['PASSWORD']))
 
-    if resp.status_code <> 200:
+    if resp.status_code != 200:
         resp.raise_for_status()
 
     return xml_pretty_print(resp.text)
@@ -64,21 +65,21 @@ def rws_call(ctx, method, default_attr=None):
     try:
         response = ctx.obj['RWS'].send_request(method)
 
-        if ctx.obj['RAW']:                  #use response from RWS
+        if ctx.obj['RAW']:  # use response from RWS
             result = ctx.obj['RWS'].last_result.text
-        elif default_attr is not None:      #human-readable summary
+        elif default_attr is not None:  # human-readable summary
             result = ""
             for item in response:
                 result = result + item.__dict__[default_attr] + "\n"
-        else:                               #use response from RWS
+        else:  # use response from RWS
             result = ctx.obj['RWS'].last_result.text
 
-        if ctx.obj['OUTPUT']:               #write to file
+        if ctx.obj['OUTPUT']:  # write to file
             ctx.obj['OUTPUT'].write(result.encode('utf-8'))
-        else:                               #echo
+        else:  # echo
             click.echo(result)
 
-    except RWSException, e:
+    except RWSException as e:
         click.echo(e.message)
 
 
@@ -104,9 +105,9 @@ def data(ctx, path):
     elif len(path) == 3:
         try:
             click.echo(get_data(ctx, path[0], path[1], path[2]))
-        except RWSException, e:
+        except RWSException as e:
             click.echo(e.message)
-        except requests.exceptions.HTTPError, e:
+        except requests.exceptions.HTTPError as e:
             click.echo(e.message)
     else:
         click.echo('Too many arguments')
@@ -121,7 +122,7 @@ def post(ctx, odm):
         ctx.obj['RWS'].send_request(PostDataRequest(odm.read()))
         if ctx.obj['RAW']:
             click.echo(ctx.obj['RWS'].last_result.text)
-    except RWSException, e:
+    except RWSException as e:
         click.echo(e.message)
 
 
@@ -152,16 +153,18 @@ def direct(ctx, path):
     """Make direct call to RWS, bypassing rwslib"""
     try:
         url = make_url(ctx.obj['RWS'].base_url, path)
-        resp = requests.get(url, auth=HTTPBasicAuth(ctx.obj['USERNAME'],  ctx.obj['PASSWORD']))
+        resp = requests.get(url, auth=HTTPBasicAuth(ctx.obj['USERNAME'], ctx.obj['PASSWORD']))
         click.echo(resp.text)
-    except RWSException, e:
+    except RWSException as e:
         click.echo(e.message)
-    except requests.exceptions.HTTPError, e:
+    except requests.exceptions.HTTPError as e:
         click.echo(e.message)
+
 
 @rws.command()
 @click.option('--steps', type=click.INT, default=10, help='Number of data entry iterations (default=10)')
-@click.option('--metadata', default=None, type=click.File('rb'), help='Metadata file (optional)')
+@click.option('--metadata', default=None, type=click.File('rb'),
+              help='Metadata file (optional)')
 @click.option('--fixed', default=None, type=click.File('rb'),
               help='File with values to override generated data (one per line in format ItemOID,Value)')
 @click.argument('study')
@@ -172,7 +175,7 @@ def autofill(ctx, steps, metadata, fixed, study, environment, subject):
     """Request enterable data for a subject, generate data values and post back to Rave.
     Requires 'rwscmd_getdata' configurable dataset to be installed on the Rave URL."""
 
-    if metadata is not None:    #Read metadata from file, if supplied
+    if metadata is not None:  # Read metadata from file, if supplied
         odm_metadata = metadata.read()
         meta_v = etree.fromstring(odm_metadata).find('.//' + E_ODM.METADATA_VERSION.value).get(A_ODM.OID.value)
     else:
@@ -180,9 +183,9 @@ def autofill(ctx, steps, metadata, fixed, study, environment, subject):
         meta_v = None
 
     fixed_values = {}
-    if fixed is not None:       #Read fixed values from file, if supplied
-        for f in fixed.readlines():
-            oid, value = f.split(',')
+    if fixed is not None:  # Read fixed values from file, if supplied
+        for f in fixed:
+            oid, value = f.decode().split(',')
             fixed_values[oid] = value
             if ctx.obj['VERBOSE']:
                 click.echo('Fixing ' + oid + ' to value: ' + value)
@@ -190,25 +193,26 @@ def autofill(ctx, steps, metadata, fixed, study, environment, subject):
     try:
         for n in range(0, steps):
             if ctx.obj['VERBOSE']:
-                click.echo('Step ' +  str(n+1))
+                click.echo('Step ' + str(n + 1))
 
-            #Get currently enterable fields for this subject
+            # Get currently enterable fields for this subject
             subject_data = get_data(ctx, study, environment, subject)
 
             subject_data_odm = etree.fromstring(subject_data)
-            if subject_data_odm.find('.//'+ E_ODM.CLINICAL_DATA.value) is None:
+            if subject_data_odm.find('.//' + E_ODM.CLINICAL_DATA.value) is None:
                 if ctx.obj['VERBOSE']:
                     click.echo('No data found')
                 break
 
-            #Get the metadata version for the subject
-            subject_meta_v = subject_data_odm.find('.//' + E_ODM.CLINICAL_DATA.value).get(A_ODM.METADATA_VERSION_OID.value)
+            # Get the metadata version for the subject
+            subject_meta_v = subject_data_odm.find('.//' + E_ODM.CLINICAL_DATA.value).get(
+                A_ODM.METADATA_VERSION_OID.value)
             if subject_meta_v is None:
                 if ctx.obj['VERBOSE']:
                     click.echo('Subject not found')
                 break
 
-            #If no metadata supplied, or versions don't match, retrieve metadata from RWS
+            # If no metadata supplied, or versions don't match, retrieve metadata from RWS
             if meta_v != subject_meta_v:
                 if ctx.obj['VERBOSE']:
                     click.echo('Getting metadata version ' + subject_meta_v)
@@ -216,15 +220,15 @@ def autofill(ctx, steps, metadata, fixed, study, environment, subject):
                 odm_metadata = ctx.obj['RWS'].last_result.text
                 meta_v = subject_meta_v
 
-            #Generate data values to fill in empty fields
+            # Generate data values to fill in empty fields
             if ctx.obj['VERBOSE']:
                 click.echo('Generating data')
 
             scr = Scramble(odm_metadata)
             odm = scr.fill_empty(fixed_values, subject_data)
 
-            #If new data values, post to RWS
-            if etree.fromstring(odm).find('.//'+ E_ODM.ITEM_DATA.value) is None:
+            # If new data values, post to RWS
+            if etree.fromstring(odm).find('.//' + E_ODM.ITEM_DATA.value) is None:
                 if ctx.obj['VERBOSE']:
                     click.echo('No data to send')
                 break
@@ -232,12 +236,8 @@ def autofill(ctx, steps, metadata, fixed, study, environment, subject):
             if ctx.obj['RAW']:
                 click.echo(ctx.obj['RWS'].last_result.text)
 
-    except RWSException, e:
-        click.echo(e.message)
+    except RWSException as e:
+        click.echo(e.rws_error)
 
-    except requests.exceptions.HTTPError, e:
-        click.echo(e.message)
-
-
-
-
+    except requests.exceptions.HTTPError as e:
+        click.echo(e.strerror)
