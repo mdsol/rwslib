@@ -4,9 +4,14 @@
 #Distribution folder
 dist/
 rwslib.egg-info/
+build
 
 # sphinx build folder
 docs/build
 
 # coverage
 htmlcov
+
+# tox
+.tox
+.eggs
