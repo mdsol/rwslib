@@ -17,8 +17,8 @@ GET_DATA_DATASET = 'rwscmd_getdata.odm'
 
 
 @click.group()
-@click.option('--username', '-u', prompt=True, envvar='RWSCMD_USERNAME', help='Rave login')
-@click.option('--password', '-p', prompt=True, hide_input=True, envvar='RWSCMD_PASSWORD', help='Rave password')
+@click.option('--username', '-u', prompt=True, default='', envvar='RWSCMD_USERNAME', help='Rave login')
+@click.option('--password', '-p', prompt=True, default='', hide_input=True, envvar='RWSCMD_PASSWORD', help='Rave password')
 @click.option('--virtual_dir', default=None, envvar='RWSCMD_VIRTUAL_DIR',
               help='RWS virtual directory, defaults to RaveWebServices')
 @click.option('--raw/--list', default=False,
@@ -35,9 +35,16 @@ def rws(ctx, url, username, password, raw, verbose, output, virtual_dir):
     ctx.obj['PASSWORD'] = password
     ctx.obj['VIRTUAL_DIR'] = virtual_dir
     if virtual_dir:
-        ctx.obj['RWS'] = RWSConnection(url, username, password, virtual_dir=virtual_dir)
+        if username and password:
+            ctx.obj['RWS'] = RWSConnection(url, username, password, virtual_dir=virtual_dir)
+        else:
+            # Acceptable for UnAuth Requests
+            ctx.obj['RWS'] = RWSConnection(url, virtual_dir=virtual_dir)
     else:
-        ctx.obj['RWS'] = RWSConnection(url, username, password)
+        if username and password:
+            ctx.obj['RWS'] = RWSConnection(url, username, password)
+        else:
+            ctx.obj['RWS'] = RWSConnection(url)
     ctx.obj['RAW'] = raw
     ctx.obj['OUTPUT'] = output
     ctx.obj['VERBOSE'] = verbose

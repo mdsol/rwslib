@@ -20,8 +20,7 @@ class TestRWSCMD(unittest.TestCase):
             status=200,
             body='1.0.0')
 
-        result = self.runner.invoke(rwscmd.rws, ['https://innovate.mdsol.com', 'version'],
-                                    input="defuser\npassword\n")
+        result = self.runner.invoke(rwscmd.rws, ['https://innovate.mdsol.com', 'version'], input="\n\n")
         self.assertIn('1.0.0', result.output)
         self.assertEqual(result.exit_code, 0)
 
