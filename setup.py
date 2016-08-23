@@ -17,7 +17,8 @@ packages = [
     'rwslib',
     'rwslib.rws_requests',
     'rwslib.extras',
-    'rwslib.extras.audit_event'
+    'rwslib.extras.audit_event',
+    'rwslib.extras.rwscmd',
 ]
 
 rwsinit = open('rwslib/__init__.py').read()
