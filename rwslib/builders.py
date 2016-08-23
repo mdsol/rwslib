@@ -217,6 +217,81 @@ class Signature(ODMElement):
         return other
 
 
+class Annotation(ODMElement):
+    def __init__(self, seqnum='1'):
+        self.flag = None
+        self.seqnum = seqnum
+
+    def build(self, builder):
+        params = {}
+
+        if self.seqnum is not None:
+            params["SeqNum"] = self.seqnum
+
+        builder.start("Annotation", params)
+
+        if self.flag is None:
+            raise ValueError('Flag is not set.')
+        self.flag.build(builder)
+
+        builder.end("Annotation")
+
+    def __lshift__(self, other):
+        if not isinstance(other, (Flag,)):
+            raise ValueError("Annotation cannot accept a child element of type %s" % other.__class__.__name__)
+
+        # Order is important, apparently
+        self.set_single_attribute(other, Flag, 'flag')
+        return other
+
+
+class Flag(ODMElement):
+    def __init__(self):
+        self.flag_type = None
+        self.flag_value = None
+
+    def build(self, builder):
+        builder.start("Flag", {})
+
+        if self.flag_type is None:
+            raise ValueError('FlagType is not set.')
+        self.flag_type.build(builder)
+
+        if self.flag_value is None:
+            raise ValueError('FlagValue is not set.')
+        self.flag_value.build(builder)
+
+        builder.end("Flag")
+
+    def __lshift__(self, other):
+        if not isinstance(other, (FlagType, FlagValue,)):
+            raise ValueError("Flag cannot accept a child element of type %s" % other.__class__.__name__)
+
+        # Order is important, apparently
+        self.set_single_attribute(other, FlagType, 'flag_type')
+        self.set_single_attribute(other, FlagValue, 'flag_value')
+        return other
+
+
+class FlagType(ODMElement):
+    def __init__(self, flag_type):
+        self.flag_type = flag_type
+
+    def build(self, builder):
+        builder.start("FlagType", {})
+        builder.data(self.flag_type)
+        builder.end("FlagType")
+
+
+class FlagValue(ODMElement):
+    def __init__(self, flag_value):
+        self.flag_value = flag_value
+
+    def build(self, builder):
+        builder.start("FlagValue", {})
+        builder.data(self.flag_value)
+        builder.end("FlagValue")
+
 
 class AuditRecord(ODMElement):
     """AuditRecord is supported only by ItemData in Rave"""
@@ -500,14 +575,16 @@ class FormData(TransactionalElement):
         self.form_repeat_key = form_repeat_key
         self.itemgroups = []
         self.signature = None
+        self.annotation = None
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, (Signature, ItemGroupData)):
+        if not isinstance(other, (Signature, ItemGroupData, Annotation)):
             raise ValueError(
-                "FormData object can only receive ItemGroupData or Signature objects (not '{}')".format(other))
+                "FormData object can only receive ItemGroupData, Signature or Annotation objects (not '{}')".format(other))
         self.set_list_attribute(other, ItemGroupData, 'itemgroups')
         self.set_single_attribute(other, Signature, 'signature')
+        self.set_single_attribute(other, Annotation, 'annotation')
         return other
 
     def build(self, builder):
@@ -531,6 +608,9 @@ class FormData(TransactionalElement):
 
         if self.signature is not None:
             self.signature.build(builder)
+
+        if self.annotation is not None:
+            self.annotation.build(builder)
 
         builder.end("FormData")
 
