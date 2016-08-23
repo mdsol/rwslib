@@ -45,9 +45,9 @@ def rws(ctx, url, username, password, raw, verbose, output, virtual_dir):
 
 def get_data(ctx, study, environment, subject):
     """Call rwscmd_getdata custom dataset to retrieve currently enterable, empty fields"""
-    studyoid = study + '(' + environment + ')'
-    path = "datasets/" + GET_DATA_DATASET + "?StudyOID=" + studyoid + "&SubjectKey=" + subject + \
-           "&IncludeIDs=0&IncludeValues=0"
+    studyoid = "{}({})".format(study, environment)
+    path = "datasets/{}?StudyOID={}&SubjectKey={}" \
+           "&IncludeIDs=0&IncludeValues=0".format(GET_DATA_DATASET, studyoid, subject)
     url = make_url(ctx.obj['RWS'].base_url, path)
 
     if ctx.obj['VERBOSE']:
@@ -188,12 +188,12 @@ def autofill(ctx, steps, metadata, fixed, study, environment, subject):
             oid, value = f.decode().split(',')
             fixed_values[oid] = value
             if ctx.obj['VERBOSE']:
-                click.echo('Fixing ' + oid + ' to value: ' + value)
+                click.echo('Fixing {} to value: {}'.format(oid, value))
 
     try:
         for n in range(0, steps):
             if ctx.obj['VERBOSE']:
-                click.echo('Step ' + str(n + 1))
+                click.echo('Step {}'.format(str(n + 1)))
 
             # Get currently enterable fields for this subject
             subject_data = get_data(ctx, study, environment, subject)
@@ -215,7 +215,7 @@ def autofill(ctx, steps, metadata, fixed, study, environment, subject):
             # If no metadata supplied, or versions don't match, retrieve metadata from RWS
             if meta_v != subject_meta_v:
                 if ctx.obj['VERBOSE']:
-                    click.echo('Getting metadata version ' + subject_meta_v)
+                    click.echo('Getting metadata version {}'.format(subject_meta_v))
                 ctx.obj['RWS'].send_request(StudyVersionRequest(study, subject_meta_v))
                 odm_metadata = ctx.obj['RWS'].last_result.text
                 meta_v = subject_meta_v
