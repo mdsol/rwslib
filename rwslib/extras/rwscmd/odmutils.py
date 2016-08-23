@@ -8,7 +8,6 @@ from enum import Enum
 ODM_NS = '{http://www.cdisc.org/ns/odm/v1.3}'
 MDSOL_NS = '{http://www.mdsol.com/ns/odm/metadata}'
 
-NSMAP = {None : "http://www.cdisc.org/ns/odm/v1.3", "mdsol": "http://www.mdsol.com/ns/odm/metadata"}
 
 # Some constant-making helpers
 def odm(value):
@@ -21,6 +20,9 @@ def mdsol(value):
 
 
 class E_ODM(Enum):
+    """
+    Defines ODM Elements
+    """
     CLINICAL_DATA = odm('ClinicalData')
     SUBJECT_DATA = odm('SubjectData')
     STUDY_EVENT_DATA = odm('StudyEventData')
@@ -51,6 +53,9 @@ class E_ODM(Enum):
 
 
 class A_ODM(Enum):
+    """
+    Defines ODM Attributes
+    """
     AUDIT_SUBCATEGORY_NAME = mdsol('AuditSubCategoryName')
     METADATA_VERSION_OID = 'MetaDataVersionOID'
     STUDY_OID = 'StudyOID'
