@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+
 __author__ = 'anewbigging'
 
-from faker import Factory
 import datetime
-from lxml import etree
 import hashlib
-from odmutils import *
+from lxml import etree
+from faker import Factory
+from rwslib.extras.rwscmd.odmutils import E_ODM, A_ODM
 
 fake = Factory.create()
 

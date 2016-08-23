@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+
 __author__ = 'anewbigging'
 
+from rwslib.extras.rwscmd import data_scrambler
+from rwslib.extras.rwscmd.odmutils import E_ODM, A_ODM
 import unittest
-import data_scrambler
 import datetime
 from lxml import etree
-from odmutils import *
+from six import string_types
 
 class TestDuckTyping(unittest.TestCase):
     def setUp(self):
@@ -41,7 +43,7 @@ class TestDuckTyping(unittest.TestCase):
 
     def test_ducktype(self):
         """Test duck typing integers"""
-        for value, expected_type in self.values.iteritems():
+        for value, expected_type in self.values.items():
             rave_type, _ = data_scrambler.typeof_rave_data(value)
             self.assertEqual(expected_type, rave_type,
                             msg='{0} should be of type {1} not {2}'.format(value, expected_type, rave_type))
@@ -68,7 +70,7 @@ class TestBasicScrambling(unittest.TestCase):
         i = self.scr.scramble_string(4)
         self.assertEqual(len(i), 4)
         i = self.scr.scramble_string(200)
-        self.assertIsInstance(i, basestring)
+        self.assertIsInstance(i, string_types)
 
     def test_scramble_date(self):
         """Test scrambling dates"""
@@ -219,8 +221,8 @@ class TestScramblingWithMetadata(unittest.TestCase):
             self.assertIsNone(output.find(path))
 
 
-    def test_fill_empty_remove_values(self):
-        """Test filling empty values in ODM document"""
+    def test_fill_empty_remove_values_ny(self):
+        """Test filling empty values in ODM document with OID"""
         odm = """
 <ODM xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" ODMVersion="1.3" FileType="Transactional" FileOID="c3f15f2d-eb69-42e6-bed4-811bff27ebf9" CreationDateTime="2016-03-02T09:27:14.000-00:00">
   <ClinicalData StudyOID="Test(Prod)" MetaDataVersionOID="1">
