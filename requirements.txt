@@ -1,4 +1,4 @@
-lxml=3.6.2
+lxml
 requests
 httpretty
 tox
