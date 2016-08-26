@@ -23,8 +23,8 @@ Contents:
    using_builders
    biostats_gateway
    odm_adapter
+   rwscmd
    classes
-
 
 Indices and tables
 ==================
