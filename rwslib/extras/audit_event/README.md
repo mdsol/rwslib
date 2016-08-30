@@ -45,15 +45,18 @@ The _context_ object passed contains all the data pulled from the audit record.
             transaction_type
             instance_name
             instance_overdue
+            instance_id
         form
             oid
             repeat_key
             transaction_type
             datapage_name
+            datapage_id
         itemgroup
             oid
             repeat_key
-            transaction_type  
+            transaction_type
+            record_id  
         item
             oid 
             value

@@ -90,6 +90,12 @@ class ODMElement(object):
             self << child
         return self
 
+    def __str__(self):
+        """Return string representation"""
+        builder = ET.TreeBuilder()
+        self.build(builder)
+        return ET.tostring(builder.close(),encoding='utf-8').decode('utf-8')
+
     def set_single_attribute(self, other, trigger_klass, property_name):
         """Used to set guard the setting of an attribute which is singular and can't be set twice"""
 
@@ -1365,7 +1371,8 @@ class ItemDef(ODMElement):
     VALID_DATATYPES = [DataType.Text, DataType.Integer, DataType.Float, DataType.Date,
                        DataType.DateTime, DataType.Time]
 
-    def __init__(self, oid, name, datatype, length,
+    def __init__(self, oid, name, datatype,
+                 length=None,
                  significant_digits=None,
                  sas_field_name=None,
                  sds_var_name=None,
@@ -1403,6 +1410,13 @@ class ItemDef(ODMElement):
         if control_type is not None:
             if not isinstance(control_type, ControlType):
                 raise AttributeError("{0} is not a valid Control Type".format(control_type))
+
+        if length is None:
+            if datatype in [DataType.DateTime, DataType.Time, DataType.Date]:
+                # Default this
+                length = len(date_time_format)
+            else:
+                raise AttributeError('length must be set for all datatypes except Date/Time types')
 
         self.datatype = datatype
         self.length = length

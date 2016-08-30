@@ -1,7 +1,9 @@
-lxml>=3.4.4
+lxml
 requests
 httpretty
 tox
 six
 enum34
 mock
+click
+fake-factory

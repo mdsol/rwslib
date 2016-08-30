@@ -7,4 +7,4 @@ Authors
 - Geoff Low <glow@mdsol.com>
 - Andrew Newbigging <anewbigging@mdsol.com>
 - Oli Quinet <https://github.com/Oli76>
-
+- Daniel Smoczyk <https://github.com/dPeS>

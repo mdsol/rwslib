@@ -486,6 +486,21 @@ class TestItemDef(unittest.TestCase):
         with self.assertRaises(AttributeError):
             ItemDef("TEST", "My Test", DataType.Text, 10, control_type="TOTALLY_WRONG_CONTROLTYPE")
 
+    def test_invalid_integer_missing_length(self):
+        """Test that integer type raises error if no length set"""
+        with self.assertRaises(AttributeError):
+            ItemDef("TEST", "My Test", DataType.Integer)
+
+    def test_invalid_text_missing_length(self):
+        """Test that text type raises error if no length set"""
+        with self.assertRaises(AttributeError):
+            ItemDef("TEST", "My Test", DataType.Text)
+
+    def test_valid_date_missing_length(self):
+        """Test that dates are defaulted to length of their format"""
+        id = ItemDef("TEST", "My Test", DataType.Date, date_time_format="mmm dd yy")
+        self.assertEqual(9, id.length)
+
     def test_accepts_mdsolhelp(self):
         self.tested << MdsolHelpText("en", "Content of help")
         self.assertEqual(1, len(self.tested.help_texts))

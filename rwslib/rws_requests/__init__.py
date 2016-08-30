@@ -129,11 +129,25 @@ class BuildVersionRequest(RWSGetRequest):
         return make_url('version', 'build')
 
 
+class CodeNameRequest(RWSGetRequest):
+    """Return the RWS version codename"""
+
+    def url_path(self):
+        return make_url('version', 'codename')
+
+
 class DiagnosticsRequest(RWSGetRequest):
     """Return the RWS build version number"""
 
     def url_path(self):
         return make_url('diagnostics')
+
+
+class TwoHundredRequest(RWSGetRequest):
+    """Return RWS MAuth information"""
+
+    def url_path(self):
+        return make_url('twohundred')
 
 
 class CacheFlushRequest(RWSAuthorizedGetRequest):
@@ -525,3 +539,47 @@ class SubjectDatasetRequest(ODMDatasetBase):
             args.append(self.formoid)
 
         return make_url(*args, **self._querystring())
+
+
+class ConfigurableDatasetRequest(RWSAuthorizedGetRequest):
+    VALID_DATASET_FORMATS = ()
+
+    def __init__(self,
+                 dataset_name,
+                 dataset_format='',
+                 params={}):
+        """
+        Create a new Configurable Dataset Request
+        :param dataset_name: Name for the dataset
+        :type dataset_name: str
+        :param dataset_format: Format for the dataset
+        :type dataset_format: str
+        :param params: set of parameters to pass to URL
+        :type params: dict
+        """
+        self.dataset_name = dataset_name
+        if self.VALID_DATASET_FORMATS:
+            if dataset_format and dataset_format not in self.VALID_DATASET_FORMATS:
+                raise ValueError("Dataset format %s is not valid for %s" % (dataset_format, dataset_name))
+        self.dataset_format = dataset_format
+        self.params = params
+
+    @property
+    def dataset(self):
+        """
+        Qualify the dataset_name with the dataset_format if supplied
+        :return: dataset name
+        :rtype: str
+        """
+        if self.dataset_format:
+            return ".".join([self.dataset_name,
+                             self.dataset_format])
+        return self.dataset_name
+
+    def url_path(self):
+        """
+        Get the correct URL Path for the Dataset
+        :return:
+        """
+        args = ['datasets', self.dataset]
+        return make_url(*args, **self.params)
