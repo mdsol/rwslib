@@ -6,6 +6,7 @@ from xml.etree import cElementTree as ET
 from datetime import datetime
 from string import ascii_letters
 from rwslib.builder_constants import *
+from collections import OrderedDict
 
 """
 builders.py provides convenience classes for building ODM documents for clinical data and metadata post messages.
@@ -530,7 +531,7 @@ class ItemGroupData(TransactionalElement):
         super(self.__class__, self).__init__(transaction_type)
         self.item_group_repeat_key = item_group_repeat_key
         self.whole_item_group = whole_item_group
-        self.items = {}
+        self.items = OrderedDict()
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -624,12 +625,14 @@ class StudyEventData(TransactionalElement):
         self.study_event_oid = study_event_oid
         self.study_event_repeat_key = study_event_repeat_key
         self.forms = []
+        self.annotations = []
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, FormData):
-            raise ValueError("StudyEventData object can only receive FormData object")
+        if not isinstance(other, (FormData, Annotation)):
+            raise ValueError("StudyEventData object can only receive FormData or Annotation objects")
         self.set_list_attribute(other, FormData, 'forms')
+        self.set_list_attribute(other, Annotation, 'annotations')
         return other
 
     def build(self, builder):
@@ -650,6 +653,10 @@ class StudyEventData(TransactionalElement):
         # Ask children
         for form in self.forms:
             form.build(builder)
+
+        for annotation in self.annotations:
+            annotation.build(builder)
+
         builder.end("StudyEventData")
 
 
