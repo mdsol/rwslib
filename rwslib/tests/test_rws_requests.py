@@ -12,12 +12,41 @@ except ImportError:
 import requests
 from rwslib.rwsobjects import RWSPostResponse, RWSSubjects, RWSSubjectListItem, \
     RWSStudyMetadataVersions, RWSStudies, RWSResponse
-from rwslib.rws_requests import StudySubjectsRequest, check_dataset_type, SubjectDatasetRequest, \
+from rwslib.rws_requests import RWSRequest, StudySubjectsRequest, check_dataset_type, SubjectDatasetRequest, \
     VersionDatasetRequest, StudyDatasetRequest, PostDataRequest, PostMetadataRequest, \
     GlobalLibraryVersionRequest, GlobalLibraryVersionsRequest, GlobalLibraryDraftsRequest, \
     GlobalLibrariesRequest, StudyVersionRequest, StudyVersionsRequest, StudyDraftsRequest, \
     MetadataStudiesRequest, ClinicalStudiesRequest, CacheFlushRequest, DiagnosticsRequest, \
     BuildVersionRequest, CodeNameRequest, TwoHundredRequest
+
+
+class TestRWSRequest(unittest.TestCase):
+    class FooRWSRequest(RWSRequest):
+            method = "POST"
+            requires_authorization = True
+
+            def __init__(self, project_name):
+                self.project_name = project_name
+
+    def test___eq___on_RWSRequest(self):
+        self.assertEqual(RWSRequest(), RWSRequest())
+
+    def test___eq___same_subclass(self):
+        request1 = TestRWSRequest.FooRWSRequest('project')
+        request2 = TestRWSRequest.FooRWSRequest('project')
+        self.assertEqual(request1, request2)
+
+    def test___eq___different_subclass(self):
+        class BarRWSRequest(TestRWSRequest.FooRWSRequest):
+            pass
+        request1 = TestRWSRequest.FooRWSRequest('project')
+        request2 = BarRWSRequest('project')
+        self.assertNotEqual(request1, request2)
+
+    def test___ne__(self):
+        request1 = TestRWSRequest.FooRWSRequest('project1')
+        request2 = TestRWSRequest.FooRWSRequest('project2')
+        self.assertNotEqual(request1, request2)
 
 
 class TestStudySubjectsRequest(unittest.TestCase):
@@ -779,11 +808,11 @@ class TimeoutTest(unittest.TestCase):
         # Test that unauthorised request times out
         rave = rwslib.RWSConnection('http://innovate.mdsol.com')
         with self.assertRaises(requests.exceptions.Timeout):
-            rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(),timeout=0.0001, verify=False)
+            rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(), timeout=0.0001, verify=False)
 
         # Raise timeout and check no timeout occurs.  An exception will be raised because the request is unauthorised
         with self.assertRaises(rwslib.AuthorizationException):
-            rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(),timeout=3600, verify=False)
+            rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(), timeout=3600, verify=False)
 
 
 if __name__ == '__main__':
