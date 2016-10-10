@@ -17,7 +17,7 @@ Authorization is required for this method.
 Returns a :class:`rwsobjects.RWSStudies` object which has :class:`rwsobjects.ODMDoc` document attributes and a list of
 :class:`rwsobjects.RWSStudyListItem` objects. These are the studies you have access to as an Architect user.
 
-Use :ref:`clinical_studies` to get a list of studies that you an interact with as an EDC user.
+Use :ref:`clinical_studies` to get a list of studies that you can interact with as an EDC user.
 
 Calls::
 
