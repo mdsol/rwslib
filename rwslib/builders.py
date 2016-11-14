@@ -1229,7 +1229,7 @@ class MdsolAttribute(ODMElement):
 
 
 class ItemRef(ODMElement):
-    def __init__(self, oid, order_number, mandatory=False, key_sequence=None,
+    def __init__(self, oid, order_number=None, mandatory=False, key_sequence=None,
                  imputation_method_oid=None, role=None, role_codelist_oid=None):
         self.oid = oid
         self.order_number = order_number
@@ -1243,9 +1243,11 @@ class ItemRef(ODMElement):
     def build(self, builder):
 
         params = dict(ItemOID=self.oid,
-                      OrderNumber=str(self.order_number),
                       Mandatory=bool_to_yes_no(self.mandatory)
                       )
+
+        if self.order_number is not None:
+            params['OrderNumber'] = str(self.order_number)
 
         if self.key_sequence is not None:
             params['KeySequence'] = str(self.key_sequence)
