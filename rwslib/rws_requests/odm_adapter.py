@@ -5,9 +5,10 @@ http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/clinical_data_audits/i
 """
 from . import RWSAuthorizedGetRequest, QueryOptionGetRequest
 
+
 class AuditRecordsRequest(QueryOptionGetRequest):
     """Clinical Audit Records Dataset"""
-    KNOWN_QUERY_OPTIONS = ['studyoid','startid','per_page']
+    KNOWN_QUERY_OPTIONS = ['studyoid', 'startid', 'per_page']
 
     def __init__(self, project_name, environment_name, startid=1, per_page=100):
         self.project_name = project_name
