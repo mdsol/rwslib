@@ -106,7 +106,7 @@ Example::
 .. _twohundred_request:
 .. index:: TwoHundredRequest
 
-TowHundredRequest()
+TwoHundredRequest()
 -------------------
 
 Returns the html result of calling::

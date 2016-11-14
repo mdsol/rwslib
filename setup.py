@@ -17,7 +17,8 @@ packages = [
     'rwslib',
     'rwslib.rws_requests',
     'rwslib.extras',
-    'rwslib.extras.audit_event'
+    'rwslib.extras.audit_event',
+    'rwslib.extras.rwscmd',
 ]
 
 rwsinit = open('rwslib/__init__.py').read()
@@ -34,7 +35,8 @@ setup(
     packages=packages,
     package_dir={'rwslib': 'rwslib'},
     include_package_data=True,
-    install_requires=['requests', 'lxml', 'httpretty', 'six'],
+    install_requires=['requests', 'lxml', 'httpretty', 'six', 'click', 'fake-factory', 'enum34'],
+    tests_require=['mock'],
     license=open('LICENSE.txt').read(),
     zip_safe=False,
     test_suite='rwslib.tests.all_tests',
@@ -49,4 +51,8 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: PyPy',
     ),
+    entry_points='''
+    [console_scripts]
+    rwscmd=rwslib.extras.rwscmd.rwscmd:rws
+    ''',
 )

@@ -3,7 +3,9 @@
 __author__ = 'glow'
 
 import unittest
+
 from six.moves.urllib_parse import quote
+
 from rwslib.rws_requests.biostats_gateway import check_dataset_format, DATASET_FORMATS, \
     dataset_format_to_extension, CVMetaDataRequest, FormDataRequest, MetaDataRequest, \
     ProjectMetaDataRequest, ViewMetaDataRequest, CommentDataRequest, ProtocolDeviationsRequest, \
@@ -35,15 +37,15 @@ class TestCheckDatasetFormat(unittest.TestCase):
 class TestDatasetFormatToExtension(unittest.TestCase):
     def test_good_cases(self):
         """Good happy case for check_dataset_format"""
-        for dsf, format in DATASET_FORMATS.items():
+        for dsf, format_ in DATASET_FORMATS.items():
             match = dataset_format_to_extension(dsf)
-            self.assertEqual(format, match)
+            self.assertEqual(format_, match)
 
     def test_poor_cases(self):
         """Bad formats for check_dataset_format"""
         for nonsense in ['xls', 'dat', 'xslx']:
             with self.assertRaises(ValueError) as exc:
-                match = dataset_format_to_extension(nonsense)
+                dataset_format_to_extension(nonsense)
             self.assertEqual("dataset_format is expected to be one of "
                              "%s. '%s' is not valid" % (', '.join(DATASET_FORMATS.keys()),
                                                         nonsense),
@@ -162,14 +164,15 @@ class TestCommentDataRequest(unittest.TestCase):
         self.assertEqual('datasets/SDTMComments?studyid=%s' % quote(t.studyname_environment()),
                          t.url_path())
 
+
 class TestProtocolDeviationsRequest(unittest.TestCase):
     def create_request_object(self,
                               project_name,
                               environment_name,
                               dataset_format="csv"):
         t = ProtocolDeviationsRequest(project_name=project_name,
-                               environment_name=environment_name,
-                                dataset_format=dataset_format)
+                                      environment_name=environment_name,
+                                      dataset_format=dataset_format)
         return t
 
     def test_successful_configuration(self):
@@ -181,14 +184,15 @@ class TestProtocolDeviationsRequest(unittest.TestCase):
         self.assertEqual('datasets/SDTMProtocolDeviations?studyid=%s' % quote(t.studyname_environment()),
                          t.url_path())
 
+
 class TestDataDictionariesRequest(unittest.TestCase):
     def create_request_object(self,
                               project_name,
                               environment_name,
                               dataset_format="csv"):
         t = DataDictionariesRequest(project_name=project_name,
-                               environment_name=environment_name,
-                                dataset_format=dataset_format)
+                                    environment_name=environment_name,
+                                    dataset_format=dataset_format)
         return t
 
     def test_successful_configuration(self):
