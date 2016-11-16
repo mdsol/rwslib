@@ -405,9 +405,8 @@ class Flag(ODMElement):
     def build(self, builder):
         builder.start("Flag", {})
 
-        if self.flag_type is None:
-            raise ValueError('FlagType is not set.')
-        self.flag_type.build(builder)
+        if self.flag_type is not None:
+            self.flag_type.build(builder)
 
         if self.flag_value is None:
             raise ValueError('FlagValue is not set.')

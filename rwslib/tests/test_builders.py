@@ -481,14 +481,6 @@ class TestFlag(unittest.TestCase):
             t = obj_to_doc(tested)
         self.assertEqual("FlagValue is not set.", str(exc.exception))
 
-    def test_no_type(self):
-        """No FlagType is an exception"""
-        tested = Flag()
-        tested << FlagValue("Some value", codelist_oid="ANOID")
-        with self.assertRaises(ValueError) as exc:
-            t = obj_to_doc(tested)
-        self.assertEqual("FlagType is not set.", str(exc.exception))
-
     def test_only_expected_types(self):
         """We can only add Flag-type elements"""
         tested = Flag()
