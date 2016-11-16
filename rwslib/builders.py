@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 __author__ = 'isparks'
 
 import uuid
@@ -95,7 +97,7 @@ class ODMElement(object):
         """Return string representation"""
         builder = ET.TreeBuilder()
         self.build(builder)
-        return ET.tostring(builder.close(),encoding='utf-8').decode('utf-8')
+        return ET.tostring(builder.close(), encoding='utf-8').decode('utf-8')
 
     def set_single_attribute(self, other, trigger_klass, property_name):
         """Used to set guard the setting of an attribute which is singular and can't be set twice"""
@@ -126,6 +128,28 @@ class ODMElement(object):
             else:
                 val.append(other)
                 setattr(self, property_name, val)
+
+
+class TransactionalElement(ODMElement):
+    """Models an ODM Element that is allowed a transaction type. Different elements have different
+       allowed transaction types"""
+    ALLOWED_TRANSACTION_TYPES = []
+
+    def __init__(self, transaction_type):
+        self._transaction_type = None
+        self.transaction_type = transaction_type
+
+    @property
+    def transaction_type(self):
+        return self._transaction_type
+
+    @transaction_type.setter
+    def transaction_type(self, value):
+        if value is not None:
+            if value not in self.ALLOWED_TRANSACTION_TYPES:
+                raise AttributeError('%s transaction_type element must be one of %s not %s' % (
+                    self.__class__.__name__, ','.join(self.ALLOWED_TRANSACTION_TYPES), value,))
+        self._transaction_type = value
 
 
 class UserRef(ODMElement):
@@ -179,14 +203,29 @@ class DateTimeStamp(ODMElement):
 
 
 class Signature(ODMElement):
-    def __init__(self):
-        self.user_ref = None
-        self.location_ref = None
-        self.signature_ref = None
-        self.date_time_stamp = None
+    """
+    An electronic signature applies to a collection of clinical data.
+    This indicates that some user accepts legal responsibility for that data.
+    See 21 CFR Part 11.
+    The signature identifies the person signing, the location of signing,
+     the signature meaning (via the referenced SignatureDef),
+     the date and time of signing,
+     and (in the case of a digital signature) an encrypted hash of the included data.
+    """
+    def __init__(self, id=None, user_ref=None, location_ref=None, signature_ref=None, date_time_stamp=None):
+        self.id = id
+        self.user_ref = user_ref
+        self.location_ref = location_ref
+        self.signature_ref = signature_ref
+        self.date_time_stamp = date_time_stamp
 
     def build(self, builder):
-        builder.start("Signature", {})
+        params = {}
+        if self.id is not None:
+            # If a Signature element is contained within a Signatures element, the ID attribute is required.
+            params['ID'] = self.id
+
+        builder.start("Signature", params)
 
         if self.user_ref is None:
             raise ValueError("User Reference not set.")
@@ -218,38 +257,150 @@ class Signature(ODMElement):
         return other
 
 
-class Annotation(ODMElement):
-    def __init__(self, seqnum='1'):
-        self.flag = None
-        self.seqnum = seqnum
+class Annotation(TransactionalElement):
+    """
+    A general note about clinical data.
+    If an annotation has both a comment and flags, the flags should be related to the comment.
+    """
+    ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Remove", "Upsert", "Context"]
+
+    def __init__(self, id=None, seqnum=1,
+                 flags=None, comment=None,
+                 transaction_type=None):
+        super(Annotation, self).__init__(transaction_type=transaction_type)
+        # initialise the flags collection
+        self.flags = []
+        if flags:
+            if isinstance(flags, (list, tuple)):
+                for flag in flags:
+                    self << flag
+            elif isinstance(flags, Flag):
+                self << flags
+            else:
+                raise AttributeError("Flags attribute should be an iterable or Flag")
+        self._id = None
+        if id is not None:
+            self.id = id
+        self._seqnum = None
+        if seqnum is not None:
+            # validate the input
+            self.seqnum = seqnum
+        self.comment = comment
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        if value in [None, ''] or str(value).strip() == '':
+            raise AttributeError("Invalid ID value supplied")
+        self._id = value
+
+    @property
+    def seqnum(self):
+        return self._seqnum
+
+    @seqnum.setter
+    def seqnum(self, value):
+        if not re.match(r'\d+', str(value)) or value < 0:
+            raise AttributeError("Invalid SeqNum value supplied")
+        self._seqnum = value
 
     def build(self, builder):
         params = {}
 
-        if self.seqnum is not None:
-            params["SeqNum"] = self.seqnum
+        # Add in the transaction type
+        if self.transaction_type is not None:
+            params["TransactionType"] = self.transaction_type
+
+        if self.seqnum is None:
+            # SeqNum is not optional (and defaulted)
+            raise ValueError("SeqNum is not set.") # pragma: no cover
+        params["SeqNum"] = self.seqnum
+
+        if self.id is not None:
+            # If an Annotation is contained with an Annotations element,
+            # the ID attribute is required.
+            params["ID"] = self.id
 
         builder.start("Annotation", params)
 
-        if self.flag is None:
+        if self.flags in (None, []):
             raise ValueError('Flag is not set.')
-        self.flag.build(builder)
+
+        # populate the flags
+        for flag in self.flags:
+            flag.build(builder)
+
+        # add the Comment, if it exists
+        if self.comment is not None:
+            self.comment.build(builder)
 
         builder.end("Annotation")
 
     def __lshift__(self, other):
-        if not isinstance(other, (Flag,)):
+        if not isinstance(other, (Flag, Comment,)):
             raise ValueError("Annotation cannot accept a child element of type %s" % other.__class__.__name__)
 
-        # Order is important, apparently
-        self.set_single_attribute(other, Flag, 'flag')
+        self.set_single_attribute(other, Comment, 'comment')
+        self.set_list_attribute(other, Flag, 'flags')
         return other
 
 
+class Comment(ODMElement):
+    """
+    A free-text (uninterpreted) comment about clinical data.
+    The comment may have come from the Sponsor or the clinical Site.
+    """
+
+    VALID_SPONSOR_OR_SITE_RESPONSES = ["Sponsor", "Site"]
+
+    def __init__(self, text=None, sponsor_or_site=None):
+        self._text = text
+        self._sponsor_or_site = sponsor_or_site
+
+    @property
+    def text(self):
+        return self._text
+
+    @text.setter
+    def text(self, value):
+        if value in (None, '') or value.strip() == "":
+            raise AttributeError("Empty text value is invalid.")
+        self._text = value
+
+    @property
+    def sponsor_or_site(self):
+        return self._sponsor_or_site
+
+    @sponsor_or_site.setter
+    def sponsor_or_site(self, value):
+        if value not in Comment.VALID_SPONSOR_OR_SITE_RESPONSES:
+            raise AttributeError("%s sponsor_or_site value of %s is not valid" % (self.__class__.__name__,
+                                                                                  value))
+        self._sponsor_or_site = value
+
+    def build(self, builder):
+        if self.text is None:
+            raise ValueError("Text is not set.")
+        params = {}
+        if self.sponsor_or_site is not None:
+            params['SponsorOrSite'] = self.sponsor_or_site
+
+        builder.start("Comment", params)
+        builder.data(self.text)
+        builder.end("Comment")
+
+
 class Flag(ODMElement):
-    def __init__(self):
+    def __init__(self, flag_type=None, flag_value=None):
         self.flag_type = None
         self.flag_value = None
+        if flag_type is not None:
+            self << flag_type
+        if flag_value is not None:
+            self << flag_value
 
     def build(self, builder):
         builder.start("Flag", {})
@@ -275,21 +426,60 @@ class Flag(ODMElement):
 
 
 class FlagType(ODMElement):
-    def __init__(self, flag_type):
+    """
+    The type of flag. This determines the purpose and semantics of the flag.
+    Different applications are expected to be interested in different types of flags.
+    The actual value must be a member of the referenced CodeList.
+    """
+    def __init__(self, flag_type, codelist_oid=None):
         self.flag_type = flag_type
+        self._codelist_oid = None
+        if codelist_oid is not None:
+            self.codelist_oid = codelist_oid
+
+    @property
+    def codelist_oid(self):
+        return self._codelist_oid
+
+    @codelist_oid.setter
+    def codelist_oid(self, value):
+        if value in (None, '') or value.strip() == "":
+            raise AttributeError("Empty CodeListOID value is invalid.")
+        self._codelist_oid = value
 
     def build(self, builder):
-        builder.start("FlagType", {})
+        if self.codelist_oid is None:
+            raise ValueError("CodeListOID not set.")
+        builder.start("FlagType", dict(CodeListOID=self.codelist_oid))
         builder.data(self.flag_type)
         builder.end("FlagType")
 
 
 class FlagValue(ODMElement):
-    def __init__(self, flag_value):
+    """
+    The value of the flag. The meaning of this value is typically dependent on the associated FlagType.
+    The actual value must be a member of the referenced CodeList.
+    """
+    def __init__(self, flag_value, codelist_oid=None):
         self.flag_value = flag_value
+        self._codelist_oid = None
+        if codelist_oid is not None:
+            self.codelist_oid = codelist_oid
+
+    @property
+    def codelist_oid(self):
+        return self._codelist_oid
+
+    @codelist_oid.setter
+    def codelist_oid(self, value):
+        if value in (None, '') or value.strip() == "":
+            raise AttributeError("Empty CodeListOID value is invalid.")
+        self._codelist_oid = value
 
     def build(self, builder):
-        builder.start("FlagValue", {})
+        if self.codelist_oid is None:
+            raise ValueError("CodeListOID not set.")
+        builder.start("FlagValue", dict(CodeListOID=self.codelist_oid))
         builder.data(self.flag_value)
         builder.end("FlagValue")
 
@@ -384,28 +574,6 @@ class AuditRecord(ODMElement):
         return other
 
 
-class TransactionalElement(ODMElement):
-    """Models an ODM Element that is allowed a transaction type. Different elements have different
-       allowed transaction types"""
-    ALLOWED_TRANSACTION_TYPES = []
-
-    def __init__(self, transaction_type):
-        self._transaction_type = None
-        self.transaction_type = transaction_type
-
-    @property
-    def transaction_type(self):
-        return self._transaction_type
-
-    @transaction_type.setter
-    def transaction_type(self, value):
-        if value is not None:
-            if value not in self.ALLOWED_TRANSACTION_TYPES:
-                raise AttributeError('%s transaction_type element must be one of %s not %s' % (
-                    self.__class__.__name__, ','.join(self.ALLOWED_TRANSACTION_TYPES), value,))
-        self._transaction_type = value
-
-
 class MdsolQuery(ODMElement):
     """MdsolQuery extension element for Queries at item level only"""
 
@@ -471,6 +639,7 @@ class ItemData(TransactionalElement):
         self.verify = verify
         self.audit_record = None
         self.queries = []
+        self.annotations = []
         self.measurement_unit_ref = None
 
     def build(self, builder):
@@ -510,14 +679,20 @@ class ItemData(TransactionalElement):
 
         for query in self.queries:
             query.build(builder)
+
+        for annotation in self.annotations:
+            annotation.build(builder)
+
         builder.end("ItemData")
 
     def __lshift__(self, other):
-        if not isinstance(other, (MeasurementUnitRef, AuditRecord, MdsolQuery,)):
-            raise ValueError("ItemData object can only receive MeasurementUnitRef, AuditRecord or MdsolQuery objects")
+        if not isinstance(other, (MeasurementUnitRef, AuditRecord, MdsolQuery, Annotation)):
+            raise ValueError("ItemData object can only receive MeasurementUnitRef, AuditRecord, Annotation"
+                             " or MdsolQuery objects")
         self.set_single_attribute(other, MeasurementUnitRef, 'measurement_unit_ref')
         self.set_single_attribute(other, AuditRecord, 'audit_record')
         self.set_list_attribute(other, MdsolQuery, 'queries')
+        self.set_list_attribute(other, Annotation, 'annotations')
         return other
 
 
@@ -527,21 +702,26 @@ class ItemGroupData(TransactionalElement):
     """
     ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert', 'Context']
 
-    def __init__(self, transaction_type=None, item_group_repeat_key=None, whole_item_group=False):
+    def __init__(self, transaction_type=None, item_group_repeat_key=None,
+                 whole_item_group=False, annotations=None):
         super(self.__class__, self).__init__(transaction_type)
         self.item_group_repeat_key = item_group_repeat_key
         self.whole_item_group = whole_item_group
         self.items = OrderedDict()
+        self.annotations = []
+        self.signature = None
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, ItemData):
-            raise ValueError("ItemGroupData object can only receive ItemData object")
+        if not isinstance(other, (ItemData, Annotation, Signature)):
+            raise ValueError("ItemGroupData object can only receive ItemData, Signature or Annotation objects")
 
-        if other.itemoid in self.items:
-            raise ValueError("ItemGroupData object with that itemoid is already in the ItemGroupData object")
-
-        self.items[other.itemoid] = other
+        self.set_list_attribute(other, Annotation, 'annotations')
+        self.set_single_attribute(other, Signature, 'signature')
+        if isinstance(other, ItemData):
+            if other.itemoid in self.items:
+                raise ValueError("ItemGroupData object with that itemoid is already in the ItemGroupData object")
+            self.items[other.itemoid] = other
         return other
 
     def build(self, builder, formname):
@@ -563,6 +743,14 @@ class ItemGroupData(TransactionalElement):
         # Ask children
         for item in self.items.values():
             item.build(builder)
+
+        # Add annotations
+        for annotation in self.annotations:
+            annotation.build(builder)
+
+        # Add the signature if it exists
+        if self.signature is not None:
+            self.signature.build(builder)
         builder.end("ItemGroupData")
 
 
@@ -576,16 +764,17 @@ class FormData(TransactionalElement):
         self.form_repeat_key = form_repeat_key
         self.itemgroups = []
         self.signature = None
-        self.annotation = None
+        self.annotations = []
 
     def __lshift__(self, other):
         """Override << operator"""
         if not isinstance(other, (Signature, ItemGroupData, Annotation)):
             raise ValueError(
-                "FormData object can only receive ItemGroupData, Signature or Annotation objects (not '{}')".format(other))
+                "FormData object can only receive ItemGroupData, Signature or Annotation objects (not '{}')".format(
+                    other))
         self.set_list_attribute(other, ItemGroupData, 'itemgroups')
+        self.set_list_attribute(other, Annotation, 'annotations')
         self.set_single_attribute(other, Signature, 'signature')
-        self.set_single_attribute(other, Annotation, 'annotation')
         return other
 
     def build(self, builder):
@@ -610,8 +799,8 @@ class FormData(TransactionalElement):
         if self.signature is not None:
             self.signature.build(builder)
 
-        if self.annotation is not None:
-            self.annotation.build(builder)
+        for annotation in self.annotations:
+            annotation.build(builder)
 
         builder.end("FormData")
 
@@ -626,12 +815,14 @@ class StudyEventData(TransactionalElement):
         self.study_event_repeat_key = study_event_repeat_key
         self.forms = []
         self.annotations = []
+        self.signature = None
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, (FormData, Annotation)):
-            raise ValueError("StudyEventData object can only receive FormData or Annotation objects")
+        if not isinstance(other, (FormData, Annotation, Signature)):
+            raise ValueError("StudyEventData object can only receive FormData, Signature or Annotation objects")
         self.set_list_attribute(other, FormData, 'forms')
+        self.set_single_attribute(other, Signature, 'signature')
         self.set_list_attribute(other, Annotation, 'annotations')
         return other
 
@@ -654,6 +845,9 @@ class StudyEventData(TransactionalElement):
         for form in self.forms:
             form.build(builder)
 
+        if self.signature is not None:
+            self.signature.build(builder)
+
         for annotation in self.annotations:
             annotation.build(builder)
 
@@ -670,15 +864,20 @@ class SubjectData(TransactionalElement):
         self.subject_key = subject_key
         self.subject_key_type = subject_key_type
         self.study_events = []  # Can have collection
+        self.annotations = []
         self.audit_record = None
+        self.signature = None
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, (StudyEventData, AuditRecord,)):
-            raise ValueError("SubjectData object can only receive StudyEventData or AuditRecord object")
+        if not isinstance(other, (StudyEventData, AuditRecord, Annotation, Signature)):
+            raise ValueError("SubjectData object can only receive StudyEventData, AuditRecord, "
+                             "Annotation or Signature object")
 
+        self.set_list_attribute(other, Annotation, 'annotations')
         self.set_list_attribute(other, StudyEventData, 'study_events')
         self.set_single_attribute(other, AuditRecord, 'audit_record')
+        self.set_single_attribute(other, Signature, 'signature')
 
         return other
 
@@ -701,6 +900,12 @@ class SubjectData(TransactionalElement):
 
         for event in self.study_events:
             event.build(builder)
+
+        if self.signature is not None:
+            self.signature.build(builder)
+
+        for annotation in self.annotations:
+            annotation.build(builder)
 
         builder.end("SubjectData")
 

@@ -797,7 +797,7 @@ class TestTwoHundredRequest(unittest.TestCase):
         self.assertEqual("twohundred", t.url_path())
 
 
-class TimeoutTest(unittest.TestCase):
+class TestTimeout(unittest.TestCase):
     """
     Strictly belongs in test_rwslib but it interacts with HttPretty which is used in that unit
     """
