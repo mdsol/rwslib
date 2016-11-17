@@ -131,8 +131,10 @@ class ODMElement(object):
 
 
 class TransactionalElement(ODMElement):
-    """Models an ODM Element that is allowed a transaction type. Different elements have different
-       allowed transaction types"""
+    """
+    Models an ODM Element that is allowed a transaction type. Different elements have different
+    allowed transaction types
+    """
     ALLOWED_TRANSACTION_TYPES = []
 
     def __init__(self, transaction_type):
@@ -153,6 +155,9 @@ class TransactionalElement(ODMElement):
 
 
 class UserRef(ODMElement):
+    """
+    Reference to a User
+    """
     def __init__(self, oid):
         self.oid = oid
 
@@ -162,6 +167,9 @@ class UserRef(ODMElement):
 
 
 class LocationRef(ODMElement):
+    """
+    Reference to a Location
+    """
     def __init__(self, oid):
         self.oid = oid
 
@@ -171,6 +179,9 @@ class LocationRef(ODMElement):
 
 
 class SignatureRef(ODMElement):
+    """
+    Reference to a Signature
+    """
     def __init__(self, oid):
         self.oid = oid
 
@@ -180,6 +191,9 @@ class SignatureRef(ODMElement):
 
 
 class ReasonForChange(ODMElement):
+    """
+    A user-supplied reason for a data change.
+    """
     def __init__(self, reason):
         self.reason = reason
 
@@ -190,6 +204,10 @@ class ReasonForChange(ODMElement):
 
 
 class DateTimeStamp(ODMElement):
+    """
+    The date/time that the data entry, modification, or signature was performed.
+    This applies to the initial occurrence of the action, not to subsequent transfers between computer systems.
+    """
     def __init__(self, date_time):
         self.date_time = date_time
 
@@ -208,9 +226,9 @@ class Signature(ODMElement):
     This indicates that some user accepts legal responsibility for that data.
     See 21 CFR Part 11.
     The signature identifies the person signing, the location of signing,
-     the signature meaning (via the referenced SignatureDef),
-     the date and time of signing,
-     and (in the case of a digital signature) an encrypted hash of the included data.
+    the signature meaning (via the referenced SignatureDef),
+    the date and time of signing,
+    and (in the case of a digital signature) an encrypted hash of the included data.
     """
     def __init__(self, id=None, user_ref=None, location_ref=None, signature_ref=None, date_time_stamp=None):
         self.id = id
@@ -261,6 +279,8 @@ class Annotation(TransactionalElement):
     """
     A general note about clinical data.
     If an annotation has both a comment and flags, the flags should be related to the comment.
+
+    .. note:: Annotation is not supported by Rave
     """
     ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Remove", "Upsert", "Context"]
 
@@ -352,6 +372,8 @@ class Comment(ODMElement):
     """
     A free-text (uninterpreted) comment about clinical data.
     The comment may have come from the Sponsor or the clinical Site.
+
+    .. note:: Comment is not supported by Rave
     """
 
     VALID_SPONSOR_OR_SITE_RESPONSES = ["Sponsor", "Site"]
@@ -394,6 +416,12 @@ class Comment(ODMElement):
 
 
 class Flag(ODMElement):
+    """
+    A machine-processable annotation on clinical data.
+
+    .. note:: Flag is not supported by Rave
+    """
+
     def __init__(self, flag_type=None, flag_value=None):
         self.flag_type = None
         self.flag_value = None
@@ -429,6 +457,8 @@ class FlagType(ODMElement):
     The type of flag. This determines the purpose and semantics of the flag.
     Different applications are expected to be interested in different types of flags.
     The actual value must be a member of the referenced CodeList.
+
+    .. note:: FlagType is not supported by Rave
     """
     def __init__(self, flag_type, codelist_oid=None):
         self.flag_type = flag_type
@@ -458,6 +488,8 @@ class FlagValue(ODMElement):
     """
     The value of the flag. The meaning of this value is typically dependent on the associated FlagType.
     The actual value must be a member of the referenced CodeList.
+
+    .. note::  FlagValue is not supported by Rave
     """
     def __init__(self, flag_value, codelist_oid=None):
         self.flag_value = flag_value
@@ -483,98 +515,10 @@ class FlagValue(ODMElement):
         builder.end("FlagValue")
 
 
-class AuditRecord(ODMElement):
-    """AuditRecord is supported only by ItemData in Rave"""
-    EDIT_MONITORING = 'Monitoring'
-    EDIT_DATA_MANAGEMENT = 'DataManagement'
-    EDIT_DB_AUDIT = 'DBAudit'
-    EDIT_POINTS = [EDIT_MONITORING, EDIT_DATA_MANAGEMENT, EDIT_DB_AUDIT]
-
-    def __init__(self, edit_point=None, used_imputation_method=None, identifier=None, include_file_oid=None):
-        self._edit_point = None
-        self.edit_point = edit_point
-        self.used_imputation_method = used_imputation_method
-        self._id = None
-        self.id = identifier
-        self.include_file_oid = include_file_oid
-        self.user_ref = None
-        self.location_ref = None
-        self.reason_for_change = None
-        self.date_time_stamp = None
-
-    @property
-    def id(self):
-        return self._id
-
-    @id.setter
-    def id(self, value):
-        if value not in [None, ''] and str(value).strip() != '':
-            val = str(value).strip()[0]
-            if val not in VALID_ID_CHARS:
-                raise AttributeError('%s id cannot start with "%s" character' % (self.__class__.__name__, val,))
-        self._id = value
-
-    @property
-    def edit_point(self):
-        return self._edit_point
-
-    @edit_point.setter
-    def edit_point(self, value):
-        if value is not None:
-            if value not in self.EDIT_POINTS:
-                raise AttributeError('%s edit_point must be one of %s not %s' % (
-                    self.__class__.__name__, ','.join(self.EDIT_POINTS), value,))
-        self._edit_point = value
-
-    def build(self, builder):
-        params = {}
-
-        if self.edit_point is not None:
-            params["EditPoint"] = self.edit_point
-
-        if self.used_imputation_method is not None:
-            params['UsedImputationMethod'] = bool_to_yes_no(self.used_imputation_method)
-
-        if self.id is not None:
-            params['ID'] = str(self.id)
-
-        if self.include_file_oid is not None:
-            params['mdsol:IncludeFileOID'] = bool_to_yes_no(self.include_file_oid)
-
-        builder.start("AuditRecord", params)
-        if self.user_ref is None:
-            raise ValueError("User Reference not set.")
-        self.user_ref.build(builder)
-
-        if self.location_ref is None:
-            raise ValueError("Location Reference not set.")
-        self.location_ref.build(builder)
-
-        if self.date_time_stamp is None:
-            raise ValueError("DateTime not set.")
-
-        self.date_time_stamp.build(builder)
-
-        # Optional
-        if self.reason_for_change is not None:
-            self.reason_for_change.build(builder)
-
-        builder.end("AuditRecord")
-
-    def __lshift__(self, other):
-        if not isinstance(other, (UserRef, LocationRef, DateTimeStamp, ReasonForChange,)):
-            raise ValueError("AuditRecord cannot accept a child element of type %s" % other.__class__.__name__)
-
-        # Order is important, apparently
-        self.set_single_attribute(other, UserRef, 'user_ref')
-        self.set_single_attribute(other, LocationRef, 'location_ref')
-        self.set_single_attribute(other, DateTimeStamp, 'date_time_stamp')
-        self.set_single_attribute(other, ReasonForChange, 'reason_for_change')
-        return other
-
-
 class MdsolQuery(ODMElement):
-    """MdsolQuery extension element for Queries at item level only"""
+    """
+    MdsolQuery extension element for Queries at item level only
+    """
 
     def __init__(self, value=None, query_repeat_key=None, recipient=None, status=None, requires_response=None,
                  response=None):
@@ -1007,7 +951,11 @@ class ODM(ODMElement):
 
 
 class GlobalVariables(ODMElement):
-    """GlobalVariables Metadata element"""
+    """
+    GlobalVariables includes general summary information about the :class:`Study`.
+
+    .. note:: Name and description are not important. protocol_name maps to the Rave project name
+    """
 
     def __init__(self, protocol_name, name=None, description=''):
         """Name and description are not important. protocol_name maps to the Rave project name"""
@@ -1025,7 +973,9 @@ class GlobalVariables(ODMElement):
 
 
 class TranslatedText(ODMElement):
-    """Represents a language and a translated text for that language"""
+    """
+    Represents a language and a translated text for that language
+    """
 
     def __init__(self, text, lang=None):
         self.text = text
@@ -1042,6 +992,9 @@ class TranslatedText(ODMElement):
 
 
 class Symbol(ODMElement):
+    """
+    A human-readable name for a :class:`MeasurementUnit`.
+    """
     def __init__(self):
         self.translations = []
 
@@ -1062,7 +1015,10 @@ class Symbol(ODMElement):
 
 
 class MeasurementUnit(ODMElement):
-    """A measurement unit"""
+    """
+    The physical unit of measure for a data item or value.
+    The meaning of a MeasurementUnit is determined by its Name attribute.
+    """
 
     def __init__(self,
                  oid,
@@ -1114,7 +1070,9 @@ class MeasurementUnit(ODMElement):
 
 
 class BasicDefinitions(ODMElement):
-    """Container for Measurement units"""
+    """
+    Container for :class:`MeasurementUnit`
+    """
 
     def __init__(self):
         self.measurement_units = []
@@ -1135,6 +1093,12 @@ class BasicDefinitions(ODMElement):
 
 
 class StudyEventRef(ODMElement):
+    """
+    A reference to a StudyEventDef as it occurs within a specific version of a :class:`Study`.
+    The list of :class:`StudyEventRef`s identifies the types of study events that are allowed to occur within the study.
+    The :class:`StudyEventRef`s within a :class:`Protocol` must not have duplicate StudyEventOIDs nor
+    duplicate OrderNumbers.
+    """
     def __init__(self, oid, order_number, mandatory):
         self.oid = oid
         self.order_number = order_number
@@ -1150,7 +1114,10 @@ class StudyEventRef(ODMElement):
 
 
 class Protocol(ODMElement):
-    """Protocol child of MetaDataVersion, holder of StudyEventRefs"""
+    """
+    The Protocol lists the kinds of study events that can occur within a specific version of a :class:`Study`.
+    All clinical data must occur within one of these study events.
+    """
 
     def __init__(self):
         self.study_event_refs = []
@@ -1172,6 +1139,11 @@ class Protocol(ODMElement):
 
 
 class FormRef(ODMElement):
+    """
+    A reference to a :class:`FormDef` as it occurs within a specific :class:`StudyEventDef` .
+    The list of :class:`FormRef` identifies the types of forms that are allowed to occur within this type of study
+    event. The :class:`FormRef` within a single :class:`StudyEventDef` must not have duplicate FormOIDs nor OrderNumbers.
+    """
     def __init__(self, oid, order_number, mandatory):
         self.oid = oid
         self.order_number = order_number
@@ -1187,6 +1159,13 @@ class FormRef(ODMElement):
 
 
 class StudyEventDef(ODMElement):
+    """
+    A StudyEventDef packages a set of forms.
+    Scheduled Study Events correspond to sets of forms that are expected to be collected for each subject as part of
+    the planned visit sequence for the study.
+    Unscheduled Study Events are designed to collect data that may or may not occur for any particular
+    subject such as a set of forms that are completed for an early termination due to a serious adverse event.
+    """
     # Event types
     SCHEDULED = 'Scheduled'
     UNSCHEDULED = 'Unscheduled'
@@ -1256,6 +1235,11 @@ class StudyEventDef(ODMElement):
 
 
 class ItemGroupRef(ODMElement):
+    """
+    A reference to an ItemGroupDef as it occurs within a specific :class:`FormDef`.
+    The list of ItemGroupRefs identifies the types of item groups that are allowed to occur within this type of form.
+    The ItemGroupRefs within a single FormDef must not have duplicate ItemGroupOIDs nor OrderNumbers.
+    """
     def __init__(self, oid, order_number, mandatory=True):
         self.oid = oid
         self.order_number = order_number
@@ -1271,7 +1255,9 @@ class ItemGroupRef(ODMElement):
 
 
 class MdsolHelpText(ODMElement):
-    """Help element for FormDefs and ItemDefs"""
+    """
+    Help element for :class:`FormDef` and :class:`ItemDef`
+    """
 
     def __init__(self, lang, content):
         self.lang = lang
@@ -1284,7 +1270,9 @@ class MdsolHelpText(ODMElement):
 
 
 class MdsolViewRestriction(ODMElement):
-    """ViewRestriction for FormDefs and ItemDefs"""
+    """
+    ViewRestriction for :class:`FormDef` and :class:`ItemDef`
+    """
 
     def __init__(self, rolename):
         self.rolename = rolename
@@ -1296,7 +1284,9 @@ class MdsolViewRestriction(ODMElement):
 
 
 class MdsolEntryRestriction(ODMElement):
-    """EntryRestriction for FormDefs and ItemDefs"""
+    """
+    EntryRestriction for :class:`FormDef` and :class:`ItemDef`
+    """
 
     def __init__(self, rolename):
         self.rolename = rolename
@@ -1308,6 +1298,9 @@ class MdsolEntryRestriction(ODMElement):
 
 
 class FormDef(ODMElement):
+    """
+    A FormDef describes a type of form that can occur in a study.
+    """
     LOG_PORTRAIT = 'Portrait'
     LOG_LANDSCAPE = 'Landscape'
 
@@ -1399,7 +1392,9 @@ class FormDef(ODMElement):
 
 
 class MdsolLabelRef(ODMElement):
-    """A reference to a label on a form"""
+    """
+    A reference to a label on a form
+    """
 
     def __init__(self, oid, order_number):
         self.oid = oid
@@ -1415,6 +1410,9 @@ class MdsolLabelRef(ODMElement):
 
 
 class MdsolAttribute(ODMElement):
+    """
+    Rave Web Services element for holding Vendor Attributes
+    """
     def __init__(self, namespace, name, value, transaction_type='Insert'):
         self.namespace = namespace
         self.name = name
@@ -1433,6 +1431,10 @@ class MdsolAttribute(ODMElement):
 
 
 class ItemRef(ODMElement):
+    """
+    A reference to an :class:`ItemDef` as it occurs within a specific :class:`ItemGroupDef`.
+    The list of ItemRefs identifies the types of items that are allowed to occur within this type of item group.
+    """
     def __init__(self, oid, order_number=None, mandatory=False, key_sequence=None,
                  imputation_method_oid=None, role=None, role_codelist_oid=None):
         self.oid = oid
@@ -1473,7 +1475,6 @@ class ItemRef(ODMElement):
 
     def __lshift__(self, other):
         """ItemRef can accept MdsolAttribute(s)"""
-
         if not isinstance(other, (MdsolAttribute)):
             raise ValueError('ItemRef cannot accept a {0} as a child element'.format(other.__class__.__name__))
         self.set_list_attribute(other, MdsolAttribute, 'attributes')
@@ -1481,6 +1482,9 @@ class ItemRef(ODMElement):
 
 
 class ItemGroupDef(ODMElement):
+    """
+    An ItemGroupDef describes a type of item group that can occur within a Study.
+    """
     def __init__(self, oid, name, repeating=False, is_reference_data=False, sas_dataset_name=None,
                  domain=None, origin=None, role=None, purpose=None, comment=None):
         self.oid = oid
@@ -1544,6 +1548,9 @@ class ItemGroupDef(ODMElement):
 
 
 class Question(ODMElement):
+    """
+    A label shown to a human user when prompted to provide data for an item on paper or on a screen.
+    """
     def __init__(self):
         self.translations = []
 
@@ -1564,6 +1571,9 @@ class Question(ODMElement):
 
 
 class MeasurementUnitRef(ODMElement):
+    """
+    A reference to a measurement unit definition (:class:`MeasurementUnit`).
+    """
     def __init__(self, oid, order_number=None):
         self.oid = oid
         self.order_number = order_number
@@ -1577,8 +1587,105 @@ class MeasurementUnitRef(ODMElement):
         builder.end('MeasurementUnitRef')
 
 
+class AuditRecord(ODMElement):
+    """
+    An AuditRecord carries information pertaining to the creation, deletion, or modification of clinical data.
+    This information includes who performed that action, and where, when, and why that action was performed.
+
+    .. note:: AuditRecord is supported only by :class:`ItemData` in Rave
+    """
+    EDIT_MONITORING = 'Monitoring'
+    EDIT_DATA_MANAGEMENT = 'DataManagement'
+    EDIT_DB_AUDIT = 'DBAudit'
+    EDIT_POINTS = [EDIT_MONITORING, EDIT_DATA_MANAGEMENT, EDIT_DB_AUDIT]
+
+    def __init__(self, edit_point=None, used_imputation_method=None, identifier=None, include_file_oid=None):
+        self._edit_point = None
+        self.edit_point = edit_point
+        self.used_imputation_method = used_imputation_method
+        self._id = None
+        self.id = identifier
+        self.include_file_oid = include_file_oid
+        self.user_ref = None
+        self.location_ref = None
+        self.reason_for_change = None
+        self.date_time_stamp = None
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        if value not in [None, ''] and str(value).strip() != '':
+            val = str(value).strip()[0]
+            if val not in VALID_ID_CHARS:
+                raise AttributeError('%s id cannot start with "%s" character' % (self.__class__.__name__, val,))
+        self._id = value
+
+    @property
+    def edit_point(self):
+        return self._edit_point
+
+    @edit_point.setter
+    def edit_point(self, value):
+        if value is not None:
+            if value not in self.EDIT_POINTS:
+                raise AttributeError('%s edit_point must be one of %s not %s' % (
+                    self.__class__.__name__, ','.join(self.EDIT_POINTS), value,))
+        self._edit_point = value
+
+    def build(self, builder):
+        params = {}
+
+        if self.edit_point is not None:
+            params["EditPoint"] = self.edit_point
+
+        if self.used_imputation_method is not None:
+            params['UsedImputationMethod'] = bool_to_yes_no(self.used_imputation_method)
+
+        if self.id is not None:
+            params['ID'] = str(self.id)
+
+        if self.include_file_oid is not None:
+            params['mdsol:IncludeFileOID'] = bool_to_yes_no(self.include_file_oid)
+
+        builder.start("AuditRecord", params)
+        if self.user_ref is None:
+            raise ValueError("User Reference not set.")
+        self.user_ref.build(builder)
+
+        if self.location_ref is None:
+            raise ValueError("Location Reference not set.")
+        self.location_ref.build(builder)
+
+        if self.date_time_stamp is None:
+            raise ValueError("DateTime not set.")
+
+        self.date_time_stamp.build(builder)
+
+        # Optional
+        if self.reason_for_change is not None:
+            self.reason_for_change.build(builder)
+
+        builder.end("AuditRecord")
+
+    def __lshift__(self, other):
+        if not isinstance(other, (UserRef, LocationRef, DateTimeStamp, ReasonForChange,)):
+            raise ValueError("AuditRecord cannot accept a child element of type %s" % other.__class__.__name__)
+
+        # Order is important, apparently
+        self.set_single_attribute(other, UserRef, 'user_ref')
+        self.set_single_attribute(other, LocationRef, 'location_ref')
+        self.set_single_attribute(other, DateTimeStamp, 'date_time_stamp')
+        self.set_single_attribute(other, ReasonForChange, 'reason_for_change')
+        return other
+
+
 class MdsolHeaderText(ODMElement):
-    """Header text for ItemDef when showed in grid"""
+    """
+    Header text for :class:`ItemDef` when showed in grid
+    """
 
     def __init__(self, content, lang=None):
         self.content = content
@@ -1595,7 +1702,9 @@ class MdsolHeaderText(ODMElement):
 
 
 class CodeListRef(ODMElement):
-    """CodeListRef: a reference a codelist within an ItemDef"""
+    """
+    A reference to a :class:`CodeList` definition.
+    """
 
     def __init__(self, oid):
         self.oid = oid
@@ -1642,7 +1751,9 @@ class MdsolLabelDef(ODMElement):
 
 
 class MdsolReviewGroup(ODMElement):
-    """Maps to Rave review groups for an Item"""
+    """
+    Maps to Rave review groups for an :class:`ItemDef`
+    """
 
     def __init__(self, name):
         self.name = name
@@ -1654,7 +1765,9 @@ class MdsolReviewGroup(ODMElement):
 
 
 class CheckValue(ODMElement):
-    """A value in a RangeCheck"""
+    """
+    A value in a :class:`RangeCheck`
+    """
 
     def __init__(self, value):
         self.value = value
@@ -1667,8 +1780,8 @@ class CheckValue(ODMElement):
 
 class RangeCheck(ODMElement):
     """
-        Rangecheck in Rave relates to QueryHigh QueryLow and NonConformandHigh and NonComformanLow
-       for other types of RangeCheck, need to use an EditCheck (part of Rave's extensions to ODM)
+    Rangecheck in Rave relates to QueryHigh QueryLow and NonConformandHigh and NonComformanLow
+    for other types of RangeCheck, need to use an EditCheck (part of Rave's extensions to ODM)
     """
 
     def __init__(self, comparator, soft_hard):
@@ -1718,6 +1831,11 @@ class RangeCheck(ODMElement):
 
 
 class ItemDef(ODMElement):
+    """
+    An ItemDef describes a type of item that can occur within a study.
+    Item properties include name, datatype, measurement units, range or codelist restrictions,
+    and several other properties.
+    """
     VALID_DATATYPES = [DataType.Text, DataType.Integer, DataType.Float, DataType.Date,
                        DataType.DateTime, DataType.Time]
 
@@ -1928,6 +2046,9 @@ class ItemDef(ODMElement):
 
 
 class Decode(ODMElement):
+    """
+    The displayed value relating to the CodedValue
+    """
     def __init__(self):
         self.translations = []
 
@@ -1946,6 +2067,10 @@ class Decode(ODMElement):
 
 
 class CodeListItem(ODMElement):
+    """
+    Defines an individual member value of a :class:`CodeList` including display format.
+    The actual value is given, along with a set of print/display-forms.
+    """
     def __init__(self, coded_value, order_number=None, specify=False):
         self.coded_value = coded_value
         self.order_number = order_number
@@ -1974,7 +2099,11 @@ class CodeListItem(ODMElement):
 
 
 class CodeList(ODMElement):
-    """A container for CodeListItems equivalent of Rave Dictionary"""
+    """
+    Defines a discrete set of permitted values for an item.
+
+    .. note:: Equivalent of Rave Dictionary
+    """
     VALID_DATATYPES = [DataType.Integer, DataType.Text, DataType.Float, DataType.String]
 
     def __init__(self, oid, name, datatype, sas_format_name=None):
