@@ -35,7 +35,7 @@ setup(
     packages=packages,
     package_dir={'rwslib': 'rwslib'},
     include_package_data=True,
-    install_requires=['requests', 'lxml', 'httpretty', 'six', 'click', 'fake-factory', 'enum34'],
+    install_requires=['requests', 'lxml', 'httpretty', 'six', 'click', 'faker', 'enum34'],
     tests_require=['mock'],
     license=open('LICENSE.txt').read(),
     zip_safe=False,
