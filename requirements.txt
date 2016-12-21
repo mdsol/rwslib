@@ -6,4 +6,4 @@ six
 enum34
 mock
 click
-fake-factory
+faker

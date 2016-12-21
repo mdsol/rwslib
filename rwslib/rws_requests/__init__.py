@@ -57,6 +57,14 @@ class RWSRequest(object):
     requires_authorization = False
     method = "GET"  # Default
 
+    def __eq__(self, other):
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def result(self, request):
         """Process a result to create a custom output"""
         # By default return text
@@ -64,7 +72,7 @@ class RWSRequest(object):
 
     def url_path(self):
         """Return url path list"""
-        raise NotImplementedError("Override url_path in descendants of RWSRequest") # pragma: no cover
+        raise NotImplementedError("Override url_path in descendants of RWSRequest")     # pragma: no cover
 
     def args(self):
         """Return additional args here as dict"""

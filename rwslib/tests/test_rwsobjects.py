@@ -2,23 +2,25 @@
 __author__ = 'isparks'
 
 import unittest
+
 from rwslib import rwsobjects
+
 
 class TestParse(unittest.TestCase):
 
     def test_parse_with_bom(self):
         """Test parser can throw away BOM"""
         text = u"""\xef\xbb\xbf<?xml version="1.0" encoding="utf-8"?><ODM/>"""
-        self.assertEqual("ODM",rwsobjects.parseXMLString(text).tag)
+        self.assertEqual("ODM", rwsobjects.parseXMLString(text).tag)
 
     def test_parse_without_bom(self):
         """Test parser can throw away BOM"""
         text = u"""<?xml version="1.0" encoding="utf-8"?><ODM/>"""
-        self.assertEqual("ODM",rwsobjects.parseXMLString(text).tag)
+        self.assertEqual("ODM", rwsobjects.parseXMLString(text).tag)
 
     def test_parse_empty_string(self):
         text = u""""""
-        self.assertEqual("",rwsobjects.parseXMLString(text))
+        self.assertEqual("", rwsobjects.parseXMLString(text))
 
 
 class TestParseEnvironment(unittest.TestCase):
@@ -39,7 +41,6 @@ class TestParseEnvironment(unittest.TestCase):
         env = rwsobjects.getEnvironmentFromNameAndProtocol('TEST :( (PROD)', 'TEST :(')
         self.assertEqual(env, 'PROD')
 
-
     def test_braces_tight_spaces(self):
         env = rwsobjects.getEnvironmentFromNameAndProtocol('TEST(99)(AUX)', 'TEST(99)')
         self.assertEqual(env, 'AUX')
@@ -51,6 +52,7 @@ class TestParseEnvironment(unittest.TestCase):
         """
         env = rwsobjects.getEnvironmentFromNameAndProtocol('TEST(99)', 'TEST(99)')
         self.assertEqual(env, '')
+
 
 class TestRWSErrorResponse(unittest.TestCase):
     """Test that RWSErrorResponse correctly reads an error response"""
@@ -70,6 +72,7 @@ class TestRWSErrorResponse(unittest.TestCase):
         self.assertEqual("Not Supplied", resp.inboundodmfileoid)
         self.assertEqual("RWS00092", resp.reasoncode)
         self.assertEqual("0b47fe86-542f-4070-9e7d-16396a5ef08a", resp.referencenumber)
+
 
 class TestRWSError(unittest.TestCase):
     """Test that RWSError correctly reads an error response"""
@@ -113,6 +116,7 @@ class TestRWSResponse(unittest.TestCase):
         self.assertEqual(4, response.fields_touched)
         self.assertEqual(5, response.loglines_touched)
 
+
 class TestRWSSubjects(unittest.TestCase):
     """Test RWSSubjects"""
 
@@ -146,7 +150,7 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(False, subjects[0].overdue)
         self.assertEqual(None, subjects[1].overdue)  # Example where status was not asked for.
         self.assertEqual(True, subjects[2].incomplete)
-        self.assertEqual(text,str(subjects))
+        self.assertEqual(text, str(subjects))
 
     def test_parse_no_uuid(self):
         """
@@ -176,10 +180,10 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(3, len(subjects))
         self.assertEqual(True, subjects[0].touched)
         self.assertEqual(False, subjects[0].overdue)
-        self.assertEqual(None, subjects[1].overdue) # Example where status was not asked for.
-        self.assertEqual(0, len(subjects[1].links))    # Example where link was not asked for
+        self.assertEqual(None, subjects[1].overdue)     # Example where status was not asked for.
+        self.assertEqual(0, len(subjects[1].links))     # Example where link was not asked for
         self.assertEqual(True, subjects[2].incomplete)
-        self.assertEqual(text,str(subjects))
+        self.assertEqual(text, str(subjects))
         self.assertEqual("1", subjects[0].subject_name)
         self.assertEqual("2", subjects[1].subject_name)
         self.assertEqual("3", subjects[2].subject_name)
@@ -212,7 +216,7 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(3, len(subjects))
         self.assertEqual(True, subjects[0].touched)
         self.assertEqual(False, subjects[0].overdue)
-        self.assertEqual(None, subjects[1].overdue) #Example where status was not asked for.
+        self.assertEqual(None, subjects[1].overdue)     #Example where status was not asked for.
         self.assertEqual(True, subjects[2].incomplete)
         self.assertEqual(text, str(subjects))
         self.assertEqual("1", subjects[0].subject_name)
@@ -303,11 +307,8 @@ class TestRWSPostResponse(unittest.TestCase):
               NewRecords=""
               SubjectNumberInStudy="1103" SubjectNumberInStudySite="55">
     </Response>"""
-
-        def doparse():
-            parsed = rwsobjects.RWSPostResponse(text)
-
-        self.assertRaises(KeyError,doparse)
+        with self.assertRaises(KeyError):
+            rwsobjects.RWSPostResponse(text)
 
 
 class TestRWSPostErrorResponse(unittest.TestCase):
