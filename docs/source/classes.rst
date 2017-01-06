@@ -1,12 +1,21 @@
 Class Reference
 ***************
 
+rwslib
+======
+
 .. module:: rwslib
 
 .. autoclass:: RWSConnection
    :members: send_request
 
-.. module:: rwslib.builders
+rwslib.builders
+===============
+Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
+
+.. automodule:: rwslib.builders
+    :members:
+    :undoc-members:
 
 .. autoclass:: Annotation
 .. autoclass:: AuditRecord
@@ -70,6 +79,9 @@ Class Reference
 .. autoclass:: TranslatedText
 .. autoclass:: UserRef
 
+rwslib.rws_requests
+===================
+
 .. module:: rwslib.rws_requests
 
 .. autoclass:: StudyDatasetRequest
@@ -77,6 +89,8 @@ Class Reference
 .. autoclass:: VersionDatasetRequest
 .. autoclass:: ConfigurableDatasetRequest
 
+rwslib.rwsobjects
+=================
 .. module:: rwslib.rwsobjects
 
 .. autoclass:: ODMDoc
@@ -91,7 +105,11 @@ Class Reference
 .. autoclass:: RWSStudyMetadataVersions
 .. autoclass:: MetaDataVersion
 
+rwslib.rws_requests.biostats_gateway
+====================================
+
 .. module:: rwslib.rws_requests.biostats_gateway
+
 .. autoclass:: CVMetaDataRequest
 .. autoclass:: FormDataRequest
 .. autoclass:: ProjectMetaDataRequest
@@ -100,8 +118,11 @@ Class Reference
 .. autoclass:: ProtocolDeviationsRequest
 .. autoclass:: DataDictionariesRequest
 
+rwslib.rws_requests.odm_adapter
+===============================
 
 .. module:: rwslib.rws_requests.odm_adapter
+
 .. autoclass:: AuditRecordsRequest
 .. autoclass:: VersionFoldersRequest
 .. autoclass:: SitesMetadataRequest
