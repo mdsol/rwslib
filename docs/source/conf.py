@@ -216,6 +216,8 @@ latex_documents = [
 # If false, no module index is generated.
 #latex_domain_indices = True
 
+# try to set class attributes
+autoclass_content = 'both'
 
 # -- Options for manual page output --------------------------------------------
 
