@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import re
 
 __author__ = 'isparks'
 
 import uuid
+import re
 from xml.etree import cElementTree as ET
 from datetime import datetime
 from string import ascii_letters
@@ -143,10 +143,12 @@ class TransactionalElement(ODMElement):
 
     @property
     def transaction_type(self):
+        """returns the TransactionType attribute"""
         return self._transaction_type
 
     @transaction_type.setter
     def transaction_type(self, value):
+        """Set the TransactionType (with Input Validation)"""
         if value is not None:
             if value not in self.ALLOWED_TRANSACTION_TYPES:
                 raise AttributeError('%s transaction_type element must be one of %s not %s' % (
@@ -156,24 +158,36 @@ class TransactionalElement(ODMElement):
 
 class UserRef(ODMElement):
     """
-    Reference to a User
+    Reference to a :class:`User`
     """
     def __init__(self, oid):
+        """
+        :param str oid: OID for referenced :class:`User`
+        """
         self.oid = oid
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         builder.start("UserRef", dict(UserOID=self.oid))
         builder.end("UserRef")
 
 
 class LocationRef(ODMElement):
     """
-    Reference to a Location
+    Reference to a :class:`Location`
     """
     def __init__(self, oid):
+        """
+        :param str oid: OID for referenced :class:`Location`
+        """
         self.oid = oid
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         builder.start("LocationRef", dict(LocationOID=self.oid))
         builder.end("LocationRef")
 
@@ -183,9 +197,15 @@ class SignatureRef(ODMElement):
     Reference to a Signature
     """
     def __init__(self, oid):
+        """
+        :param str oid: OID for referenced :class:`Signature`
+        """
         self.oid = oid
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         builder.start("SignatureRef", dict(SignatureOID=self.oid))
         builder.end("SignatureRef")
 
@@ -195,9 +215,15 @@ class ReasonForChange(ODMElement):
     A user-supplied reason for a data change.
     """
     def __init__(self, reason):
+        """
+        :param str reason: Supplied Reason for change
+        """
         self.reason = reason
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         builder.start("ReasonForChange", {})
         builder.data(self.reason)
         builder.end("ReasonForChange")
@@ -209,9 +235,13 @@ class DateTimeStamp(ODMElement):
     This applies to the initial occurrence of the action, not to subsequent transfers between computer systems.
     """
     def __init__(self, date_time):
+        #: specified DateTime for event
         self.date_time = date_time
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         builder.start("DateTimeStamp", {})
         if isinstance(self.date_time, datetime):
             builder.data(dt_to_iso8601(self.date_time))
@@ -231,13 +261,39 @@ class Signature(ODMElement):
     and (in the case of a digital signature) an encrypted hash of the included data.
     """
     def __init__(self, id=None, user_ref=None, location_ref=None, signature_ref=None, date_time_stamp=None):
+        #: Unique ID for Signature
+        """
+        :param UserRef user_ref: :class:`UserRef` for :class:`User` signing Data
+        :param LocationRef location_ref: :class:`LocationRef` for :class:`Location` of signing
+        :param SignatureRef signature_ref: :class:`SignatureRef` for :class:`SignatureDef` providing signature meaning
+        :param date_time_stamp: :class:`DateTimeStamp` for the time of Signature
+        """
+        self._id = None
         self.id = id
         self.user_ref = user_ref
         self.location_ref = location_ref
         self.signature_ref = signature_ref
         self.date_time_stamp = date_time_stamp
 
+    @property
+    def id(self):
+        """
+        The ID for the Signature
+
+        .. note:: If a Signature element is contained within a Signatures element, the ID attribute is required.
+        """
+        return self._id
+
+    @id.setter
+    def id(self, id):
+        """Set the ID for the Signature"""
+        self._id = id
+
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
+
         params = {}
         if self.id is not None:
             # If a Signature element is contained within a Signatures element, the ID attribute is required.
@@ -280,13 +336,23 @@ class Annotation(TransactionalElement):
     A general note about clinical data.
     If an annotation has both a comment and flags, the flags should be related to the comment.
 
-    .. note:: Annotation is not supported by Rave
+    .. note:: Annotation is not supported by Medidata Rave
     """
     ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Remove", "Upsert", "Context"]
 
     def __init__(self, id=None, seqnum=1,
                  flags=None, comment=None,
                  transaction_type=None):
+        """
+        :param id: ID for this Annotation (required if contained within an Annotations element)
+        :type id: str or None
+        :param int seqnum: :attr:`SeqNum` for Annotation
+        :param flags: one or more :class:`Flag` for the Annotation
+        :type flags: Flag or list(Flag)
+        :param comment: one or more :class:`Comment` for the Annotation
+        :type comment: Comment
+        :param transaction_type: :attr:`TransactionType` for Annotation (one of **Insert**, **Update**, *Remove*, **Upsert**, **Context**)
+        """
         super(Annotation, self).__init__(transaction_type=transaction_type)
         # initialise the flags collection
         self.flags = []
@@ -309,25 +375,42 @@ class Annotation(TransactionalElement):
 
     @property
     def id(self):
+        """
+        ID for annotation
+
+        .. note:: If an Annotation is contained with an Annotations element, the ID attribute is required.
+        """
         return self._id
 
     @id.setter
     def id(self, value):
+        """Set ID for Annotation"""
         if value in [None, ''] or str(value).strip() == '':
             raise AttributeError("Invalid ID value supplied")
         self._id = value
 
     @property
     def seqnum(self):
+        """
+        SeqNum attribute (a small positive integer) uniquely identifies the annotation within its parent entity.
+        """
         return self._seqnum
 
     @seqnum.setter
     def seqnum(self, value):
+        """
+        Set SeqNum for Annotation
+        :param value: SeqNum value
+        :type value: int
+        """
         if not re.match(r'\d+', str(value)) or value < 0:
             raise AttributeError("Invalid SeqNum value supplied")
         self._seqnum = value
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         params = {}
 
         # Add in the transaction type
@@ -373,37 +456,48 @@ class Comment(ODMElement):
     A free-text (uninterpreted) comment about clinical data.
     The comment may have come from the Sponsor or the clinical Site.
 
-    .. note:: Comment is not supported by Rave
+    .. note:: Comment is not supported by Medidata Rave
     """
 
     VALID_SPONSOR_OR_SITE_RESPONSES = ["Sponsor", "Site"]
 
     def __init__(self, text=None, sponsor_or_site=None):
+        """
+        :param str text: Text for Comment
+        :param str sponsor_or_site: Originator flag for Comment (either _Sponsor_ or _Site_)
+        """
         self._text = text
         self._sponsor_or_site = sponsor_or_site
 
     @property
     def text(self):
+        """Text content of Comment"""
         return self._text
 
     @text.setter
     def text(self, value):
+        """Set Text content for Comment (validation of input)"""
         if value in (None, '') or value.strip() == "":
             raise AttributeError("Empty text value is invalid.")
         self._text = value
 
     @property
     def sponsor_or_site(self):
+        """Originator of comment (either Sponsor or Site)"""
         return self._sponsor_or_site
 
     @sponsor_or_site.setter
     def sponsor_or_site(self, value):
+        """Set Originator with validation of input"""
         if value not in Comment.VALID_SPONSOR_OR_SITE_RESPONSES:
             raise AttributeError("%s sponsor_or_site value of %s is not valid" % (self.__class__.__name__,
                                                                                   value))
         self._sponsor_or_site = value
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         if self.text is None:
             raise ValueError("Text is not set.")
         params = {}
@@ -423,6 +517,10 @@ class Flag(ODMElement):
     """
 
     def __init__(self, flag_type=None, flag_value=None):
+        """
+        :param FlagType flag_type: Type for Flag
+        :param FlagValue flag_value: Value for Flag
+        """
         self.flag_type = None
         self.flag_value = None
         if flag_type is not None:
@@ -431,6 +529,9 @@ class Flag(ODMElement):
             self << flag_value
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         builder.start("Flag", {})
 
         if self.flag_type is not None:
@@ -461,6 +562,9 @@ class FlagType(ODMElement):
     .. note:: FlagType is not supported by Rave
     """
     def __init__(self, flag_type, codelist_oid=None):
+        """
+        :param flag_type: Type for :class:`Flag`
+        """
         self.flag_type = flag_type
         self._codelist_oid = None
         if codelist_oid is not None:
@@ -468,6 +572,7 @@ class FlagType(ODMElement):
 
     @property
     def codelist_oid(self):
+        """Reference to the :class:`CodeList` for the FlagType"""
         return self._codelist_oid
 
     @codelist_oid.setter
@@ -477,6 +582,9 @@ class FlagType(ODMElement):
         self._codelist_oid = value
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         if self.codelist_oid is None:
             raise ValueError("CodeListOID not set.")
         builder.start("FlagType", dict(CodeListOID=self.codelist_oid))
@@ -492,6 +600,9 @@ class FlagValue(ODMElement):
     .. note::  FlagValue is not supported by Rave
     """
     def __init__(self, flag_value, codelist_oid=None):
+        """
+        :param flag_value: Value for :class:`Flag`
+        """
         self.flag_value = flag_value
         self._codelist_oid = None
         if codelist_oid is not None:
@@ -499,6 +610,7 @@ class FlagValue(ODMElement):
 
     @property
     def codelist_oid(self):
+        """Reference to the :class:`CodeList` for the FlagType"""
         return self._codelist_oid
 
     @codelist_oid.setter
@@ -508,6 +620,9 @@ class FlagValue(ODMElement):
         self._codelist_oid = value
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         if self.codelist_oid is None:
             raise ValueError("CodeListOID not set.")
         builder.start("FlagValue", dict(CodeListOID=self.codelist_oid))
@@ -518,10 +633,21 @@ class FlagValue(ODMElement):
 class MdsolQuery(ODMElement):
     """
     MdsolQuery extension element for Queries at item level only
+
+    .. note:: This is a Medidata Rave specific extension
     """
 
     def __init__(self, value=None, query_repeat_key=None, recipient=None, status=None, requires_response=None,
                  response=None):
+        """
+        :param str value: Query Value
+        :param int query_repeat_key: Repeat key for Query
+        :param str recipient: Recipient for Query
+        :param QueryStatusType status: Query status
+        :param bool requires_response: Does this Query need a response?
+        :param response: Query response (if any)
+        :type response: str or None
+        """
         self.value = value
         self.query_repeat_key = query_repeat_key
         self.recipient = recipient
@@ -532,16 +658,21 @@ class MdsolQuery(ODMElement):
 
     @property
     def status(self):
+        """Query Status"""
         return self._status
 
     @status.setter
     def status(self, value):
+        """Set Query Status"""
         if value is not None:
             if not isinstance(value, QueryStatusType):
                 raise AttributeError("%s action type is invalid in mdsol:Query." % (value,))
         self._status = value
 
     def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
         params = {}
 
         if self.value is not None:
@@ -572,6 +703,15 @@ class ItemData(TransactionalElement):
     ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert', 'Context', 'Remove']
 
     def __init__(self, itemoid, value, specify_value=None, transaction_type=None, lock=None, freeze=None, verify=None):
+        """
+        :param str itemoid: OID for the matching :class:`ItemDef`
+        :param str value: Value for the the ItemData
+        :param str specify_value: 'If other, specify' value - *Rave specific attribute*
+        :param str transaction_type: Transaction type for the data
+        :param bool lock: Locks the DataPoint? - *Rave specific attribute*
+        :param bool freeze: Freezes the DataPoint? - *Rave specific attribute*
+        :param bool verify: Verifies the DataPoint? - *Rave specific attribute*
+        """
         super(self.__class__, self).__init__(transaction_type)
         self.itemoid = itemoid
         self.value = value
@@ -580,14 +720,18 @@ class ItemData(TransactionalElement):
         self.lock = lock
         self.freeze = freeze
         self.verify = verify
+        #: the corresponding :class:`AuditRecord` for the DataPoint
         self.audit_record = None
+        #: the list of :class:`MdsolQuery` on the DataPoint  - *Rave Specific Attribute*
         self.queries = []
+        #: the list of :class:`Annotation` on the DataPoint - *Not supported by Rave*
         self.annotations = []
+        #: the corresponding :class:`MeasurementUnitRef` for the DataPoint
         self.measurement_unit_ref = None
 
     def build(self, builder):
-        """Build XML by appending to builder
-           <ItemData ItemOID="MH_DT" Value="06 Jan 2009" TransactionType="Insert">
+        """
+        Build XML by appending to builder
         """
         params = dict(ItemOID=self.itemoid)
 
@@ -640,18 +784,35 @@ class ItemData(TransactionalElement):
 
 
 class ItemGroupData(TransactionalElement):
-    """Models the ODM ItemGroupData object.
-       Note no name for the ItemGroupData element is required. This is built automatically by the form.
+    """
+    Models the ODM ItemGroupData object.
+
+    .. note:: No name for the ItemGroupData element is required. This is built automatically by the form.
     """
     ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert', 'Context']
 
     def __init__(self, transaction_type=None, item_group_repeat_key=None,
                  whole_item_group=False, annotations=None):
+        """
+        :param str transaction_type: TransactionType for the ItemGroupData
+        :param int item_group_repeat_key: RepeatKey for the ItemGroupData
+        :param bool whole_item_group: Is this the entire ItemGroupData, or just parts? - *Rave specific attribute*
+        :param annotations: Annotation for the ItemGroup - *Not supported by Rave*
+        :type annotations: list(Annotation) or Annotation
+        """
         super(self.__class__, self).__init__(transaction_type)
         self.item_group_repeat_key = item_group_repeat_key
         self.whole_item_group = whole_item_group
         self.items = OrderedDict()
         self.annotations = []
+        if annotations:
+            # Add the annotations
+            if isinstance(annotations, Annotation):
+                self << annotations
+            elif isinstance(annotations, list):
+                for annotation in annotations:
+                    self << annotation
+        #: :class:`Signature` for ItemGroupData
         self.signature = None
 
     def __lshift__(self, other):
@@ -668,8 +829,7 @@ class ItemGroupData(TransactionalElement):
         return other
 
     def build(self, builder, formname):
-        """Build XML by appending to builder
-        """
+        """Build XML by appending to builder"""
         params = dict(ItemGroupOID=formname)
 
         if self.transaction_type is not None:
@@ -702,11 +862,18 @@ class FormData(TransactionalElement):
     ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update']
 
     def __init__(self, formoid, transaction_type=None, form_repeat_key=None):
+        """
+        :param str formoid: :class:`FormDef` OID
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**)
+        :param str form_repeat_key: Repeat Key for FormData
+        """
         super(self.__class__, self).__init__(transaction_type)
         self.formoid = formoid
         self.form_repeat_key = form_repeat_key
         self.itemgroups = []
+        #: :class:`Signature` for FormData
         self.signature = None
+        #: Collection of :class:`Annotation` for FormData - *Not supported by Rave*
         self.annotations = []
 
     def __lshift__(self, other):
@@ -722,8 +889,9 @@ class FormData(TransactionalElement):
 
     def build(self, builder):
         """Build XML by appending to builder
-
+        :Example:
         <FormData FormOID="MH" TransactionType="Update">
+
         """
         params = dict(FormOID=self.formoid)
 
@@ -753,11 +921,19 @@ class StudyEventData(TransactionalElement):
     ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Remove', 'Context']
 
     def __init__(self, study_event_oid, transaction_type="Update", study_event_repeat_key=None):
+        """
+        :param str study_event_oid: :class:`StudyEvent` OID
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, *Remove*, **Context**)
+        :param int study_event_repeat_key: :attr:`StudyEventRepeatKey` for StudyEventData
+        """
         super(self.__class__, self).__init__(transaction_type)
         self.study_event_oid = study_event_oid
         self.study_event_repeat_key = study_event_repeat_key
+        #: :class:`FormData` part of Study Event Data
         self.forms = []
+        #: :class:`Annotation` for Study Event Data  - *Not Supported by Rave*
         self.annotations = []
+        #: :class:`Signature` for Study Event Data
         self.signature = None
 
     def __lshift__(self, other):
@@ -771,8 +947,9 @@ class StudyEventData(TransactionalElement):
 
     def build(self, builder):
         """Build XML by appending to builder
-
+        :Example:
         <StudyEventData StudyEventOID="SCREENING" StudyEventRepeatKey="1" TransactionType="Update">
+
         """
         params = dict(StudyEventOID=self.study_event_oid)
 
@@ -801,14 +978,24 @@ class SubjectData(TransactionalElement):
     """Models the ODM SubjectData and ODM SiteRef objects"""
     ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert']
 
-    def __init__(self, sitelocationoid, subject_key, subject_key_type="SubjectName", transaction_type="Update"):
+    def __init__(self, site_location_oid, subject_key, subject_key_type="SubjectName", transaction_type="Update"):
+        """
+        :param str site_location_oid: :class:`SiteLocation` OID
+        :param str subject_key: Value for SubjectKey
+        :param str subject_key_type: Specifier as to the type of SubjectKey (either **SubjectName** or **SubjectUUID**)
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**)
+        """
         super(self.__class__, self).__init__(transaction_type)
-        self.sitelocationoid = sitelocationoid
+        self.sitelocationoid = site_location_oid
         self.subject_key = subject_key
         self.subject_key_type = subject_key_type
-        self.study_events = []  # Can have collection
+        #: collection of :class:`StudyEventData`
+        self.study_events = []
+        #: collection of :class:`Annotation`
         self.annotations = []
+        #: :class:`AuditRecord` for SubjectData - *Not Supported By Rave*
         self.audit_record = None
+        #: :class:`Signature` for SubjectData
         self.signature = None
 
     def __lshift__(self, other):
@@ -857,9 +1044,15 @@ class ClinicalData(ODMElement):
     """Models the ODM ClinicalData object"""
 
     def __init__(self, projectname, environment, metadata_version_oid="1"):
+        """
+        :param projectname: Name of Project in Medidata Rave
+        :param environment: Rave Study Enviroment
+        :param metadata_version_oid: MetadataVersion OID
+        """
         self.projectname = projectname
         self.environment = environment
         self.metadata_version_oid = metadata_version_oid
+        #: :class:`SubjectData` for the ClinicalData Element
         self.subject_data = None
 
     def __lshift__(self, other):
@@ -888,6 +1081,18 @@ class ODM(ODMElement):
     FILETYPE_SNAPSHOT = 'Snapshot'
 
     def __init__(self, originator, description="", creationdatetime=now_to_iso8601(), fileoid=None, filetype=None):
+        """
+        :param str originator: The organization that generated the ODM file.
+        :param str description: The sender should use the Description attribute to record any information that will 
+            help the receiver interpret the document correctly.
+        :param str creationdatetime: Time of creation of the file containing the document.
+        :param str fileoid: A unique identifier for this file.
+        :param str filetype: Snapshot means that the document contains only the current state of the data and metadata 
+            it describes, and no transactional history. A Snapshot document may include only one instruction per 
+            data point. For clinical data, TransactionType in a Snapshot file must either not be present or be Insert. 
+            Transactional means that the document may contain more than one instruction per data point. 
+            Use a Transactional document to send both what the current state of the data is, and how it came to be there.
+        """
         self.originator = originator  # Required
         self.description = description
         self.creationdatetime = creationdatetime
@@ -958,7 +1163,11 @@ class GlobalVariables(ODMElement):
     """
 
     def __init__(self, protocol_name, name=None, description=''):
-        """Name and description are not important. protocol_name maps to the Rave project name"""
+        """
+        :param str protocol_name: Protocol Name
+        :param str name: Study Name
+        :param str description: Study Description
+        """
         self.protocol_name = protocol_name
         self.name = name if name is not None else protocol_name
         self.description = description
@@ -978,6 +1187,10 @@ class TranslatedText(ODMElement):
     """
 
     def __init__(self, text, lang=None):
+        """
+        :param str text: Content expressed in language designated by :attr:`lang`
+        :param str lang: Language code
+        """
         self.text = text
         self.lang = lang
 
@@ -996,6 +1209,7 @@ class Symbol(ODMElement):
     A human-readable name for a :class:`MeasurementUnit`.
     """
     def __init__(self):
+        #: Collection of :class:`TranslatedText`
         self.translations = []
 
     def __lshift__(self, other):
@@ -1029,6 +1243,18 @@ class MeasurementUnit(ODMElement):
                  constant_c=0,
                  constant_k=0,
                  standard_unit=False):
+        """
+        :param str oid: MeasurementUnit OID
+        :param str name: Maps to Coded Unit within unit dictionary entries in Rave.
+        :param str unit_dictionary_name: Maps to unit dictionary Name in Rave. - *Rave specific attribute*
+        :param int constant_a: Maps to the unit dictionary Constant A in Rave. - *Rave specific attribute*
+        :param int constant_b: Maps to the unit dictionary Constant B in Rave. - *Rave specific attribute*
+        :param int constant_c: Maps to the unit dictionary Constant C in Rave. - *Rave specific attribute*
+        :param int constant_k: Maps to the unit dictionary Constant K in Rave. - *Rave specific attribute*
+        :param bool standard_unit: Yes = Standard checked within the unit dictionary entry in Rave.
+            No = Standard unchecked within the unit dictionary entry in Rave.  - *Rave specific attribute*
+        """
+        #: Collection of :class:`Symbol` for this MeasurementUnit
         self.symbols = []
         self.oid = oid
         self.name = name
@@ -1075,6 +1301,7 @@ class BasicDefinitions(ODMElement):
     """
 
     def __init__(self):
+        #: Collection of :class:`MeasurementUnit`
         self.measurement_units = []
 
     def build(self, builder):
@@ -1095,11 +1322,19 @@ class BasicDefinitions(ODMElement):
 class StudyEventRef(ODMElement):
     """
     A reference to a StudyEventDef as it occurs within a specific version of a :class:`Study`.
-    The list of :class:`StudyEventRef`s identifies the types of study events that are allowed to occur within the study.
-    The :class:`StudyEventRef`s within a :class:`Protocol` must not have duplicate StudyEventOIDs nor
+    The list of :class:`StudyEventRef` identifies the types of study events that are allowed to occur within the study.
+    The :class:`StudyEventRef` within a :class:`Protocol` must not have duplicate StudyEventOIDs nor
     duplicate OrderNumbers.
     """
     def __init__(self, oid, order_number, mandatory):
+        """
+        :param oid: :class:`StudyEventDef` OID
+        :type oid: str
+        :param order_number: OrderNumber for the :class:`StudyEventRef` within the :class:`Study`
+        :type order_number: int
+        :param mandatory: Is this StudyEventDef Mandatory? (True|False)
+        :type mandatory: bool
+        """
         self.oid = oid
         self.order_number = order_number
         self.mandatory = mandatory
@@ -1120,6 +1355,7 @@ class Protocol(ODMElement):
     """
 
     def __init__(self):
+        #: Collection of :class:`StudyEventRef`
         self.study_event_refs = []
 
     def build(self, builder):
@@ -1134,7 +1370,6 @@ class Protocol(ODMElement):
         if not isinstance(other, (StudyEventRef,)):
             raise ValueError('Protocol cannot accept a {0} as a child element'.format(other.__class__.__name__))
         self.set_list_attribute(other, StudyEventRef, 'study_event_refs')
-
         return other
 
 
@@ -1145,11 +1380,17 @@ class FormRef(ODMElement):
     event. The :class:`FormRef` within a single :class:`StudyEventDef` must not have duplicate FormOIDs nor OrderNumbers.
     """
     def __init__(self, oid, order_number, mandatory):
+        """
+        :param str oid: Set the :class:`FormDef` OID for the :class:`FormRef`
+        :param int order_number: Define the OrderNumber for the :class:`FormRef` within the containing :class:`StudyEventDef`
+        :param bool mandatory: Is this Form Mandatory?
+        """
         self.oid = oid
         self.order_number = order_number
         self.mandatory = mandatory
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(FormOID=self.oid,
                       OrderNumber=str(self.order_number),
                       Mandatory=bool_to_yes_no(self.mandatory)
@@ -1180,6 +1421,26 @@ class StudyEventDef(ODMElement):
                  overdue_days=None,
                  close_days=None
                  ):
+        """
+        :param str oid: OID for StudyEventDef
+        :param str name: Name for StudyEventDef
+        :param bool repeating: Is this a repeating StudyEvent?
+        :param str event_type: Type of StudyEvent (either *Scheduled*, *Unscheduled*, *Common*)
+        :param str category: Category attribute is typically used to indicate the study phase appropriate to this type
+            of study event. Examples might include Screening, PreTreatment, Treatment, and FollowUp.
+        :param int access_days: The number of days before the Target date that the folder may be opened, viewed and
+            edited from the Task List in Rave EDC. - *Rave Specific Attribute*
+        :param int start_win_days: The number of days before the Target date that is considered to be the ideal
+            start-date for use of this folder. - *Rave Specific Attribute*
+        :param int target_days: The ideal number of days between Time Zero and the date of use for the
+            folder. - *Rave Specific Attribute*
+        :param int end_win_days: The number of days after the Target date that is considered to be the ideal end
+            date for use of this folder. - *Rave Specific Attribute*
+        :param int overdue_days: The number of days after the Target date at which point empty data points are
+            marked overdue, and are displayed in the Task Summary in Rave EDC. - *Rave Specific Attribute*
+        :param int close_days: The number of days after the Target date at which point no new data may be entered
+            into the folder. - *Rave Specific Attribute*
+        """
         self.oid = oid
         self.name = name
         self.repeating = repeating
@@ -1240,7 +1501,14 @@ class ItemGroupRef(ODMElement):
     The list of ItemGroupRefs identifies the types of item groups that are allowed to occur within this type of form.
     The ItemGroupRefs within a single FormDef must not have duplicate ItemGroupOIDs nor OrderNumbers.
     """
+
     def __init__(self, oid, order_number, mandatory=True):
+        #: OID for the referred :class:`ItemGroupDef`
+        """
+        :param str oid: OID for the referenced :class:`ItemGroupDef`
+        :param int order_number: OrderNumber for the ItemGroupRef
+        :param bool mandatory: Is this ItemGroupRef required?
+        """
         self.oid = oid
         self.order_number = order_number
         self.mandatory = mandatory
@@ -1257,10 +1525,14 @@ class ItemGroupRef(ODMElement):
 class MdsolHelpText(ODMElement):
     """
     Help element for :class:`FormDef` and :class:`ItemDef`
+
+    .. note:: This is  Medidata Rave Specific Element
     """
 
     def __init__(self, lang, content):
+        #: Language specification for HelpText
         self.lang = lang
+        #: HelpText content
         self.content = content
 
     def build(self, builder):
@@ -1272,9 +1544,12 @@ class MdsolHelpText(ODMElement):
 class MdsolViewRestriction(ODMElement):
     """
     ViewRestriction for :class:`FormDef` and :class:`ItemDef`
+
+    .. note:: This is  Medidata Rave Specific Element
     """
 
     def __init__(self, rolename):
+        #: Name for the role for which the ViewRestriction applies
         self.rolename = rolename
 
     def build(self, builder):
@@ -1286,9 +1561,12 @@ class MdsolViewRestriction(ODMElement):
 class MdsolEntryRestriction(ODMElement):
     """
     EntryRestriction for :class:`FormDef` and :class:`ItemDef`
+
+    .. note:: This is  Medidata Rave Specific Element
     """
 
     def __init__(self, rolename):
+        #: Name for the role for which the EntryRestriction applies
         self.rolename = rolename
 
     def build(self, builder):
@@ -1324,6 +1602,25 @@ class FormDef(ODMElement):
                  link_study_event_oid=None,
                  link_form_oid=None
                  ):
+        """
+        :param str oid: OID for FormDef
+        :param str name: Name for FormDef
+        :param bool repeating: Is this a repeating Form?
+        :param int order_number: OrderNumber for the FormDef
+        :param bool active:  Indicates that the form is available to end users when you publish and
+            push the draft to Rave EDC - *Rave Specific Attribute*
+        :param bool template: Indicates that the form is a template form in Rave EDC - *Rave Specific Attribute*
+        :param bool signature_required: Select to ensure that the form requires investigator signature
+            for all submitted data points - *Rave Specific Attribute*
+        :param str log_direction: Set the display mode of a form,
+            (*Landscape* or *Portrait*) - *Rave Specific Attribute*
+        :param str double_data_entry: Indicates if the form is used to collect data in Rave Double Data
+            Entry (DDE), (*Always*, *Never* or *As Per Site*) - *Rave Specific Attribute*
+        :param confirmation_style: Style of Confirmation,
+            (*None*, *NotLink*, *LinkNext* or *LinkCustom*) - *Rave Specific Attribute*
+        :param link_study_event_oid: OID for :class:`StudyEvent` target for Link - *Rave Specific Attribute*
+        :param link_form_oid: OID for :class:`FormRef` target for Link - *Rave Specific Attribute*
+        """
         self.oid = oid
         self.name = name
         self.order_number = order_number
@@ -1336,12 +1633,17 @@ class FormDef(ODMElement):
         self.confirmation_style = confirmation_style
         self.link_study_event_oid = link_study_event_oid
         self.link_form_oid = link_form_oid
+        #: Collection of :class:`ItemGroupRef` for Form
         self.itemgroup_refs = []
-        self.helptexts = []  # Not clear that Rave can accept multiple from docs
+        #: Collection of :class:`HelpText` for Form (Cardinality not clear) - *Rave Specific Attribute*
+        self.helptexts = []  #
+        #: Collection of :class:`ViewRestriction` for Form - *Rave Specific Attribute*
         self.view_restrictions = []
+        #: Collection of :class:`EntryRestriction` for Form - *Rave Specific Attribute*
         self.entry_restrictions = []
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(OID=self.oid,
                       Name=self.name,
                       Repeating=bool_to_yes_no(self.repeating)
@@ -1394,13 +1696,18 @@ class FormDef(ODMElement):
 class MdsolLabelRef(ODMElement):
     """
     A reference to a label on a form
+
+    .. note:: This is  Medidata Rave Specific Element
     """
 
     def __init__(self, oid, order_number):
+        #: OID for the corresponding :class:`MdsoLabel`
         self.oid = oid
+        #: :attr:`OrderNumber` for the Label
         self.order_number = order_number
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(LabelOID=self.oid,
                       OrderNumber=str(self.order_number),
                       )
@@ -1412,14 +1719,21 @@ class MdsolLabelRef(ODMElement):
 class MdsolAttribute(ODMElement):
     """
     Rave Web Services element for holding Vendor Attributes
+
+    .. note:: This is  Medidata Rave Specific Element
     """
     def __init__(self, namespace, name, value, transaction_type='Insert'):
+        #: Namespace for the Attribute
         self.namespace = namespace
+        #: Name for the Attribute
         self.name = name
+        #: Value for the Attribute
         self.value = value
+        #: TransactionType for the Attribute
         self.transaction_type = transaction_type
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(Namespace=self.namespace,
                       Name=self.name,
                       Value=self.value,
@@ -1437,6 +1751,18 @@ class ItemRef(ODMElement):
     """
     def __init__(self, oid, order_number=None, mandatory=False, key_sequence=None,
                  imputation_method_oid=None, role=None, role_codelist_oid=None):
+        """
+
+        :param str oid: OID for :class:`ItemDef`
+        :param int order_number: :attr:`OrderNumber` for the ItemRef
+        :param bool mandatory: Is this ItemRef required?
+        :param int key_sequence: The KeySequence (if present) indicates that this item is a key for the enclosing item
+            group. It also provides an ordering for the keys.
+        :param str imputation_method_oid: *DEPRECATED*
+        :param str role: Role name describing the use of this data item.
+        :param str role_codelist_oid: RoleCodeListOID may be used to reference a :class:`CodeList` that defines the
+            full set roles from which the :attr:`Role` attribute value is to be taken.
+        """
         self.oid = oid
         self.order_number = order_number
         self.mandatory = mandatory
@@ -1444,9 +1770,11 @@ class ItemRef(ODMElement):
         self.imputation_method_oid = imputation_method_oid
         self.role = role
         self.role_codelist_oid = role_codelist_oid
+        #: Collection of :class:`MdsolAttribute`
         self.attributes = []
 
     def build(self, builder):
+        """Build XML by appending to builder"""
 
         params = dict(ItemOID=self.oid,
                       Mandatory=bool_to_yes_no(self.mandatory)
@@ -1487,6 +1815,21 @@ class ItemGroupDef(ODMElement):
     """
     def __init__(self, oid, name, repeating=False, is_reference_data=False, sas_dataset_name=None,
                  domain=None, origin=None, role=None, purpose=None, comment=None):
+        """
+
+        :param str oid: OID for ItemGroupDef
+        :param str name: Name for ItemGroupDef
+        :param bool repeating: Is this a repeating ItemDef?
+        :param bool is_reference_data: If IsReferenceData is Yes, this type of item group can occur only within a
+            :class:`ReferenceData` element. If IsReferenceData is No, this type of item group can occur only within a
+            :class:`ClinicalData` element. The default for this attribute is No.
+        :param str sas_dataset_name: SAS Dataset Name
+        :param str domain: Domain for Items within this ItemGroup
+        :param origin: Origin of data (eg CRF, eDT, Derived)
+        :param role: Role for the ItemGroup (eg Identifier, Topic, Timing, Qualifiers)
+        :param purpose: Purpose (eg Tabulation)
+        :param comment: Comment on the ItemGroup Contents
+        """
         self.oid = oid
         self.name = name
         self.repeating = repeating
@@ -1497,10 +1840,13 @@ class ItemGroupDef(ODMElement):
         self.role = role
         self.purpose = purpose
         self.comment = comment
+        #: Collection of :class:`ItemRef`
         self.item_refs = []
+        #: Collection of :class:`MdsolLabelRef`
         self.label_refs = []
 
     def build(self, builder):
+        """Build XML by appending to builder"""
 
         params = dict(OID=self.oid,
                       Name=self.name,
@@ -1552,6 +1898,7 @@ class Question(ODMElement):
     A label shown to a human user when prompted to provide data for an item on paper or on a screen.
     """
     def __init__(self):
+        #: Collection of :class:`Translation` for the Question
         self.translations = []
 
     def __lshift__(self, other):
@@ -1563,7 +1910,11 @@ class Question(ODMElement):
         return other
 
     def build(self, builder):
-        """Questions can contain translations"""
+        """
+        Build XML by appending to builder
+
+        .. note:: Questions can contain translations
+        """
         builder.start('Question', {})
         for translation in self.translations:
             translation.build(builder)
@@ -1575,6 +1926,10 @@ class MeasurementUnitRef(ODMElement):
     A reference to a measurement unit definition (:class:`MeasurementUnit`).
     """
     def __init__(self, oid, order_number=None):
+        """
+        :param str oid: :class:`MeasurementUnit` OID
+        :param order_number: :attr:`OrderNumber` for MeasurementUnitRef
+        """
         self.oid = oid
         self.order_number = order_number
 
@@ -1600,19 +1955,35 @@ class AuditRecord(ODMElement):
     EDIT_POINTS = [EDIT_MONITORING, EDIT_DATA_MANAGEMENT, EDIT_DB_AUDIT]
 
     def __init__(self, edit_point=None, used_imputation_method=None, identifier=None, include_file_oid=None):
+        """
+
+        :param str edit_point: EditPoint attribute identifies the phase of data processing in which action occurred
+            (*Monitoring*, *DataManagement*, *DBAudit*)
+        :param bool used_imputation_method: Indicates whether the action involved the use of a Method
+        :param bool include_file_oid: Include the FileOID in the AuditRecord
+        """
         self._edit_point = None
         self.edit_point = edit_point
         self.used_imputation_method = used_imputation_method
         self._id = None
         self.id = identifier
         self.include_file_oid = include_file_oid
+        #: :class:`UserRef` for the AuditRecord
         self.user_ref = None
+        #: :class:`LocationRef` for the AuditRecord
         self.location_ref = None
+        #: :class:`ReasonForChange` for the AuditRecord
         self.reason_for_change = None
+        #: :class:`DateTimeStamp` for the AuditRecord
         self.date_time_stamp = None
 
     @property
     def id(self):
+        """
+        AuditRecord ID
+
+        .. note:: If an AuditRecord is contained within an AuditRecords element, the ID attribute must be provided.
+        """
         return self._id
 
     @id.setter
@@ -1625,6 +1996,10 @@ class AuditRecord(ODMElement):
 
     @property
     def edit_point(self):
+        """
+        EditPoint attribute identifies the phase of data processing in which action occurred
+            (*Monitoring*, *DataManagement*, *DBAudit*)
+        """
         return self._edit_point
 
     @edit_point.setter
@@ -1636,6 +2011,7 @@ class AuditRecord(ODMElement):
         self._edit_point = value
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = {}
 
         if self.edit_point is not None:
@@ -1684,14 +2060,22 @@ class AuditRecord(ODMElement):
 
 class MdsolHeaderText(ODMElement):
     """
-    Header text for :class:`ItemDef` when showed in grid
+    Header text for :class:`ItemDef` when shown in grid
+
+    .. note:: this is a Medidata Rave Specific Element
     """
 
     def __init__(self, content, lang=None):
+        """
+        :param str content: Content for the Header Text
+        :param str lang: Language specification for Header
+        """
         self.content = content
         self.lang = lang
 
     def build(self, builder):
+        """Build XML by appending to builder"""
+
         params = {}
         if self.lang is not None:
             params['xml:lang'] = self.lang
@@ -1707,25 +2091,43 @@ class CodeListRef(ODMElement):
     """
 
     def __init__(self, oid):
+        """
+        :param oid: OID for :class:`CodeList`
+        """
         self.oid = oid
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         builder.start('CodeListRef', {'CodeListOID': self.oid})
         builder.end('CodeListRef')
 
 
 class MdsolLabelDef(ODMElement):
-    """Label definition"""
+    """
+    Label definition
+
+    .. note:: This is a Medidata Rave Specific Element
+    """
 
     def __init__(self, oid, name, field_number=None):
+        """
+        :param oid: OID for the MdsolLabelDef
+        :param name: Name for the MdsolLabelDef
+        :param int field_number: :attr:`FieldNumber` for the MdsolLabelDef
+        """
         self.oid = oid
         self.name = name
         self.field_number = field_number
+        #: Collection of :class:`HelpText`
         self.help_texts = []
+        #: Collection of :class:`Translation`
         self.translations = []
+        #: Collection of :class:`ViewRestriction`
         self.view_restrictions = []
 
     def build(self, builder):
+        """Build XML by appending to builder"""
+
         params = dict(OID=self.oid, Name=self.name)
         if self.field_number is not None:
             params['FieldNumber'] = str(self.field_number)
@@ -1753,12 +2155,18 @@ class MdsolLabelDef(ODMElement):
 class MdsolReviewGroup(ODMElement):
     """
     Maps to Rave review groups for an :class:`ItemDef`
+
+    .. note:: this is a Medidata Rave Specific Element
     """
 
     def __init__(self, name):
+        """
+        :param str name: Name for the MdsolReviewGroup
+        """
         self.name = name
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         builder.start('mdsol:ReviewGroup', {})
         builder.data(self.name)
         builder.end('mdsol:ReviewGroup')
@@ -1770,9 +2178,14 @@ class CheckValue(ODMElement):
     """
 
     def __init__(self, value):
+        """
+
+        :param str value: Value for a :class:`RangeCheck`
+        """
         self.value = value
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         builder.start('CheckValue', {})
         builder.data(str(self.value))
         builder.end('CheckValue')
@@ -1780,39 +2193,50 @@ class CheckValue(ODMElement):
 
 class RangeCheck(ODMElement):
     """
-    Rangecheck in Rave relates to QueryHigh QueryLow and NonConformandHigh and NonComformanLow
+    Rangecheck in Rave relates to QueryHigh QueryLow and NonConformantHigh and NonComformantLow
     for other types of RangeCheck, need to use an EditCheck (part of Rave's extensions to ODM)
     """
 
     def __init__(self, comparator, soft_hard):
+        """
+        :param str comparator: Comparator for RangeCheck (*LT*, *LE*, *GT*, *GE*, *EQ*, *NE*, *IN*, *NOTIN*)
+        :param str soft_hard: Soft or Hard range check (*Soft*, *Hard*)
+        """
         self._comparator = None
         self.comparator = comparator
         self._soft_hard = None
         self.soft_hard = soft_hard
+        #! :class:`CheckValue` for RangeCheck
         self.check_value = None
+        #! :class:`MeasurementUnitRef` for RangeCheck
         self.measurement_unit_ref = None
 
     @property
     def comparator(self):
+        """returns the comparator"""
         return self._comparator
 
     @comparator.setter
     def comparator(self, value):
+        """sets the comparator (with validation of input)"""
         if not isinstance(value, RangeCheckComparatorType):
             raise AttributeError("%s comparator is invalid in RangeCheck." % (value,))
         self._comparator = value
 
     @property
     def soft_hard(self):
+        """returns the Soft or Hard range setting"""
         return self._soft_hard
 
     @soft_hard.setter
     def soft_hard(self, value):
+        """sets the Soft or Hard range setting (with validation of input)"""
         if not isinstance(value, RangeCheckType):
             raise AttributeError("%s soft_hard invalid in RangeCheck." % (value,))
         self._soft_hard = value
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(SoftHard=self.soft_hard.value, Comparator=self.comparator.value)
         builder.start("RangeCheck", params)
         if self.check_value is not None:
@@ -1869,6 +2293,54 @@ class ItemDef(ODMElement):
                  field_number=None,
                  variable_oid=None
                  ):
+        """
+        :param str oid: OID for ItemDef
+        :param str name: Name for ItemDef
+        :param str datatype: Datatype for ItemDef
+        :param int length: Max. Length of content expected in Item Value
+        :param int significant_digits: Max. Number of significant digits in Item Value
+        :param str sas_field_name: SAS Name for the ItemDef
+        :param str sds_var_name: SDS Variable Name
+        :param str origin: Origin for the Variable
+        :param str comment: Comment for the Variable
+        :param bool active: Is the Variable Active? - *Rave Specific Attribute*
+        :param ControlType control_type: Control Type for the Variable - *Rave Specific Attribute*
+        :param str acceptable_file_extensions: File extensions for File Upload Control (separated by a comma)
+            - *Rave Specific Attribute*
+        :param int indent_level: Level of indentation of a field from the left-hand page margin.
+            - *Rave Specific Attribute*
+        :param bool source_document_verify: Does this Variable need to be SDV'ed? - *Rave Specific Attribute*
+        :param str default_value: Value entered in this field is displayed as the default value in Rave EDC.
+            - *Rave Specific Attribute*
+        :param str sas_format: SAS variable format of maximum 25 alphanumeric characters.
+        :param str sas_label: SAS label of maximum 256 alphanumeric characters.
+        :param bool query_future_date: Generates a query when the Rave EDC user enters a future date in the field.
+            - *Rave Specific Attribute*
+        :param bool visible:  Indicates that the field displays on the form when the version is pushed to Rave EDC.
+            - *Rave Specific Attribute*
+        :param bool translation_required: Enables translation functionality for the selected field.
+            - *Rave Specific Attribute*
+        :param bool query_non_conformance: Generates a query when the Rave EDC user enters data in a format other than what
+            has been defined for the variable. - *Rave Specific Attribute*
+        :param bool other_visits: Display previous visit data - *Rave Specific Attribute*
+        :param bool can_set_item_group_date: If a form contains log fields, this parameter assigns the date entered
+            into the field as the date for the record (log line) - *Rave Specific Attribute*
+        :param bool can_set_form_date: Observation Date of Form assigns the date entered into the field as the date for
+            the form - *Rave Specific Attribute*
+        :param bool can_set_study_event_date: Observation Date of Folder assigns the date entered into the field as the date
+            for the folder - *Rave Specific Attribute*
+        :param bool can_set_subject_date: Observation Date of Subject assigns the date entered into the field
+            as the date for the Subject. - *Rave Specific Attribute*
+        :param bool visual_verify: This parameter sets the field as a Visual Verify field in Rave DDE
+            - *Rave Specific Attribute*
+        :param bool does_not_break_signature: Indicates that the field (both derived and non-derived) does not
+            participate in signature. - *Rave Specific Attribute*
+        :param str date_time_format: Displays text boxes for the user to enter the day, month, and year according to the
+            specified variable format. - *Rave Specific Attribute*
+        :param str field_number: Number that displays to the right of a field label in Rave EDC to create a numbered list
+            on the form. - *Rave Specific Attribute*
+        :param variable_oid: OID for Variable - *Rave Specific Attribute*
+        """
         self.oid = oid
         self.name = name
 
@@ -1916,14 +2388,23 @@ class ItemDef(ODMElement):
         self.field_number = field_number
         self.variable_oid = variable_oid
 
+        #: Matching :class:`Question`
         self.question = None
+        #: Matching :class:`CodeListRef`
         self.codelistref = None
+        #: Collection of :class:`MeasurementUnitRef`
         self.measurement_unit_refs = []
+        #: Collection of :class:`MdsolHelpText`
         self.help_texts = []
+        #: Collection of :class:`MdsolViewRestriction`
         self.view_restrictions = []
+        #: Collection of :class:`MdsolEntryRestriction`
         self.entry_restrictions = []
+        #: Matching :class:`MdsolHeaderText`
         self.header_text = None
+        #: Collection of :class:`MdsolReviewGroup`
         self.review_groups = []
+        #: Collection of :class:`RangeCheck`
         self.range_checks = []
 
     def build(self, builder):
@@ -2050,9 +2531,11 @@ class Decode(ODMElement):
     The displayed value relating to the CodedValue
     """
     def __init__(self):
+        #: Collection of :class:`Translation` for the Decode
         self.translations = []
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         builder.start("Decode", {})
         for translation in self.translations:
             translation.build(builder)
@@ -2072,12 +2555,19 @@ class CodeListItem(ODMElement):
     The actual value is given, along with a set of print/display-forms.
     """
     def __init__(self, coded_value, order_number=None, specify=False):
+        """
+        :param str coded_value: Coded Value for CodeListItem
+        :param int order_number: :attr:`OrderNumber` for the CodeListItem - Note: this is a
+            Medidata Rave Extension, but upstream ODM has been updated to include the OrderNumber attribute
+        :param bool specify: Does this have a Specify? option? - *Rave Specific Attribute*
+        """
         self.coded_value = coded_value
         self.order_number = order_number
         self.specify = specify
         self.decode = None
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(CodedValue=self.coded_value)
         if self.order_number is not None:
             params['mdsol:OrderNumber'] = str(self.order_number)
@@ -2102,20 +2592,30 @@ class CodeList(ODMElement):
     """
     Defines a discrete set of permitted values for an item.
 
-    .. note:: Equivalent of Rave Dictionary
+    .. note:: Equates to a Rave Dictionary
+    .. note:: Does not support ExternalCodeList
     """
     VALID_DATATYPES = [DataType.Integer, DataType.Text, DataType.Float, DataType.String]
 
     def __init__(self, oid, name, datatype, sas_format_name=None):
+        """
+        :param str oid: CodeList OID
+        :param str name: Name of CodeList
+        :param str datatype: DataType restricts the values that can appear in the CodeList whether internal or external
+            (*integer* | *float* | *text* | *string* )
+        :param str sas_format_name: SASFormatName must be a legal SAS format for CodeList
+        """
         self.oid = oid
         self.name = name
         if datatype not in CodeList.VALID_DATATYPES:
             raise ValueError("{0} is not a valid CodeList datatype".format(datatype))
         self.datatype = datatype
         self.sas_format_name = sas_format_name
+        #: Collection of :class:`CodeListItem`
         self.codelist_items = []
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(OID=self.oid,
                       Name=self.name,
                       DataType=self.datatype.value)
@@ -2136,13 +2636,22 @@ class CodeList(ODMElement):
 
 
 class MdsolConfirmationMessage(ODMElement):
-    """Form is saved confirmation message"""
+    """
+    Form is saved confirmation message
+
+    .. note:: this is a Medidata Rave Specific Element
+    """
 
     def __init__(self, message, lang=None):
+        """
+        :param str message: Content of confirmation message
+        :param str lang: Language declaration for Message
+        """
         self.message = message
         self.lang = lang
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = {}
         if self.lang:
             params['xml:lang'] = self.lang
@@ -2153,9 +2662,13 @@ class MdsolConfirmationMessage(ODMElement):
 
 class MdsolDerivationStep(ODMElement):
     """A derivation step modeled after the Architect Loader definition.
-       Do not use directly, use appropriate subclasses.
+
+    .. note:: Do not use directly, use appropriate subclasses.
+    .. note:: this is a Medidata Rave Specific Element
     """
+
     VALID_STEPS = VALID_DERIVATION_STEPS
+    LRP_TYPES = LOGICAL_RECORD_POSITIONS
 
     def __init__(self,
                  variable_oid=None,
@@ -2171,7 +2684,19 @@ class MdsolDerivationStep(ODMElement):
                  folder_repeat_number=None,
                  logical_record_position=None
                  ):
-
+        """
+        :param str variable_oid: OID for Variable targeted by Derivation
+        :param str data_format: Format for Value
+        :param str form_oid: OID for Form
+        :param str folder_oid: OID for Folder
+        :param str field_oid: OID for Field
+        :param str value: Value for DerivationStep
+        :param str custom_function: Name of Custom Function for DerivationStep
+        :param int record_position: Record Position - If the field is a standard (non-log) field, enter 0
+        :param int form_repeat_number: Repeat Number for Form for DerivationStep
+        :param int folder_repeat_number: Repeat Number for Folder for DerivationStep
+        :param LogicalRecordPositionType logical_record_position: LRP value for the DerivationStep
+        """
         self.variable_oid = variable_oid
         self.data_format = data_format
         self.form_oid = form_oid
@@ -2184,10 +2709,30 @@ class MdsolDerivationStep(ODMElement):
         self.record_position = record_position
         self.form_repeat_number = form_repeat_number
         self.folder_repeat_number = folder_repeat_number
+        self._logical_record_position = None
         self.logical_record_position = logical_record_position
 
     @property
+    def logical_record_position(self):
+        """
+        Get the Logical Record Position
+        :return: the Logical Record Position
+        """
+        return self._logical_record_position
+
+    @logical_record_position.setter
+    def logical_record_position(self, value=None):
+        if value is not None:
+            if value not in MdsolDerivationStep.LRP_TYPES:
+                raise AttributeError("Invalid Derivation Logical Record Position %s" % value)
+        self._logical_record_position = value
+
+    @property
     def function(self):
+        """
+        Return the Derivation Function
+        :return:
+        """
         return self._function
 
     @function.setter
@@ -2198,6 +2743,7 @@ class MdsolDerivationStep(ODMElement):
         self._function = value
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict()
 
         if self.variable_oid is not None:
@@ -2234,7 +2780,7 @@ class MdsolDerivationStep(ODMElement):
             params['FolderRepeatNumber'] = str(self.folder_repeat_number)
 
         if self.logical_record_position is not None:
-            params['LogicalRecordPosition'] = self.logical_record_position
+            params['LogicalRecordPosition'] = self.logical_record_position.value
 
         builder.start("mdsol:DerivationStep", params)
         builder.end("mdsol:DerivationStep")
@@ -2242,9 +2788,13 @@ class MdsolDerivationStep(ODMElement):
 
 class MdsolCheckStep(ODMElement):
     """A check step modeled after the Architect Loader definition.
-       Do not use directly, use appropriate subclasses.
+
+    .. note:: Do not use directly, use appropriate subclasses.
+    .. note:: this is a Medidata Rave Specific Element
     """
+
     VALID_STEPS = ALL_STEPS
+    LRP_TYPES = LOGICAL_RECORD_POSITIONS
 
     def __init__(self,
                  variable_oid=None,
@@ -2261,6 +2811,20 @@ class MdsolCheckStep(ODMElement):
                  logical_record_position=None
                  ):
 
+        """
+        :param str variable_oid: OID for Variable targeted by CheckStep
+        :param str data_format: Format for Value
+        :param str form_oid: OID for Form
+        :param str folder_oid: OID for Folder
+        :param str field_oid: OID for Field
+        :param str custom_function: Name of Custom Function for CheckStep
+        :param int record_position: Record Position - If the field is a standard (non-log) field, enter 0
+        :param int form_repeat_number: Repeat Number for Form for CheckStep
+        :param int folder_repeat_number: Repeat Number for Folder for CheckStep
+        :param LogicalRecordPositionType logical_record_position: LRP value for the CheckStep
+        :param str static_value: Static Value for CheckStep
+        :param StepType function: Check Function for CheckStep
+        """
         self.variable_oid = variable_oid
         self.data_format = data_format
         self.form_oid = form_oid
@@ -2273,7 +2837,23 @@ class MdsolCheckStep(ODMElement):
         self.record_position = record_position
         self.form_repeat_number = form_repeat_number
         self.folder_repeat_number = folder_repeat_number
+        self._logical_record_position = None
         self.logical_record_position = logical_record_position
+
+    @property
+    def logical_record_position(self):
+        """
+        Get the Logical Record Position
+        :return: the Logical Record Position
+        """
+        return self._logical_record_position
+
+    @logical_record_position.setter
+    def logical_record_position(self, value=None):
+        if value is not None:
+            if value not in MdsolCheckStep.LRP_TYPES:
+                raise AttributeError("Invalid Check Step Logical Record Position %s" % value)
+        self._logical_record_position = value
 
     @property
     def function(self):
@@ -2287,6 +2867,7 @@ class MdsolCheckStep(ODMElement):
         self._function = value
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict()
 
         if self.variable_oid is not None:
@@ -2323,7 +2904,7 @@ class MdsolCheckStep(ODMElement):
             params['FolderRepeatNumber'] = str(self.folder_repeat_number)
 
         if self.logical_record_position is not None:
-            params['LogicalRecordPosition'] = self.logical_record_position
+            params['LogicalRecordPosition'] = self.logical_record_position.value
 
         builder.start("mdsol:CheckStep", params)
         builder.end("mdsol:CheckStep")
@@ -2332,7 +2913,9 @@ class MdsolCheckStep(ODMElement):
 class MdsolCheckAction(ODMElement):
     """
     Check Action modeled after check action in Architect Loader spreadsheet.
-    Do not use directly, use appropriate sub-class.
+
+    .. note:: Do not use directly, use appropriate sub-class.
+    .. note:: This is a Medidata Rave Specific Element
     """
 
     def __init__(self,
@@ -2348,7 +2931,18 @@ class MdsolCheckAction(ODMElement):
                  check_options=None,
                  check_script=None
                  ):
-
+        """
+        :param str variable_oid: OID for the Variable that is the target of the CheckAction
+        :param str field_oid: OID for the Field that is the target of the CheckAction
+        :param str form_oid: OID for the Form that is the target of the CheckAction
+        :param str folder_oid: OID for the Folder that is the target of the CheckAction
+        :param int record_position: Record Position for the CheckAction
+        :param int form_repeat_number: Form Repeat Number for the CheckAction
+        :param int folder_repeat_number: Folder Repeat Number for the CheckAction
+        :param str check_string: CheckAction String
+        :param str check_options: CheckAction Options
+        :param str check_script: CheckAction Script
+        """
         self.variable_oid = variable_oid
         self.folder_oid = folder_oid
         self.field_oid = field_oid
@@ -2364,10 +2958,12 @@ class MdsolCheckAction(ODMElement):
 
     @property
     def check_action_type(self):
+        """return the CheckAction Type"""
         return self._check_action_type
 
     @check_action_type.setter
     def check_action_type(self, value):
+        """Set the value for the CheckActionType, validating input"""
         if value is not None:
             if not isinstance(value, ActionType):
                 raise AttributeError("Invalid check action %s" % value)
@@ -2414,17 +3010,30 @@ class MdsolCheckAction(ODMElement):
 
 
 class MdsolEditCheckDef(ODMElement):
-    """Extension for Rave edit checks"""
+    """
+    Extension for Rave edit checks
+
+    .. note:: This is a Medidata Rave Specific Extension
+    """
 
     def __init__(self, oid, active=True, bypass_during_migration=False, needs_retesting=False):
+        """
+        :param str oid: EditCheck OID
+        :param bool active: Is this EditCheck active?
+        :param bool bypass_during_migration: Bypass this EditCheck during a Study Migration
+        :param bool needs_retesting: Does this EditCheck need Retesting?
+        """
         self.oid = oid
         self.active = active
         self.bypass_during_migration = bypass_during_migration
         self.needs_retesting = needs_retesting
+        #: Set of :class:`MdsolCheckStep` for this EditCheck
         self.check_steps = []
+        #: Set of :class:`MdsolCheckAction` for this EditCheck
         self.check_actions = []
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(OID=self.oid,
                       Active=bool_to_true_false(self.active),
                       BypassDuringMigration=bool_to_true_false(self.bypass_during_migration),
@@ -2448,7 +3057,12 @@ class MdsolEditCheckDef(ODMElement):
 
 
 class MdsolDerivationDef(ODMElement):
-    """Extension for Rave derivations"""
+    """
+    Extension for Rave derivations
+
+    .. note:: This is a Medidata Rave Specific Extension
+    """
+    LRP_TYPES = LOGICAL_RECORD_POSITIONS
 
     def __init__(self, oid, active=True,
                  bypass_during_migration=False,
@@ -2464,6 +3078,24 @@ class MdsolDerivationDef(ODMElement):
                  all_variables_in_folders=None,
                  all_variables_in_fields=None
                  ):
+        """
+        :param str oid: OID for Derivation
+        :param bool active: Is this Derivation Active?
+        :param bool bypass_during_migration: Bypass this Derivation on Study Migration?
+        :param bool needs_retesting: Does this Derivation need retesting?
+        :param str variable_oid: OID for target variable (eg OID for :class:`ItemDef`)
+        :param str field_oid: OID for target field (eg OID for :class:`ItemDef`)
+        :param str form_oid: OID for Form for target of Derivation (eg OID for :class:`FormDef`)
+        :param str folder_oid: OID for Folder for target of Derivation (eg OID for :class:`StudyEventDef`)
+        :param int record_position: Record Position for the Derivation
+        :param int form_repeat_number: Form Repeat Number for the CheckAction
+        :param int folder_repeat_number: Folder Repeat Number for the CheckAction
+        :param LogicalRecordPositionType logical_record_position:
+        :param bool all_variables_in_folders: Evaluates the derivation according to any field using the specified
+            variable within a specific folder.
+        :param bool all_variables_in_fields: Evaluates the derivation according to any field using the specified
+            variable across the whole subject.
+        """
         self.oid = oid
         self.active = active
         self.bypass_during_migration = bypass_during_migration
@@ -2475,12 +3107,30 @@ class MdsolDerivationDef(ODMElement):
         self.record_position = record_position
         self.form_repeat_number = form_repeat_number
         self.folder_repeat_number = folder_repeat_number
+        self._logical_record_position = None
         self.logical_record_position = logical_record_position
         self.all_variables_in_folders = all_variables_in_folders
         self.all_variables_in_fields = all_variables_in_fields
+        #: Set of :class:`MdsolDerivationStep` for this derivation
         self.derivation_steps = []
 
+    @property
+    def logical_record_position(self):
+        """
+        Get the Logical Record Position
+        :return: the Logical Record Position
+        """
+        return self._logical_record_position
+
+    @logical_record_position.setter
+    def logical_record_position(self, value=None):
+        if value is not None:
+            if value not in MdsolCheckStep.LRP_TYPES:
+                raise AttributeError("Invalid Check Step Logical Record Position %s" % value)
+        self._logical_record_position = value
+
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(
             OID=self.oid,
             Active=bool_to_true_false(self.active),
@@ -2531,18 +3181,29 @@ class MdsolDerivationDef(ODMElement):
 
 
 class MdsolCustomFunctionDef(ODMElement):
-    """Extension for Rave Custom functions"""
+    """
+    Extension for Rave Custom functions
+
+    .. note:: This is a Medidata Rave Specific Extension
+    .. note:: VB was deprecated in later Rave versions.
+    """
     VB = "VB"  # VB was deprecated in later Rave versions.
     C_SHARP = "C#"
     SQL = "SQ"
     VALID_LANGUAGES = [C_SHARP, SQL, VB]
 
     def __init__(self, oid, code, language="C#"):
+        """
+        :param str oid: OID for CustomFunction
+        :param str code: Content for the CustomFunction
+        :param str language: Language for the CustomFunction
+        """
         self.oid = oid
         self.code = code
         self.language = language
 
     def build(self, builder):
+        """Build XML by appending to builder"""
         params = dict(OID=self.oid, Language=self.language)
         builder.start('mdsol:CustomFunctionDef', params)
         builder.data(self.code)
@@ -2550,7 +3211,9 @@ class MdsolCustomFunctionDef(ODMElement):
 
 
 class MetaDataVersion(ODMElement):
-    """MetaDataVersion, child of study"""
+    """
+    A metadata version (MDV) defines the types of study events, forms, item groups, and items that form the study data.
+    """
 
     def __init__(self, oid, name,
                  description=None,
@@ -2558,6 +3221,15 @@ class MetaDataVersion(ODMElement):
                  default_matrix_oid=None,
                  delete_existing=False,
                  signature_prompt=None):
+        """
+        :param str oid: MDV OID
+        :param str name: Name for MDV
+        :param str description: Description for MDV
+        :param str primary_formoid: OID of Primary Form - *Rave Specific Attribute*
+        :param str default_matrix_oid: OID of Default Matrix - *Rave Specific Attribute*
+        :param bool delete_existing: Overwrite the previous version - *Rave Specific Attribute*
+        :param str signature_prompt: Prompt for Signature - *Rave Specific Attribute*
+        """
         self.oid = oid
         self.name = name
         self.description = description
@@ -2656,17 +3328,24 @@ class MetaDataVersion(ODMElement):
 
 
 class Study(ODMElement):
-    """ODM Study Metadata element"""
+    """
+    This element collects static structural information about an individual study.
+    """
 
     PROJECT = 'Project'
     GLOBAL_LIBRARY = 'GlobalLibrary Volume'
     PROJECT_TYPES = [PROJECT, GLOBAL_LIBRARY]
 
     def __init__(self, oid, project_type=None):
+        """
+        :param str oid: Study OID
+        :param str project_type: Type of Project (Project or Global Library) - *Rave Specific Attribute*
+        """
         self.oid = oid
         self.global_variables = None
         self.basic_definitions = None
         self.metadata_version = None
+        #: set of :class:`StudyEventDef` for this Study element
         self.studyevent_defs = []
         if project_type is None:
             self.project_type = "Project"
