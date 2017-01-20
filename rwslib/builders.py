@@ -3166,7 +3166,7 @@ class MdsolDerivationDef(ODMElement):
             params['AllVariablesInFields'] = bool_to_true_false(self.all_variables_in_fields)
 
         if self.logical_record_position is not None:
-            params['LogicalRecordPosition'] = self.logical_record_position
+            params['LogicalRecordPosition'] = self.logical_record_position.value
 
         builder.start('mdsol:DerivationDef', params)
         for step in self.derivation_steps:

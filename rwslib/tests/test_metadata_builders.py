@@ -983,7 +983,7 @@ class TestMdsolDerivationDef(unittest.TestCase):
                                     form_oid="MyForm",
                                     folder_oid="MyFolder",
                                     record_position=0, form_repeat_number=2, folder_repeat_number=3,
-                                    logical_record_position="MaxBySubject",
+                                    logical_record_position=LogicalRecordPositionType.MaxBySubject,
                                     all_variables_in_fields=True,
                                     all_variables_in_folders=True)
         doc = obj_to_doc(tested)
