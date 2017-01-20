@@ -851,7 +851,7 @@ class TestMdsolCheckStep(unittest.TestCase):
                                 form_oid="MyForm",
                                 folder_oid="MyFolder",
                                 record_position=0, form_repeat_number=2, folder_repeat_number=3,
-                                logical_record_position="MaxBySubject")
+                                logical_record_position=LogicalRecordPositionType.MaxBySubject)
         doc = obj_to_doc(tested)
         self.assertEqual("mdsol:CheckStep", doc.tag)
         self.assertEqual("VAROID", doc.attrib['VariableOID'])
@@ -942,7 +942,7 @@ class TestMdsolDerivationStep(unittest.TestCase):
                                      form_oid="VFORM",
                                      folder_oid="MyFolder",
                                      record_position=0, form_repeat_number=2, folder_repeat_number=3,
-                                     logical_record_position="MaxBySubject")
+                                     logical_record_position=LogicalRecordPositionType.MaxBySubject)
         doc = obj_to_doc(tested)
         self.assertEqual("mdsol:DerivationStep", doc.tag)
         self.assertEqual("VAROID", doc.attrib['VariableOID'])
