@@ -708,9 +708,9 @@ class ItemData(TransactionalElement):
         :param str value: Value for the the ItemData
         :param str specify_value: 'If other, specify' value - *Rave specific attribute*
         :param str transaction_type: Transaction type for the data
-        :param bool lock: Locks the DataPoint? - *Rave specific attribute*
-        :param bool freeze: Freezes the DataPoint? - *Rave specific attribute*
-        :param bool verify: Verifies the DataPoint? - *Rave specific attribute*
+        :param bool lock: Lock the DataPoint? - *Rave specific attribute*
+        :param bool freeze: Freeze the DataPoint? - *Rave specific attribute*
+        :param bool verify: Verify the DataPoint? - *Rave specific attribute*
         """
         super(self.__class__, self).__init__(transaction_type)
         self.itemoid = itemoid
