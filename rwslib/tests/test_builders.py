@@ -146,11 +146,11 @@ class TestAuditRecord(unittest.TestCase):
 
         # Underscore OK
         ar = AuditRecord(identifier='_Hello')
-        self.assertEqual('_Hello', ar.id)
+        self.assertEqual('_Hello', ar.audit_id)
 
         # Letter OK
         ar = AuditRecord(identifier='Hello')
-        self.assertEqual('Hello', ar.id)
+        self.assertEqual('Hello', ar.audit_id)
 
     def test_accepts_no_invalid_children(self):
         with self.assertRaises(ValueError):
@@ -237,7 +237,7 @@ class TestSignatureRef(unittest.TestCase):
 class TestSignature(unittest.TestCase):
     def test_creates_expected_element(self):
         """We create a Signature element"""
-        t = Signature(id="Some ID",
+        t = Signature(signature_id="Some ID",
                       user_ref=UserRef(oid="AUser"),
                       location_ref=LocationRef(oid="ALocation"),
                       signature_ref=SignatureRef(oid="ASignature"),
@@ -302,7 +302,7 @@ class TestSignature(unittest.TestCase):
 
     def test_signature_builder(self):
         """"""
-        tested = Signature(id="Some ID")
+        tested = Signature(signature_id="Some ID")
         all = dict(user_ref=UserRef(oid="AUser"),
                    location_ref=LocationRef(oid="ALocation"),
                    signature_ref=SignatureRef(oid="ASignature"),
@@ -322,7 +322,7 @@ class TestSignature(unittest.TestCase):
 
     def test_signature_builder_with_invalid_input(self):
         """"""
-        tested = Signature(id="Some ID")
+        tested = Signature(signature_id="Some ID")
         with self.assertRaises(ValueError) as exc:
             tested << ItemData(itemoid="GENDER", value="MALE")
         self.assertEqual("Signature cannot accept a child element of type ItemData",
@@ -334,7 +334,7 @@ class TestAnnotation(unittest.TestCase):
 
     def test_happy_path(self):
         """ Simple Annotation with a single flag and comment"""
-        tested = Annotation(id="APPLE",
+        tested = Annotation(annotation_id="APPLE",
                             seqnum=1)
         f = Flag(flag_value=FlagValue("Some value", codelist_oid="ANOID"),
                  flag_type=FlagType("Some type", codelist_oid="ANOTHEROID"))
@@ -415,7 +415,7 @@ class TestAnnotation(unittest.TestCase):
 
     def test_only_accept_valid_children(self):
         """ Annotation can only take one or more Flags and one Comment"""
-        tested = Annotation(id='An Annotation')
+        tested = Annotation(annotation_id='An Annotation')
         with self.assertRaises(ValueError) as exc:
             tested << ItemData(itemoid="GENDER", value="MALE")
         self.assertEqual("Annotation cannot accept a child element of type ItemData",
@@ -430,7 +430,7 @@ class TestAnnotation(unittest.TestCase):
         """ Annotation ID must be a non empty string"""
         for nonsense in ('', '     '):
             with self.assertRaises(AttributeError) as exc:
-                tested = Annotation(id=nonsense)
+                tested = Annotation(annotation_id=nonsense)
             self.assertEqual("Invalid ID value supplied",
                              str(exc.exception),
                              "Value should raise with '%s'" % nonsense)
@@ -802,9 +802,37 @@ class TestItemGroupData(unittest.TestCase):
         self.assertEqual(self.__class__.__name__[4:], t.tag)
         self.assertTrue(len(t.getchildren()) == 6)  # two itemdata + 4 annotations
 
+    def test_add_annotations_on_create_multiple(self):
+        """Test we can add one or more annotations at initialisation"""
+        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
+        annotations = [Annotation(comment=Comment("Some Comment %s" % i), flags=flags) for i in range(0, 4)]
+        # add a list of annotations
+        igd = ItemGroupData(annotations=annotations)(
+            ItemData("Field1", "ValueA"),
+            ItemData("Field2", "ValueB")
+        )
+        t = obj_to_doc(igd, "TESTFORM")
+        self.assertEqual(self.__class__.__name__[4:], t.tag)
+        self.assertTrue(len(t.getchildren()) == 6)  # two itemdata + 4 annotations
+
+    def test_add_annotations_on_create_single(self):
+        """Test we can add one or more annotations at initialisation with one"""
+        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
+        annotations = [Annotation(comment=Comment("Some Comment %s" % i), flags=flags) for i in range(0, 4)]
+        # add a list of annotations
+        igd = ItemGroupData(annotations=annotations[0])(
+            ItemData("Field1", "ValueA"),
+            ItemData("Field2", "ValueB")
+        )
+        t = obj_to_doc(igd, "TESTFORM")
+        self.assertEqual(self.__class__.__name__[4:], t.tag)
+        self.assertTrue(len(t.getchildren()) == 3)  # two itemdata + 4 annotations
+
     def test_add_signature(self):
         """Test we can add one signature"""
-        self.tested << Signature(id="Some ID",
+        self.tested << Signature(signature_id="Some ID",
                                  user_ref=UserRef(oid="AUser"),
                                  location_ref=LocationRef(oid="ALocation"),
                                  signature_ref=SignatureRef(oid="ASignature"),
@@ -910,7 +938,7 @@ class TestFormData(unittest.TestCase):
 
     def test_add_signature(self):
         """Test we can add one signature"""
-        self.tested << Signature(id="Some ID",
+        self.tested << Signature(signature_id="Some ID",
                                  user_ref=UserRef(oid="AUser"),
                                  location_ref=LocationRef(oid="ALocation"),
                                  signature_ref=SignatureRef(oid="ASignature"),
@@ -993,7 +1021,7 @@ class TestStudyEventData(unittest.TestCase):
 
     def test_add_signature(self):
         """Test we can add one signature"""
-        self.tested << Signature(id="Some ID",
+        self.tested << Signature(signature_id="Some ID",
                                  user_ref=UserRef(oid="AUser"),
                                  location_ref=LocationRef(oid="ALocation"),
                                  signature_ref=SignatureRef(oid="ASignature"),
@@ -1131,7 +1159,7 @@ class TestSubjectData(unittest.TestCase):
 
     def test_add_signature(self):
         """Test we can add one signature"""
-        self.tested << Signature(id="Some ID",
+        self.tested << Signature(signature_id="Some ID",
                                  user_ref=UserRef(oid="AUser"),
                                  location_ref=LocationRef(oid="ALocation"),
                                  signature_ref=SignatureRef(oid="ASignature"),
