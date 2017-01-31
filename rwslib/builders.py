@@ -260,7 +260,7 @@ class Signature(ODMElement):
     the date and time of signing,
     and (in the case of a digital signature) an encrypted hash of the included data.
     """
-    def __init__(self, id=None, user_ref=None, location_ref=None, signature_ref=None, date_time_stamp=None):
+    def __init__(self, signature_id=None, user_ref=None, location_ref=None, signature_ref=None, date_time_stamp=None):
         #: Unique ID for Signature
         """
         :param UserRef user_ref: :class:`UserRef` for :class:`User` signing Data
@@ -269,14 +269,15 @@ class Signature(ODMElement):
         :param date_time_stamp: :class:`DateTimeStamp` for the time of Signature
         """
         self._id = None
-        self.id = id
+        if signature_id:
+            self.signature_id = signature_id
         self.user_ref = user_ref
         self.location_ref = location_ref
         self.signature_ref = signature_ref
         self.date_time_stamp = date_time_stamp
 
     @property
-    def id(self):
+    def signature_id(self):
         """
         The ID for the Signature
 
@@ -284,8 +285,8 @@ class Signature(ODMElement):
         """
         return self._id
 
-    @id.setter
-    def id(self, id):
+    @signature_id.setter
+    def signature_id(self, id):
         """Set the ID for the Signature"""
         self._id = id
 
@@ -295,9 +296,9 @@ class Signature(ODMElement):
         """
 
         params = {}
-        if self.id is not None:
+        if self.signature_id is not None:
             # If a Signature element is contained within a Signatures element, the ID attribute is required.
-            params['ID'] = self.id
+            params['ID'] = self.signature_id
 
         builder.start("Signature", params)
 
@@ -340,7 +341,7 @@ class Annotation(TransactionalElement):
     """
     ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Remove", "Upsert", "Context"]
 
-    def __init__(self, id=None, seqnum=1,
+    def __init__(self, annotation_id=None, seqnum=1,
                  flags=None, comment=None,
                  transaction_type=None):
         """
@@ -365,8 +366,8 @@ class Annotation(TransactionalElement):
             else:
                 raise AttributeError("Flags attribute should be an iterable or Flag")
         self._id = None
-        if id is not None:
-            self.id = id
+        if annotation_id is not None:
+            self.annotation_id = annotation_id
         self._seqnum = None
         if seqnum is not None:
             # validate the input
@@ -374,7 +375,7 @@ class Annotation(TransactionalElement):
         self.comment = comment
 
     @property
-    def id(self):
+    def annotation_id(self):
         """
         ID for annotation
 
@@ -382,8 +383,8 @@ class Annotation(TransactionalElement):
         """
         return self._id
 
-    @id.setter
-    def id(self, value):
+    @annotation_id.setter
+    def annotation_id(self, value):
         """Set ID for Annotation"""
         if value in [None, ''] or str(value).strip() == '':
             raise AttributeError("Invalid ID value supplied")
@@ -422,10 +423,10 @@ class Annotation(TransactionalElement):
             raise ValueError("SeqNum is not set.") # pragma: no cover
         params["SeqNum"] = self.seqnum
 
-        if self.id is not None:
+        if self.annotation_id is not None:
             # If an Annotation is contained with an Annotations element,
             # the ID attribute is required.
-            params["ID"] = self.id
+            params["ID"] = self.annotation_id
 
         builder.start("Annotation", params)
 
@@ -1956,7 +1957,7 @@ class AuditRecord(ODMElement):
 
     def __init__(self, edit_point=None, used_imputation_method=None, identifier=None, include_file_oid=None):
         """
-
+        :param str identifier: Audit identifier
         :param str edit_point: EditPoint attribute identifies the phase of data processing in which action occurred
             (*Monitoring*, *DataManagement*, *DBAudit*)
         :param bool used_imputation_method: Indicates whether the action involved the use of a Method
@@ -1966,7 +1967,8 @@ class AuditRecord(ODMElement):
         self.edit_point = edit_point
         self.used_imputation_method = used_imputation_method
         self._id = None
-        self.id = identifier
+        if identifier:
+            self.audit_id = identifier
         self.include_file_oid = include_file_oid
         #: :class:`UserRef` for the AuditRecord
         self.user_ref = None
@@ -1978,7 +1980,7 @@ class AuditRecord(ODMElement):
         self.date_time_stamp = None
 
     @property
-    def id(self):
+    def audit_id(self):
         """
         AuditRecord ID
 
@@ -1986,8 +1988,8 @@ class AuditRecord(ODMElement):
         """
         return self._id
 
-    @id.setter
-    def id(self, value):
+    @audit_id.setter
+    def audit_id(self, value):
         if value not in [None, ''] and str(value).strip() != '':
             val = str(value).strip()[0]
             if val not in VALID_ID_CHARS:
@@ -2020,8 +2022,8 @@ class AuditRecord(ODMElement):
         if self.used_imputation_method is not None:
             params['UsedImputationMethod'] = bool_to_yes_no(self.used_imputation_method)
 
-        if self.id is not None:
-            params['ID'] = str(self.id)
+        if self.audit_id is not None:
+            params['ID'] = str(self.audit_id)
 
         if self.include_file_oid is not None:
             params['mdsol:IncludeFileOID'] = bool_to_yes_no(self.include_file_oid)
@@ -3126,7 +3128,7 @@ class MdsolDerivationDef(ODMElement):
     def logical_record_position(self, value=None):
         if value is not None:
             if value not in MdsolCheckStep.LRP_TYPES:
-                raise AttributeError("Invalid Check Step Logical Record Position %s" % value)
+                raise AttributeError("Invalid Derivation Def Logical Record Position %s" % value)
         self._logical_record_position = value
 
     def build(self, builder):
