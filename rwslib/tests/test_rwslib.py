@@ -1,3 +1,5 @@
+from mock import mock
+
 __author__ = 'isparks'
 
 import unittest
@@ -7,8 +9,10 @@ import requests
 import socket
 import errno
 
+# TODO: per the Repository, httpretty is not supporting Python3 - do we need to replace?
 
-class VersionTest(unittest.TestCase):
+
+class TestVersion(unittest.TestCase):
     """Test for the version method"""
     @httpretty.activate
     def test_version(self):
@@ -26,30 +30,14 @@ class VersionTest(unittest.TestCase):
         self.assertEqual(v, '1.0.0')
         self.assertEqual(rave.last_result.status_code,200)
 
-    @httpretty.activate
     def test_connection_failure(self):
         """Test we get a failure if we do not retry"""
-        rave = rwslib.RWSConnection('https://innovate.mdsol.com')
-
-
-        class FailResponse():
-            """A fake response that will raise a connection error as if socket connection failed"""
-            def fill_filekind(self, fk):
-                raise socket.error(errno.ECONNREFUSED, "Refused")
-
-
-        httpretty.register_uri(
-            httpretty.GET, "https://innovate.mdsol.com/RaveWebServices/version",
-                 responses=[
-                               FailResponse(), #First try
-                            ])
-
-
-        #Now my test
-        def do():
-            v = rave.send_request(rwslib.rws_requests.VersionRequest())
-
-        self.assertRaises(requests.ConnectionError, do)
+        with mock.patch("rwslib.requests") as mockr:
+            session = mockr.Session.return_value
+            session.get.side_effect = requests.ConnectionError
+            rave = rwslib.RWSConnection('https://innovate.mdsol.com')
+            with self.assertRaises(requests.ConnectionError) as exc:
+                v = rave.send_request(rwslib.rws_requests.VersionRequest())
 
     """Test with only mdsol sub-domain"""
     @httpretty.activate
@@ -101,7 +89,7 @@ class TestMustBeRWSRequestSubclass(unittest.TestCase):
         self.assertRaises(ValueError, do)
 
 
-class RequestTime(unittest.TestCase):
+class TestRequestTime(unittest.TestCase):
     """Test for the last request time property"""
     @httpretty.activate
     def test_request_time(self):
