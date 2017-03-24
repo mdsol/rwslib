@@ -1,15 +1,11 @@
+# -*- coding: utf-8 -*-
+
 __author__ = 'isparks'
 
 import unittest
 from rwslib.builders import *
 from xml.etree import cElementTree as ET
-
-
-def obj_to_doc(obj, *args, **kwargs):
-    """Convert an object to am XML document object"""
-    builder = ET.TreeBuilder()
-    obj.build(builder, *args, **kwargs)
-    return builder.close()
+from rwslib.tests.common import obj_to_doc
 
 
 class TestBoolToTrueFalse(unittest.TestCase):
@@ -191,38 +187,6 @@ class TestAuditRecord(unittest.TestCase):
         with self.assertRaises(ValueError) as err:
             doc = obj_to_doc(self.tested)
             self.assertIn("DateTimeStamp", err.exception.message)
-
-
-class TestMdsolQuery(unittest.TestCase):
-    """Test extension MdsolQuery"""
-
-    def get_tested(self):
-        return MdsolQuery(status=QueryStatusType.Open, value="Data missing", query_repeat_key=123,
-                          recipient="Site from System", requires_response=True)
-
-    def test_basic(self):
-        tested = self.get_tested()
-        self.assertEqual("Data missing", tested.value)
-        self.assertEqual(123, tested.query_repeat_key)
-        self.assertEqual(QueryStatusType.Open, tested.status)
-        self.assertEqual("Site from System", tested.recipient)
-        self.assertEqual(True, tested.requires_response)
-
-    def test_builder(self):
-        tested = self.get_tested()
-        tested.response = "Done"
-        doc = obj_to_doc(tested)
-        self.assertEqual("mdsol:Query", doc.tag)
-        self.assertEqual("Yes", doc.attrib['RequiresResponse'])
-        self.assertEqual("Site from System", doc.attrib['Recipient'])
-        self.assertEqual("123", doc.attrib['QueryRepeatKey'])
-        self.assertEqual("Data missing", doc.attrib['Value'])
-        self.assertEqual("Done", doc.attrib['Response'])
-
-    def test_invalid_status_value(self):
-        """Status must come from QueryStatusType"""
-        with self.assertRaises(AttributeError):
-            MdsolQuery(status='A test')
 
 
 class TestSignatureRef(unittest.TestCase):
@@ -1304,6 +1268,8 @@ class TestODM(unittest.TestCase):
         self.assertEqual(doc.tag, NS_ODM + "ODM")
         self.assertEqual(doc.attrib["Originator"], "MY TEST SYSTEM")
         self.assertEqual(doc.attrib["Description"], self.tested.description)
+
+
 
 
 if __name__ == '__main__':

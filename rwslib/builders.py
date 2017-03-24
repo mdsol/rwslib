@@ -729,6 +729,8 @@ class ItemData(TransactionalElement):
         self.annotations = []
         #: the corresponding :class:`MeasurementUnitRef` for the DataPoint
         self.measurement_unit_ref = None
+        #: the list of :class:`MdsolProtocolDeviation` references on the DataPoint - *Rave Specific Attribute*
+        self.deviations = []
 
     def build(self, builder):
         """
@@ -765,21 +767,25 @@ class ItemData(TransactionalElement):
         if self.measurement_unit_ref is not None:
             self.measurement_unit_ref.build(builder)
 
-        for query in self.queries:
+        for query in self.queries: # type: MdsolQuery
             query.build(builder)
 
-        for annotation in self.annotations:
+        for deviation in self.deviations: # type: MdsolProtocolDeviation
+            deviation.build(builder)
+
+        for annotation in self.annotations: # type: Annotation
             annotation.build(builder)
 
         builder.end("ItemData")
 
     def __lshift__(self, other):
-        if not isinstance(other, (MeasurementUnitRef, AuditRecord, MdsolQuery, Annotation)):
-            raise ValueError("ItemData object can only receive MeasurementUnitRef, AuditRecord, Annotation"
-                             " or MdsolQuery objects")
+        if not isinstance(other, (MeasurementUnitRef, AuditRecord, MdsolQuery, Annotation, MdsolProtocolDeviation)):
+            raise ValueError("ItemData object can only receive MeasurementUnitRef, AuditRecord, Annotation,"
+                             "MdsolProtocolDeviation or MdsolQuery objects")
         self.set_single_attribute(other, MeasurementUnitRef, 'measurement_unit_ref')
         self.set_single_attribute(other, AuditRecord, 'audit_record')
         self.set_list_attribute(other, MdsolQuery, 'queries')
+        self.set_list_attribute(other, MdsolProtocolDeviation, 'deviations')
         self.set_list_attribute(other, Annotation, 'annotations')
         return other
 
@@ -873,9 +879,9 @@ class FormData(TransactionalElement):
         self.form_repeat_key = form_repeat_key
         self.itemgroups = []
         #: :class:`Signature` for FormData
-        self.signature = None
+        self.signature = None   # type: Signature
         #: Collection of :class:`Annotation` for FormData - *Not supported by Rave*
-        self.annotations = []
+        self.annotations = []   # type: list(Annotation)
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -3056,6 +3062,73 @@ class MdsolEditCheckDef(ODMElement):
             raise ValueError('EditCheck cannot accept a {0} as a child element'.format(other.__class__.__name__))
         self.set_list_attribute(other, MdsolCheckStep, 'check_steps')
         self.set_list_attribute(other, MdsolCheckAction, 'check_actions')
+
+
+class MdsolProtocolDeviation(TransactionalElement):
+    """
+    Extension for Protocol Deviations in Rave
+    
+    .. note:: This is a Medidata Rave Specific Extension
+    .. note:: This primarily exists as a mechanism for use by the Clinical Audit Record Service, but it is useful 
+        to define for the builders
+    """
+    ALLOWED_TRANSACTION_TYPES = ["Insert"]
+
+    def __init__(self, value, status, repeat_key=1, code=None, klass=None, transaction_type=None):
+        """
+        :param str value: Value for the Protocol Deviation 
+        :param rwslib.builder_constants.ProtocolDeviationStatus status: 
+        :param int repeat_key: RepeatKey for the Protocol Deviation
+        :param basestring code: Protocol Deviation Code
+        :param basestring klass: Protocol Deviation Class 
+        :param transaction_type: Transaction Type for the Protocol Deviation
+        """
+        super(MdsolProtocolDeviation, self).__init__(transaction_type=transaction_type)
+        self._status = None
+        self._repeat_key = None
+        self.status = status
+        self.value = value
+        self.repeat_key = repeat_key
+        self.code = code
+        self.pdclass = klass
+
+    @property
+    def repeat_key(self):
+        return self._repeat_key
+
+    @repeat_key.setter
+    def repeat_key(self, value):
+        if isinstance(value, int):
+            self._repeat_key = value
+        else:
+            raise ValueError("RepeatKey {} is not a valid value".format(value))
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, value):
+        if isinstance(value, ProtocolDeviationStatus):
+            self._status = value
+        else:
+            raise ValueError("Status {} is not a valid ProtocolDeviationStatus".format(value))
+
+    def build(self, builder):
+        """Build XML by appending to builder"""
+        params = dict(Value=self.value,
+                      Status=self.status.value,
+                      ProtocolDeviationRepeatKey=self.repeat_key
+                      )
+
+        if self.code:
+            params['Code'] = self.code
+        if self.pdclass:
+            params['Class'] = self.pdclass
+        if self.transaction_type:
+            params['TransactionType'] = self.transaction_type
+        builder.start('mdsol:ProtocolDeviation', params)
+        builder.end('mdsol:ProtocolDeviation')
 
 
 class MdsolDerivationDef(ODMElement):

@@ -235,6 +235,11 @@ class LogicalRecordPositionType(enum.Enum):
     MinBySubject = 'MinBySubject'
 
 
+class ProtocolDeviationStatus(enum.Enum):
+    Open = "Open"
+    Removed = "Removed"
+
+
 LOGICAL_RECORD_POSITIONS = [
     LogicalRecordPositionType.MaxBySubject,
     LogicalRecordPositionType.MaxBySubject,
