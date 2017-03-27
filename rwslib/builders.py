@@ -160,6 +160,7 @@ class UserRef(ODMElement):
     """
     Reference to a :class:`User`
     """
+
     def __init__(self, oid):
         """
         :param str oid: OID for referenced :class:`User`
@@ -178,6 +179,7 @@ class LocationRef(ODMElement):
     """
     Reference to a :class:`Location`
     """
+
     def __init__(self, oid):
         """
         :param str oid: OID for referenced :class:`Location`
@@ -196,6 +198,7 @@ class SignatureRef(ODMElement):
     """
     Reference to a Signature
     """
+
     def __init__(self, oid):
         """
         :param str oid: OID for referenced :class:`Signature`
@@ -214,6 +217,7 @@ class ReasonForChange(ODMElement):
     """
     A user-supplied reason for a data change.
     """
+
     def __init__(self, reason):
         """
         :param str reason: Supplied Reason for change
@@ -234,6 +238,7 @@ class DateTimeStamp(ODMElement):
     The date/time that the data entry, modification, or signature was performed.
     This applies to the initial occurrence of the action, not to subsequent transfers between computer systems.
     """
+
     def __init__(self, date_time):
         #: specified DateTime for event
         self.date_time = date_time
@@ -260,6 +265,7 @@ class Signature(ODMElement):
     the date and time of signing,
     and (in the case of a digital signature) an encrypted hash of the included data.
     """
+
     def __init__(self, signature_id=None, user_ref=None, location_ref=None, signature_ref=None, date_time_stamp=None):
         #: Unique ID for Signature
         """
@@ -420,7 +426,7 @@ class Annotation(TransactionalElement):
 
         if self.seqnum is None:
             # SeqNum is not optional (and defaulted)
-            raise ValueError("SeqNum is not set.") # pragma: no cover
+            raise ValueError("SeqNum is not set.")  # pragma: no cover
         params["SeqNum"] = self.seqnum
 
         if self.annotation_id is not None:
@@ -562,6 +568,7 @@ class FlagType(ODMElement):
 
     .. note:: FlagType is not supported by Rave
     """
+
     def __init__(self, flag_type, codelist_oid=None):
         """
         :param flag_type: Type for :class:`Flag`
@@ -600,6 +607,7 @@ class FlagValue(ODMElement):
 
     .. note::  FlagValue is not supported by Rave
     """
+
     def __init__(self, flag_value, codelist_oid=None):
         """
         :param flag_value: Value for :class:`Flag`
@@ -767,19 +775,20 @@ class ItemData(TransactionalElement):
         if self.measurement_unit_ref is not None:
             self.measurement_unit_ref.build(builder)
 
-        for query in self.queries: # type: MdsolQuery
+        for query in self.queries:  # type: MdsolQuery
             query.build(builder)
 
-        for deviation in self.deviations: # type: MdsolProtocolDeviation
+        for deviation in self.deviations:  # type: MdsolProtocolDeviation
             deviation.build(builder)
 
-        for annotation in self.annotations: # type: Annotation
+        for annotation in self.annotations:  # type: Annotation
             annotation.build(builder)
 
         builder.end("ItemData")
 
     def __lshift__(self, other):
-        if not isinstance(other, (MeasurementUnitRef, AuditRecord, MdsolQuery, Annotation, MdsolProtocolDeviation)):
+        if not isinstance(other, (MeasurementUnitRef, AuditRecord, MdsolQuery, Annotation,
+                                  MdsolProtocolDeviation)):
             raise ValueError("ItemData object can only receive MeasurementUnitRef, AuditRecord, Annotation,"
                              "MdsolProtocolDeviation or MdsolQuery objects")
         self.set_single_attribute(other, MeasurementUnitRef, 'measurement_unit_ref')
@@ -879,9 +888,9 @@ class FormData(TransactionalElement):
         self.form_repeat_key = form_repeat_key
         self.itemgroups = []
         #: :class:`Signature` for FormData
-        self.signature = None   # type: Signature
+        self.signature = None  # type: Signature
         #: Collection of :class:`Annotation` for FormData - *Not supported by Rave*
-        self.annotations = []   # type: list(Annotation)
+        self.annotations = []  # type: list(Annotation)
 
     def __lshift__(self, other):
         """Override << operator"""
@@ -1215,6 +1224,7 @@ class Symbol(ODMElement):
     """
     A human-readable name for a :class:`MeasurementUnit`.
     """
+
     def __init__(self):
         #: Collection of :class:`TranslatedText`
         self.translations = []
@@ -1333,6 +1343,7 @@ class StudyEventRef(ODMElement):
     The :class:`StudyEventRef` within a :class:`Protocol` must not have duplicate StudyEventOIDs nor
     duplicate OrderNumbers.
     """
+
     def __init__(self, oid, order_number, mandatory):
         """
         :param oid: :class:`StudyEventDef` OID
@@ -1386,6 +1397,7 @@ class FormRef(ODMElement):
     The list of :class:`FormRef` identifies the types of forms that are allowed to occur within this type of study
     event. The :class:`FormRef` within a single :class:`StudyEventDef` must not have duplicate FormOIDs nor OrderNumbers.
     """
+
     def __init__(self, oid, order_number, mandatory):
         """
         :param str oid: Set the :class:`FormDef` OID for the :class:`FormRef`
@@ -1729,6 +1741,7 @@ class MdsolAttribute(ODMElement):
 
     .. note:: This is  Medidata Rave Specific Element
     """
+
     def __init__(self, namespace, name, value, transaction_type='Insert'):
         #: Namespace for the Attribute
         self.namespace = namespace
@@ -1756,6 +1769,7 @@ class ItemRef(ODMElement):
     A reference to an :class:`ItemDef` as it occurs within a specific :class:`ItemGroupDef`.
     The list of ItemRefs identifies the types of items that are allowed to occur within this type of item group.
     """
+
     def __init__(self, oid, order_number=None, mandatory=False, key_sequence=None,
                  imputation_method_oid=None, role=None, role_codelist_oid=None):
         """
@@ -1820,6 +1834,7 @@ class ItemGroupDef(ODMElement):
     """
     An ItemGroupDef describes a type of item group that can occur within a Study.
     """
+
     def __init__(self, oid, name, repeating=False, is_reference_data=False, sas_dataset_name=None,
                  domain=None, origin=None, role=None, purpose=None, comment=None):
         """
@@ -1904,6 +1919,7 @@ class Question(ODMElement):
     """
     A label shown to a human user when prompted to provide data for an item on paper or on a screen.
     """
+
     def __init__(self):
         #: Collection of :class:`Translation` for the Question
         self.translations = []
@@ -1932,6 +1948,7 @@ class MeasurementUnitRef(ODMElement):
     """
     A reference to a measurement unit definition (:class:`MeasurementUnit`).
     """
+
     def __init__(self, oid, order_number=None):
         """
         :param str oid: :class:`MeasurementUnit` OID
@@ -2214,9 +2231,9 @@ class RangeCheck(ODMElement):
         self.comparator = comparator
         self._soft_hard = None
         self.soft_hard = soft_hard
-        #! :class:`CheckValue` for RangeCheck
+        # ! :class:`CheckValue` for RangeCheck
         self.check_value = None
-        #! :class:`MeasurementUnitRef` for RangeCheck
+        # ! :class:`MeasurementUnitRef` for RangeCheck
         self.measurement_unit_ref = None
 
     @property
@@ -2538,6 +2555,7 @@ class Decode(ODMElement):
     """
     The displayed value relating to the CodedValue
     """
+
     def __init__(self):
         #: Collection of :class:`Translation` for the Decode
         self.translations = []
@@ -2562,6 +2580,7 @@ class CodeListItem(ODMElement):
     Defines an individual member value of a :class:`CodeList` including display format.
     The actual value is given, along with a set of print/display-forms.
     """
+
     def __init__(self, coded_value, order_number=None, specify=False):
         """
         :param str coded_value: Coded Value for CodeListItem
@@ -3101,7 +3120,7 @@ class MdsolProtocolDeviation(TransactionalElement):
         if isinstance(value, int):
             self._repeat_key = value
         else:
-            raise ValueError("RepeatKey {} is not a valid value".format(value))
+            raise ValueError("RepeatKey should be an integer, not {}".format(value))
 
     @property
     def status(self):

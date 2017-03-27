@@ -44,25 +44,6 @@ class TestMdsolQuery(unittest.TestCase):
 class TestProtocolDeviation(unittest.TestCase):
     """Test extension MdsolProtocolDeviation"""
 
-    def setUp(self):
-        self.tested = ODM("MY TEST SYSTEM", description="My test message")(
-            ClinicalData("STUDY1", "DEV")(
-                SubjectData("SITE1", "SUBJECT1")(
-                    StudyEventData('VISIT_1')(
-                        FormData("TESTFORM_A")(
-                            ItemGroupData()(
-                                ItemData("Field1", "ValueA"),
-                                ItemData("Field2", "ValueB")
-                            ),
-                            ItemGroupData(item_group_repeat_key=2)(
-                                ItemData("Field3", "ValueC"),
-                            ),
-                        )
-                    )
-                )
-            )
-        )
-
     def test_define_protocol_deviation(self):
         """Create a simple protocol deviation"""
         pd = MdsolProtocolDeviation(value="Deviated from Protocol",
@@ -131,11 +112,4 @@ class TestProtocolDeviation(unittest.TestCase):
             pd = MdsolProtocolDeviation(value="Deviated from Protocol",
                                         status=ProtocolDeviationStatus.Open,
                                         repeat_key="no repeats", code="E01", klass="Blargle")
-        self.assertEqual("RepeatKey no repeats is not a valid value", str(exc.exception))
-        # tested = obj_to_doc(pd)
-        # self.assertEqual("mdsol:ProtocolDeviation", tested.tag, "Unexpected Tag")
-        # self.assertEqual("Open", tested.attrib['Status'], "Status Key is missing")
-        # self.assertEqual("Deviated from Protocol", tested.get('Value'), "Value is missing")
-        # self.assertEqual("E01", tested.get('Code'), "Code is missing")
-        # self.assertEqual("Blargle", tested.get('Class'), "Class is missing")
-        # self.assertEqual(1, tested.get('ProtocolDeviationRepeatKey'), "ProtocolDeviationRepeatKey is missing")
+        self.assertEqual("RepeatKey should be an integer, not no repeats", str(exc.exception))
