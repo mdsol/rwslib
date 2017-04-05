@@ -220,3 +220,36 @@ class ControlType(enum.Enum):
     SignaturePage = 'Signature page'
     SignatureFolder = 'Signature folder'
     SignatureSubject = 'Signature subject'
+
+
+class LogicalRecordPositionType(enum.Enum):
+    MaxBySubject = 'MaxBySubject'
+    MaxByInstance = 'MaxByInstance'
+    MaxByDataPage = 'MaxByDataPage'
+    Last = 'Last'
+    Next = 'Next'
+    Previous = 'Previous'
+    First = 'First'
+    MinByDataPage = 'MinByDataPage'
+    MinByInstance = "MinByInstance"
+    MinBySubject = 'MinBySubject'
+
+
+class ProtocolDeviationStatus(enum.Enum):
+    Open = "Open"
+    Removed = "Removed"
+
+
+LOGICAL_RECORD_POSITIONS = [
+    LogicalRecordPositionType.MaxBySubject,
+    LogicalRecordPositionType.MaxBySubject,
+    LogicalRecordPositionType.MaxByInstance,
+    LogicalRecordPositionType.MaxByDataPage,
+    LogicalRecordPositionType.Last,
+    LogicalRecordPositionType.Next,
+    LogicalRecordPositionType.Previous,
+    LogicalRecordPositionType.First,
+    LogicalRecordPositionType.MinByDataPage,
+    LogicalRecordPositionType.MinByInstance,
+    LogicalRecordPositionType.MinBySubject
+]

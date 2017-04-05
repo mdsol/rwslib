@@ -851,7 +851,7 @@ class TestMdsolCheckStep(unittest.TestCase):
                                 form_oid="MyForm",
                                 folder_oid="MyFolder",
                                 record_position=0, form_repeat_number=2, folder_repeat_number=3,
-                                logical_record_position="MaxBySubject")
+                                logical_record_position=LogicalRecordPositionType.MaxBySubject)
         doc = obj_to_doc(tested)
         self.assertEqual("mdsol:CheckStep", doc.tag)
         self.assertEqual("VAROID", doc.attrib['VariableOID'])
@@ -880,6 +880,23 @@ class TestMdsolCheckStep(unittest.TestCase):
     def test_invalid_function(self):
         with self.assertRaises(AttributeError):
             MdsolCheckStep(function='bad_name')
+
+    def test_create_with_valid_lrp(self):
+        """We create a function with a valid LRP value"""
+        tested = MdsolCheckStep(custom_function="AlwaysTrue*",
+                                logical_record_position=LogicalRecordPositionType.Last)
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:CheckStep", doc.tag)
+        self.assertEqual("AlwaysTrue*", doc.attrib['CustomFunction'])
+        self.assertEqual("Last", doc.attrib['LogicalRecordPosition'])
+
+    def test_create_with_invalid_lrp(self):
+        """We create a function with an invalid LRP value"""
+        with self.assertRaises(AttributeError) as exc:
+            tested = MdsolCheckStep(custom_function="AlwaysTrue*",
+                                    logical_record_position='Wibble')
+        self.assertEqual("Invalid Check Step Logical Record Position Wibble",
+                         str(exc.exception))
 
 
 class TestMdsolEditCheckDef(unittest.TestCase):
@@ -921,6 +938,9 @@ class TestMdsolDerivationStep(unittest.TestCase):
     """Test extensions to ODM for Derivation Steps in Rave"""
 
     def test_build(self):
+        """
+        We build a Derivation Value Step
+        """
         tested = MdsolDerivationStep(data_format="$1", value="1")
         doc = obj_to_doc(tested)
         self.assertEqual("mdsol:DerivationStep", doc.tag)
@@ -930,6 +950,7 @@ class TestMdsolDerivationStep(unittest.TestCase):
         self.assertEqual("", doc.attrib.get('Function', ''))
 
     def test_build_function(self):
+        """We build a Derivation Function Step"""
         tested = MdsolDerivationStep(function=StepType.Add)
         doc = obj_to_doc(tested)
         self.assertEqual("mdsol:DerivationStep", doc.tag)
@@ -938,11 +959,12 @@ class TestMdsolDerivationStep(unittest.TestCase):
         self.assertEqual("", doc.attrib.get('DataFormat', ''))
 
     def test_build_datastep(self):
+        """We build a Derivation Data Step"""
         tested = MdsolDerivationStep(variable_oid="VAROID", field_oid="FIELDOID",
                                      form_oid="VFORM",
                                      folder_oid="MyFolder",
                                      record_position=0, form_repeat_number=2, folder_repeat_number=3,
-                                     logical_record_position="MaxBySubject")
+                                     logical_record_position=LogicalRecordPositionType.MaxBySubject)
         doc = obj_to_doc(tested)
         self.assertEqual("mdsol:DerivationStep", doc.tag)
         self.assertEqual("VAROID", doc.attrib['VariableOID'])
@@ -959,6 +981,7 @@ class TestMdsolDerivationStep(unittest.TestCase):
         self.assertEqual("", doc.attrib.get('Function', ''))
 
     def test_build_custom_function(self):
+        """We build a Custom Function Step"""
         tested = MdsolDerivationStep(custom_function="AlwaysTrue*")
         doc = obj_to_doc(tested)
         self.assertEqual("mdsol:DerivationStep", doc.tag)
@@ -969,9 +992,27 @@ class TestMdsolDerivationStep(unittest.TestCase):
         self.assertEqual("", doc.attrib.get('Function', ''))
 
     def test_invalid_function(self):
+        """Trying to create a Derivation with an invalid step raises an exception"""
         with self.assertRaises(AttributeError):
             # StepType.IsPresent not valid for DerivationStep
             MdsolDerivationStep(function=StepType.IsPresent)
+
+    def test_create_with_valid_lrp(self):
+        """We create a function with a valid LRP value"""
+        tested = MdsolDerivationStep(custom_function="AlwaysTrue*",
+                                     logical_record_position=LogicalRecordPositionType.Last)
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:DerivationStep", doc.tag)
+        self.assertEqual("AlwaysTrue*", doc.attrib['CustomFunction'])
+        self.assertEqual("Last", doc.attrib['LogicalRecordPosition'])
+
+    def test_create_with_invalid_lrp(self):
+        """We create a function with an invalid LRP value"""
+        with self.assertRaises(AttributeError) as exc:
+            tested = MdsolDerivationStep(custom_function="AlwaysTrue*",
+                                         logical_record_position='Wibble')
+        self.assertEqual("Invalid Derivation Logical Record Position Wibble",
+                         str(exc.exception))
 
 
 class TestMdsolDerivationDef(unittest.TestCase):
@@ -983,7 +1024,7 @@ class TestMdsolDerivationDef(unittest.TestCase):
                                     form_oid="MyForm",
                                     folder_oid="MyFolder",
                                     record_position=0, form_repeat_number=2, folder_repeat_number=3,
-                                    logical_record_position="MaxBySubject",
+                                    logical_record_position=LogicalRecordPositionType.MaxBySubject,
                                     all_variables_in_fields=True,
                                     all_variables_in_folders=True)
         doc = obj_to_doc(tested)
@@ -1017,6 +1058,22 @@ class TestMdsolDerivationDef(unittest.TestCase):
         ds = MdsolDerivationStep(function=StepType.Age)
         tested << ds
         self.assertEqual(ds, tested.derivation_steps[0])
+
+    def test_create_with_valid_lrp(self):
+        """We create a function with a valid LRP value"""
+        tested = MdsolDerivationDef('TANK',
+                                    logical_record_position=LogicalRecordPositionType.Last)
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:DerivationDef", doc.tag)
+        self.assertEqual("Last", doc.attrib['LogicalRecordPosition'])
+
+    def test_create_with_invalid_lrp(self):
+        """We create a function with an invalid LRP value"""
+        with self.assertRaises(AttributeError) as exc:
+            tested = MdsolDerivationDef('TANK',
+                                        logical_record_position='Wibble')
+        self.assertEqual("Invalid Derivation Def Logical Record Position Wibble",
+                         str(exc.exception))
 
 
 class TestMetaDataVersion(unittest.TestCase):
