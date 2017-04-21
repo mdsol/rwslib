@@ -17,6 +17,8 @@ Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific ex
     :members:
     :undoc-members:
 
+.. autoclass:: AdminData
+.. autoclass:: Alias
 .. autoclass:: Annotation
 .. autoclass:: AuditRecord
 .. autoclass:: BasicDefinitions
@@ -41,6 +43,7 @@ Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific ex
 .. autoclass:: ItemGroupDef
 .. autoclass:: ItemGroupRef
 .. autoclass:: ItemRef
+.. autoclass:: Location
 .. autoclass:: LocationRef
 .. autoclass:: MdsolAttribute
 .. autoclass:: MdsolCheckAction
@@ -77,6 +80,7 @@ Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific ex
 .. autoclass:: Symbol
 .. autoclass:: TransactionalElement
 .. autoclass:: TranslatedText
+.. autoclass:: User
 .. autoclass:: UserRef
 
 rwslib.rws_requests
