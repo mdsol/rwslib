@@ -253,3 +253,28 @@ LOGICAL_RECORD_POSITIONS = [
     LogicalRecordPositionType.MinByInstance,
     LogicalRecordPositionType.MinBySubject
 ]
+
+
+class LocationType(enum.Enum):
+    Sponsor = 'Sponsor'
+    Site = 'Site'
+    CRO = 'CRO'
+    Lab = 'Lab'
+    Other = 'Other'
+
+
+class UserType(enum.Enum):
+    Sponsor = 'Sponsor'
+    Investigator = 'Investigator'
+    Lab = 'Lab'
+    Other = 'Other'
+
+
+class GranularityType(enum.Enum):
+    All =  'All'
+    Metadata = 'Metadata'
+    AdminData = 'AdminData'
+    ReferenceData = 'ReferenceData'
+    AllClinicalData = 'AllClinicalData'
+    SingleSite = 'SingleSite'
+    SingleSubject = 'SingleSubject'
