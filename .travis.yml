@@ -5,7 +5,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  - "pypy"
+
 # command to install dependencies
 install: "python setup.py install"
 # command to run tests
