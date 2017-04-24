@@ -938,6 +938,25 @@ class DateTimeStamp(ODMElement):
         builder.end("DateTimeStamp")
 
 
+class SourceID(ODMElement):
+    """
+    Information that identifies the source of the data within an originating system. 
+      It is only meaningful within the context of that system.
+    """
+
+    def __init__(self, source_id):
+        #: specified DateTime for event
+        self.source_id = source_id
+
+    def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
+        builder.start("SourceID", {})
+        builder.data(self.source_id)
+        builder.end("SourceID")
+
+
 class AuditRecord(ODMElement):
     """
     An AuditRecord carries information pertaining to the creation, deletion, or modification of clinical data.
@@ -973,6 +992,8 @@ class AuditRecord(ODMElement):
         self.reason_for_change = None
         #: :class:`DateTimeStamp` for the AuditRecord
         self.date_time_stamp = None
+        #: :class:`SourceID` for the AuditRecord
+        self.source_id = None
 
     @property
     def audit_id(self):
@@ -1038,13 +1059,16 @@ class AuditRecord(ODMElement):
         self.date_time_stamp.build(builder)
 
         # Optional
+        if self.source_id:
+            self.source_id.build(builder)
+        # Optional
         if self.reason_for_change is not None:
             self.reason_for_change.build(builder)
 
         builder.end("AuditRecord")
 
     def __lshift__(self, other):
-        if not isinstance(other, (UserRef, LocationRef, DateTimeStamp, ReasonForChange,)):
+        if not isinstance(other, (UserRef, LocationRef, DateTimeStamp, ReasonForChange, SourceID)):
             raise ValueError("AuditRecord cannot accept a child element of type %s" % other.__class__.__name__)
 
         # Order is important, apparently
@@ -1052,6 +1076,7 @@ class AuditRecord(ODMElement):
         self.set_single_attribute(other, LocationRef, 'location_ref')
         self.set_single_attribute(other, DateTimeStamp, 'date_time_stamp')
         self.set_single_attribute(other, ReasonForChange, 'reason_for_change')
+        self.set_single_attribute(other, SourceID, 'source_id')
         return other
 
 

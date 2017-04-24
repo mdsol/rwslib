@@ -1161,3 +1161,22 @@ class TestComment(unittest.TestCase):
                              str(exc.exception))
 
 
+class TestSourceID(unittest.TestCase):
+    def test_create_source_id(self):
+        """We can create a source ID"""
+        obj = SourceID("12345")
+        tested = obj_to_doc(obj)
+        self.assertEqual('SourceID', tested.tag)
+        self.assertEqual('12345', tested.text)
+
+    def test_add_to_audit(self):
+        """We can add a SourceID to an Audit"""
+        record = AuditRecord()
+        record << UserRef("glow1")
+        record << LocationRef("hillview")
+        record << DateTimeStamp(datetime.utcnow())
+        record << SourceID("12345")
+        tested = obj_to_doc(record)
+        self.assertEqual("AuditRecord", tested.tag)
+        self.assertEqual("SourceID", list(tested)[-1].tag)
+        self.assertEqual("12345", list(tested)[-1].text)
