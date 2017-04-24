@@ -5,6 +5,7 @@ __author__ = 'glow'
 import datetime
 import enum
 
+
 class MODMExtensionRegistry(enum.Enum):
     """
     A registry of MODM extension Elements
@@ -18,6 +19,7 @@ class MODMExtensionRegistry(enum.Enum):
     ItemData = ["ItemUUID"]
     SiteRef = ["SiteStartDate", "SiteCloseDate"]
     Location = ["SiteStartDate", "SiteCloseDate"]
+
 
 class MODMAttribute(object):
 
@@ -60,18 +62,29 @@ class MODMMixin(object):
 class LastUpdateMixin(MODMMixin):
 
     def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "last_update_time"):
-            if "last_update_time" in kwargs:
-                cls.last_update_time = kwargs.get("last_update_time")
-            else:
-                cls.last_update_time = None
+        if not hasattr(cls, "_last_update_time"):
+            cls._last_update_time = None
         return super(LastUpdateMixin, cls).__new__(cls)
 
-    def set_update_time(self):
+    @property
+    def last_update_time(self):
+        return self._last_update_time
+
+    @last_update_time.setter
+    def last_update_time(self, value):
+        if isinstance(value, (datetime.datetime,)):
+            self._last_update_time = value
+        else:
+            raise ValueError("Expect last_update_time to be a datetime")
+
+    def set_update_time(self, update_time=None):
         """
         Set the Update Time from the local clock (in UTC)
         """
-        self.last_update_time = datetime.datetime.utcnow()
+        if update_time and isinstance(update_time, datetime.datetime):
+            self.last_update_time = update_time
+        else:
+            self.last_update_time = datetime.datetime.utcnow()
 
     def mixin_params(self, params):
         """

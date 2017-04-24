@@ -214,6 +214,13 @@ class TestMODMItemData(TestCase):
         self.assertEqual("ItemData", tested.tag)
         self.assertEqual(now.isoformat(), tested.get('mdsol:LastUpdateTime'))
 
+    def test_add_last_update_time_with_invalid_time(self):
+        """We add a LastUpdateTime with a nonsense value"""
+        obj = ItemData(itemoid="BRTHDAT", value="12 DEC 1975")
+        now = "2017-04-21"
+        with self.assertRaises(ValueError) as exc:
+            obj.last_update_time = now
+
     def test_last_update_time_naiive(self):
         """We don't see a LastUpdateTime for naiive elements"""
         obj = ItemData(itemoid="BRTHDAT", value="12 DEC 1975")
