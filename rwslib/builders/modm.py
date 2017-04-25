@@ -13,7 +13,7 @@ class MODMExtensionRegistry(enum.Enum):
     StudyEventDef = ["ArmAssociation"]
     StudyEventRef = ["ArmAssociation"]
     ClinicalData = ["ExternalStudyID", "StudyUUID"]
-    SubjectData = ["VisitOpenDate", "VisitCloseDate", "StudyEventUUID"]
+    SubjectData = ["VisitOpenDate", "VisitCloseDate", "StudyEventUUID", "SubjectName"]
     FormData = ["FormUUID"]
     ItemGroupData = ["ItemGroupUUID"]
     ItemData = ["ItemUUID"]

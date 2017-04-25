@@ -72,6 +72,7 @@ Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific ex
 .. autoclass:: ReasonForChange
 .. autoclass:: Signature
 .. autoclass:: SignatureRef
+.. autoclass:: SiteRef
 .. autoclass:: Study
 .. autoclass:: SourceID
 .. autoclass:: StudyEventData

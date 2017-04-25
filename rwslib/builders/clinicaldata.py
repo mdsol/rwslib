@@ -78,6 +78,8 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         self.audit_record = None
         #: :class:`Signature` for SubjectData
         self.signature = None
+        #: :class:`SiteRef`
+        self.siteref = None
 
     def build(self, builder):
         """Build XML by appending to builder"""
@@ -97,8 +99,11 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         if self.audit_record is not None:
             self.audit_record.build(builder)
 
-        builder.start("SiteRef", {'LocationOID': self.sitelocationoid})
-        builder.end("SiteRef")
+        if self.siteref:
+            self.siteref.build(builder)
+        else:
+            builder.start("SiteRef", {'LocationOID': self.sitelocationoid})
+            builder.end("SiteRef")
 
         for event in self.study_events:
             event.build(builder)
@@ -113,7 +118,7 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, (StudyEventData, AuditRecord, Annotation, Signature)):
+        if not isinstance(other, (StudyEventData, AuditRecord, Annotation, Signature, SiteRef)):
             raise ValueError("SubjectData object can only receive StudyEventData, AuditRecord, "
                              "Annotation or Signature object")
 
@@ -121,6 +126,7 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         self.set_list_attribute(other, StudyEventData, 'study_events')
         self.set_single_attribute(other, AuditRecord, 'audit_record')
         self.set_single_attribute(other, Signature, 'signature')
+        self.set_single_attribute(other, SiteRef, 'siteref')
 
         return other
 
@@ -875,6 +881,30 @@ class LocationRef(ODMElement):
         """
         builder.start("LocationRef", dict(LocationOID=self.oid))
         builder.end("LocationRef")
+
+
+class SiteRef(ODMElement, LastUpdateMixin):
+    """
+    Reference to a :class:`Location`
+    """
+
+    def __init__(self, oid):
+        """
+        :param str oid: OID for referenced :class:`Location`
+        """
+        self.oid = oid
+
+    def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
+        params = dict(LocationOID=self.oid)
+        # mixins
+        self.mixin()
+        self.mixin_params(params)
+
+        builder.start("SiteRef", params)
+        builder.end("SiteRef")
 
 
 class SignatureRef(ODMElement):
