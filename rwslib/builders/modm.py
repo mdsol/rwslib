@@ -65,7 +65,7 @@ class LastUpdateMixin(MODMMixin):
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, "_last_update_time"):
             cls._last_update_time = None
-        return super(LastUpdateMixin, cls).__new__(cls)
+        return super().__new__(cls)
 
     @property
     def last_update_time(self):
@@ -100,18 +100,21 @@ class LastUpdateMixin(MODMMixin):
 
 class MilestoneMixin(MODMMixin):
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "milestones"):
-            cls.milestones = {}
-        return super(MilestoneMixin, cls).__new__(cls)
+    @property
+    def milestones(self):
+        if not hasattr(self, "_milestones"):
+            self._milestones = {}
+        return self._milestones
 
-    def add_milestone(self, milestone, codelistoid="MILESTONES"):
+    def add_milestone(self,
+                      milestone,
+                      codelistoid="MILESTONES"):
         """
         Add a milestone
         :param str milestone: Milestone to add 
         """
         if milestone not in self.milestones.get(codelistoid, []):
-            self.milestones.setdefault(codelistoid, []).append(milestone)
+            self._milestones.setdefault(codelistoid, []).append(milestone)
 
     def mixin(self):
         """

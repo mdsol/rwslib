@@ -276,6 +276,25 @@ class TestMODMItemData(TestCase):
             obj.add_attribute("Nonsense", "85D4F9F0-9F49-42F3-A8E7-413DE85CC55E")
         self.assertEqual("Can't add Nonsense to ItemData", str(exc.exception))
 
+    def test_gate_modm_milestones_global(self):
+        """We add a mdsol:Nonsense"""
+        igp = ItemGroupData("LOG_LINE")
+        brth = ItemData(itemoid="BRTHDAT", value="12 DEC 1975")
+        brth.add_milestone("Birth Date")
+        igp << brth
+        ifc = ItemData(itemoid="DSSTDAT_IFC", value="12 DEC 1975")
+        ifc.add_milestone("Informed Consent")
+        igp << ifc
+        tested = obj_to_doc(igp)
+        self.assertEqual('ItemGroupData', tested.tag)
+        self.assertEqual('ItemData', list(tested)[0].tag)
+        idata_zero = list(tested)[0]
+        self.assertEqual('Annotation', list(idata_zero)[0].tag)
+        anno = list(idata_zero)[0]
+        print(list(anno))
+        self.assertEqual(1, len(list(anno)))
+
+
 
 class TestMODMLocation(unittest.TestCase):
 
