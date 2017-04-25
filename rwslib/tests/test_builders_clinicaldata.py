@@ -866,7 +866,7 @@ class TestAnnotation(unittest.TestCase):
         tested << c
         t = obj_to_doc(tested)
         self.assertEqual('Annotation', t.tag)
-        self.assertEqual(1, t.attrib['SeqNum'])
+        self.assertEqual('1', t.attrib['SeqNum'])
         self.assertEqual("APPLE", t.attrib['ID'])
         self.assertTrue(len(t.getchildren()) == 2)
 
@@ -880,7 +880,7 @@ class TestAnnotation(unittest.TestCase):
         tested << c
         t = obj_to_doc(tested)
         self.assertEqual('Annotation', t.tag)
-        self.assertEqual(1, t.attrib['SeqNum'])
+        self.assertEqual('1', t.attrib['SeqNum'])
         self.assertNotIn("ID", t.attrib)
         self.assertTrue(len(t.getchildren()) == 2)
 
@@ -894,7 +894,7 @@ class TestAnnotation(unittest.TestCase):
         tested << c
         t = obj_to_doc(tested)
         self.assertEqual('Annotation', t.tag)
-        self.assertEqual(1, t.attrib['SeqNum'])
+        self.assertEqual('1', t.attrib['SeqNum'])
         self.assertTrue(len(t.getchildren()) == 2)
 
     def test_happy_path_multiple_flags(self):
