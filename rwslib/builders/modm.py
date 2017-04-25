@@ -62,13 +62,14 @@ class MODMMixin(object):
 
 class LastUpdateMixin(MODMMixin):
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, "_last_update_time"):
-            cls._last_update_time = None
-        return super().__new__(cls)
-
     @property
     def last_update_time(self):
+        """
+        Last Update Time 
+        :return: 
+        """
+        if not hasattr(self, "_last_update_time"):
+            self._last_update_time = None
         return self._last_update_time
 
     @last_update_time.setter
@@ -82,7 +83,7 @@ class LastUpdateMixin(MODMMixin):
         """
         Set the Update Time from the local clock (in UTC)
         """
-        if update_time and isinstance(update_time, datetime.datetime):
+        if update_time and isinstance(update_time, (datetime.datetime, )):
             self.last_update_time = update_time
         else:
             self.last_update_time = datetime.datetime.utcnow()
