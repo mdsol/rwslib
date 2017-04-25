@@ -605,7 +605,7 @@ class Annotation(TransactionalElement):
         if self.seqnum is None:
             # SeqNum is not optional (and defaulted)
             raise ValueError("SeqNum is not set.")  # pragma: no cover
-        params["SeqNum"] = self.seqnum
+        params["SeqNum"] = str(self.seqnum)
 
         if self.annotation_id is not None:
             # If an Annotation is contained with an Annotations element,
