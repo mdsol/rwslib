@@ -49,14 +49,6 @@ class TestClinicalData(unittest.TestCase):
 
         self.assertRaises(ValueError, do)
 
-    def test_only_accepts_one_subject(self):
-        """Test that only one SubjectData can be inserted"""
-
-        def do():
-            self.tested << SubjectData("SITE2", "SUBJECT2")
-
-        self.assertRaises(ValueError, do)
-
     def test_builder(self):
         """XML produced"""
         doc = obj_to_doc(self.tested)
@@ -175,6 +167,13 @@ class TestSubjectData(unittest.TestCase):
         self.assertEqual(self.__class__.__name__[4:], t.tag)
         self.assertTrue(len(t.getchildren()) == 3)  # 1 studyeventdata + 1 SiteRef + 1 signature
 
+    def test_multiple_subject_data(self):
+        """We can add multiple SubjectData to the Clinical Data"""
+        cd = ClinicalData("Mediflex", "Prod")
+        cd << SubjectData("Site1", "Subject1")
+        cd << SubjectData("Site1", "Subject2")
+        doc = obj_to_doc(cd)
+        self.assertEqual(2, len(doc))
 
 class TestStudyEventData(unittest.TestCase):
     """Test StudyEventData classes"""

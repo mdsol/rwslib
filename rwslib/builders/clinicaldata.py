@@ -24,8 +24,8 @@ class ClinicalData(ODMElement, LastUpdateMixin):
         self.projectname = projectname
         self.environment = environment
         self.metadata_version_oid = metadata_version_oid
-        #: :class:`SubjectData` for the ClinicalData Element
-        self.subject_data = None
+        #: collection of :class:`SubjectData` for the ClinicalData Element
+        self.subject_data = []
         self.annotations = annotations
 
     def build(self, builder):
@@ -39,8 +39,9 @@ class ClinicalData(ODMElement, LastUpdateMixin):
 
         builder.start("ClinicalData", params)
         # Ask children
-        if self.subject_data is not None:
-            self.subject_data.build(builder)
+        if self.subject_data:
+            for subject in self.subject_data:
+                subject.build(builder)
         # Add the Annotations
         if self.annotations is not None:
             self.annotations.build(builder)
@@ -50,7 +51,7 @@ class ClinicalData(ODMElement, LastUpdateMixin):
         """Override << operator"""
         if not isinstance(other, (SubjectData, Annotations)):
             raise ValueError("ClinicalData object can only receive SubjectData or Annotations object")
-        self.set_single_attribute(other, SubjectData, 'subject_data')
+        self.set_list_attribute(other, SubjectData, 'subject_data')
         self.set_single_attribute(other, Annotations, 'annotations')
         return other
 
