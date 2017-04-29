@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 from rwslib.builders.constants import LocationType, UserType
 
 __author__ = 'glow'
 
 import unittest
 from rwslib.tests.common import obj_to_doc
-from rwslib.builders.admindata import AdminData, User, FirstName, LastName, Location, DisplayName
+from rwslib.builders.admindata import AdminData, User, FirstName, LastName, Location, DisplayName, MetaDataVersionRef
 
 
 class TestAdminData(unittest.TestCase):
@@ -87,3 +89,33 @@ class TestUser(unittest.TestCase):
         self.assertEqual("DisplayName", list(tested)[0].tag)
         self.assertEqual("Henrik", list(tested)[0].text)
 
+class TestMetaDataVersionRef(unittest.TestCase):
+
+    def test_create_a_version_ref(self):
+        """We create a MetaDataVersionRef"""
+        obj = MetaDataVersionRef("Mediflex(Prod)", "1024", datetime.datetime.utcnow())
+        tested = obj_to_doc(obj)
+        self.assertEqual("MetaDataVersionRef", tested.tag)
+        self.assertEqual("Mediflex(Prod)", tested.get('StudyOID'))
+        self.assertEqual("1024", tested.get('MetaDataVersionOID'))
+        self.assertTrue(tested.get('EffectiveDate').startswith(datetime.date.today().isoformat()))
+
+    def test_create_a_version_ref_and_attach_to_location(self):
+        """We create a MetaDataVersionRef"""
+        this = MetaDataVersionRef("Mediflex(Prod)", "1024", datetime.datetime.utcnow() - datetime.timedelta(days=7))
+        that = MetaDataVersionRef("Mediflex(Prod)", "1025", datetime.datetime.utcnow())
+        obj = Location('Site01', 'Site 1')
+        obj << this
+        obj <<  that
+        tested = obj_to_doc(obj)
+        self.assertEqual("Location", tested.tag)
+        self.assertTrue(len(list(tested)) == 2)
+        _this = list(tested)[0]
+        self.assertEqual("Mediflex(Prod)", _this.get('StudyOID'))
+        self.assertEqual("1024", _this.get('MetaDataVersionOID'))
+        self.assertTrue(_this.get('EffectiveDate').startswith((datetime.date.today() -
+                                                               datetime.timedelta(days=7)).isoformat()))
+        _that = list(tested)[1]
+        self.assertEqual("Mediflex(Prod)", _that.get('StudyOID'))
+        self.assertEqual("1025", _that.get('MetaDataVersionOID'))
+        self.assertTrue(_that.get('EffectiveDate').startswith(datetime.date.today().isoformat()))
