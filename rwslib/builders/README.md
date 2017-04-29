@@ -1,9 +1,9 @@
 # builders
 
-This submodule assists in the building of CDISC ODM (with Medidata Extensions where applicable)
+This package assists in the building of CDISC ODM (with Medidata Extensions where applicable)
 
 ## Organisation
-The module is broken down by the logical arrangement of the ODM document itself.
+The package is broken down by the logical arrangement of the ODM document itself.
 
 * [common.py](common.py) - common elements, functions that are reused across the module
 * [core.py](core.py) -  the ODM parent element
