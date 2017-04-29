@@ -54,6 +54,13 @@ class TestMODMClinicalData(TestCase):
         tested = obj_to_doc(clindata)
         self.assertEqual(now.isoformat(), tested.get('mdsol:LastUpdateTime'))
 
+    def test_add_audit_subcategory(self):
+        """We add a LastUpdateTime"""
+        clindata = ClinicalData("Mediflex", "Prod", metadata_version_oid="1012")
+        clindata.add_attribute('AuditSubCategoryName', "EnteredWithChangeCode")
+        tested = obj_to_doc(clindata)
+        self.assertEqual("EnteredWithChangeCode", tested.get('mdsol:AuditSubCategoryName'))
+
     def test_last_update_time_naiive(self):
         """We don't see a LastUpdateTime for naiive elements"""
         clindata = ClinicalData("Mediflex", "Prod", metadata_version_oid="1012")
