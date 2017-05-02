@@ -54,6 +54,15 @@ class TestClinicalData(unittest.TestCase):
         doc = obj_to_doc(self.tested)
         self.assertEqual(doc.tag, "ClinicalData")
 
+    def test_add_to_odm(self):
+        """We can add multiple ClinicalData to an ODM"""
+        odm = ODM("Some test case")
+        odm  << ClinicalData("Study1", "Dev")
+        odm  << ClinicalData("Study1", "Dev")
+        tested = obj_to_doc(odm)
+        self.assertEqual('ODM', tested.tag)
+        self.assertTrue(2, len(list(tested)))
+
 
 class TestSubjectData(unittest.TestCase):
     """Test SubjectData classes"""
