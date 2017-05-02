@@ -37,7 +37,7 @@ class ODM(ODMElement):
         # ODM version will always be 1.3
         # Granularity="SingleSubject"
         # AsOfDateTime always OMITTED (it's optional)
-        self.clinical_data = None
+        self.clinical_data = []
         self.study = None
         self.filetype = ODM.FILETYPE_TRANSACTIONAL if filetype is None else ODM.FILETYPE_SNAPSHOT
         self.admindata = None
@@ -61,7 +61,9 @@ class ODM(ODMElement):
         """Override << operator"""
         if not isinstance(other, (ClinicalData, Study, AdminData)):
             raise ValueError("ODM object can only receive ClinicalData, Study or AdminData object")
-        self.set_single_attribute(other, ClinicalData, 'clinical_data')
+        # per the ODM, we can have multiple ClinicalData elements
+        self.set_list_attribute(other, ClinicalData, 'clinical_data')
+        # per the ODM, we can have multiple Study elements, but owing to the context we restrict it here
         self.set_single_attribute(other, Study, 'study')
         self.set_single_attribute(other, AdminData, 'admindata')
 
@@ -70,7 +72,11 @@ class ODM(ODMElement):
     def getroot(self):
         """Build XML object, return the root"""
         builder = ET.TreeBuilder()
+        self.build(builder)
+        return builder.close()
 
+    def build(self, builder):
+        """Build XML object, return the root, this is a copy for consistency and testing"""
         params = dict(ODMVersion="1.3",
                       FileType=self.filetype,
                       CreationDateTime=self.creationdatetime,
@@ -91,8 +97,9 @@ class ODM(ODMElement):
         if self.study is not None:
             self.study.build(builder)
 
-        if self.clinical_data is not None:
-            self.clinical_data.build(builder)
+        if self.clinical_data:
+            for clinical_data in self.clinical_data:
+                clinical_data.build(builder)
 
         if self.admindata is not None:
             self.admindata.build(builder)
