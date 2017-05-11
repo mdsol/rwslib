@@ -9,12 +9,15 @@ import enum
 class MODMExtensionRegistry(enum.Enum):
     """
     A registry of MODM extension Elements
+    TODO: Get this from the Schema
     """
     StudyEventDef = ["ArmAssociation"]
     StudyEventRef = ["ArmAssociation"]
     ClinicalData = ["ExternalStudyID", "StudyUUID", "AuditSubCategoryName"]
     StudyEventData = ["VisitOpenDate", "VisitCloseDate", "StudyEventUUID",
-                      "InstanceName"]
+                      "InstanceName", "VisitTargetDate", "InstanceId",
+                      "InstanceOverDue", "InstanceStartWindow","InstanceEndWindow"
+                      "InstanceClose", "InstanceAccess", "StudyEventDate"]
     SubjectData = ["SubjectName"]
     FormData = ["FormUUID"]
     ItemGroupData = ["ItemGroupUUID"]
