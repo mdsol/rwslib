@@ -106,3 +106,10 @@ class TestODM(unittest.TestCase):
             self.assertEqual("Should be an instance of GranularityType not <class 'str'>", str(exc.exception))
         else:
             self.assertEqual("Should be an instance of GranularityType not <type 'str'>", str(exc.exception))
+
+    def test_source_system(self):
+        """We can add a SourceSystem, SourceSystemVersion """
+        obj = ODM("Test User", fileoid="1234", source_system="Battlestar", source_system_version="1.04")
+        tested = obj_to_doc(obj=obj)
+        self.assertEqual("Battlestar", tested.get('SourceSystem'))
+        self.assertEqual("1.04", tested.get('SourceSystemVersion'))

@@ -17,7 +17,9 @@ class ODM(ODMElement):
     FILETYPE_SNAPSHOT = 'Snapshot'
 
     def __init__(self, originator, description="", creationdatetime=now_to_iso8601(),
-                 fileoid=None, filetype=None, granularity=GranularityType.AllClinicalData):
+                 fileoid=None, filetype=None,
+                 granularity=GranularityType.AllClinicalData,
+                 source_system=None, source_system_version=None):
         """
         :param str originator: The organization that generated the ODM file.
         :param str description: The sender should use the Description attribute to record any information that will 
@@ -33,6 +35,8 @@ class ODM(ODMElement):
         self.originator = originator  # Required
         self.description = description
         self.creationdatetime = creationdatetime
+        self.source_system = source_system
+        self.source_system_version = source_system_version
         # filetype will always be "Transactional"
         # ODM version will always be 1.3
         # Granularity="SingleSubject"
@@ -86,6 +90,11 @@ class ODM(ODMElement):
                       )
         if self.granularity_type:
             params['Granularity'] = self.granularity_type.value
+        if self.source_system:
+            params['SourceSystem'] = self.source_system
+
+        if self.source_system_version:
+            params['SourceSystemVersion'] = self.source_system_version
         params['xmlns:mdsol'] = "http://www.mdsol.com/ns/odm/metadata"
 
         if self.description:
