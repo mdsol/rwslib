@@ -18,7 +18,7 @@ class MODMExtensionRegistry(enum.Enum):
                       "InstanceName", "VisitTargetDate", "InstanceId",
                       "InstanceOverDue", "InstanceStartWindow","InstanceEndWindow"
                       "InstanceClose", "InstanceAccess", "StudyEventDate"]
-    SubjectData = ["SubjectName"]
+    SubjectData = ["SubjectName", "Status"]
     FormData = ["FormUUID"]
     ItemGroupData = ["ItemGroupUUID"]
     ItemData = ["ItemUUID"]
