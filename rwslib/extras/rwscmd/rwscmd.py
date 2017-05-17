@@ -53,18 +53,26 @@ def rws(ctx, url, username, password, raw, verbose, output, virtual_dir):
 def get_data(ctx, study, environment, subject):
     """Call rwscmd_getdata custom dataset to retrieve currently enterable, empty fields"""
     studyoid = "{}({})".format(study, environment)
-    path = "datasets/{}?StudyOID={}&SubjectKey={}" \
-           "&IncludeIDs=0&IncludeValues=0".format(GET_DATA_DATASET, studyoid, subject)
-    url = make_url(ctx.obj['RWS'].base_url, path)
+    client = ctx.obj['RWS'] #: type: RWSConnection
+    cfg =  ConfigurableDatasetRequest(GET_DATA_DATASET.split('.')[0],
+                                      dataset_format=GET_DATA_DATASET.split('.')[1],
+                                      params=dict(StudyOID=studyoid,
+                                                  SubjectKey=subject,
+                                                  IncludeIDs=0,
+                                                  IncludeValues=0))
+    # path = "datasets/{}?StudyOID={}&SubjectKey={}" \
+    #        "&IncludeIDs=0&IncludeValues=0".format(GET_DATA_DATASET, studyoid, subject)
+    # url = make_url(ctx.obj['RWS'].base_url, path)
 
     if ctx.obj['VERBOSE']:
         click.echo('Getting data list')
-    resp = requests.get(url, auth=HTTPBasicAuth(ctx.obj['USERNAME'], ctx.obj['PASSWORD']))
+    resp = client.send_request(cfg)
+    # resp = requests.get(url, auth=HTTPBasicAuth(ctx.obj['USERNAME'], ctx.obj['PASSWORD']))
 
-    if resp.status_code != 200:
-        resp.raise_for_status()
+    if client.last_result.status_code != 200:
+        click.echo(client.last_result.text)
 
-    return xml_pretty_print(resp.text)
+    return xml_pretty_print(resp)
 
 
 def rws_call(ctx, method, default_attr=None):
