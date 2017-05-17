@@ -304,7 +304,7 @@ class TestAutofill(unittest.TestCase):
   </ClinicalData>
 </ODM>"""
 
-        self.path = "datasets/rwscmd_getdata.odm?StudyOID=Test(Prod)&SubjectKey=001&IncludeIDs=0&IncludeValues=0"
+        self.path = "datasets/rwscmd_getdata.odm"
 
         self.response_content = """<Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
               InboundODMFileOID=""
