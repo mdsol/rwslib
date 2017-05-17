@@ -164,7 +164,7 @@ class StudyEventData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
             params["TransactionType"] = self.transaction_type
 
         if self.study_event_repeat_key is not None:
-            params["StudyEventRepeatKey"] = self.study_event_repeat_key
+            params["StudyEventRepeatKey"] = str(self.study_event_repeat_key)
 
         # mixins
         self.mixin()

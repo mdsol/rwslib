@@ -241,6 +241,23 @@ class TestStudyEventData(unittest.TestCase):
         self.assertEqual("StudyEventData", t.tag)
         self.assertEqual("1", t.attrib['StudyEventRepeatKey'])
 
+    def test_study_event_repeat_key_as_int(self):
+        """ If supplied we export the study event repeat key"""
+        tested = StudyEventData('VISIT_1', study_event_repeat_key=1)(
+            FormData("TESTFORM_A")(
+                ItemGroupData()(
+                    ItemData("Field1", "ValueA"),
+                    ItemData("Field2", "ValueB")
+                ),
+                ItemGroupData(item_group_repeat_key=2)(
+                    ItemData("Field3", "ValueC"),
+                ),
+            )
+        )
+        t = obj_to_doc(tested)
+        self.assertEqual("StudyEventData", t.tag)
+        self.assertEqual("1", t.attrib['StudyEventRepeatKey'])
+
     def test_only_add_formdata_once(self):
         """Test that an FormData object can only be added once"""
         fd = FormData("FORM1")
