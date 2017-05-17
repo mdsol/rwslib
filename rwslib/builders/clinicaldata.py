@@ -30,7 +30,7 @@ class ClinicalData(ODMElement, LastUpdateMixin):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(MetaDataVersionOID=self.metadata_version_oid,
+        params = dict(MetaDataVersionOID=str(self.metadata_version_oid),
                       StudyOID="%s (%s)" % (self.projectname, self.environment,),
                       )
 

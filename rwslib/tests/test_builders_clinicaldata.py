@@ -36,9 +36,20 @@ class TestClinicalData(unittest.TestCase):
         self.assertEqual("1", self.tested.metadata_version_oid)
 
     def test_metadata_version_oid(self):
+        """
+        Test we can handle a MDV as a String
+        """
         self.tested.metadata_version_oid = '2'
         doc = obj_to_doc(self.tested)
         self.assertEqual(doc.attrib["MetaDataVersionOID"], self.tested.metadata_version_oid)
+
+    def test_metadata_version_oid_as_int(self):
+        """
+        Test that we can handle a MDV as an integer (which we are mandating in the IG)
+        """
+        self.tested.metadata_version_oid = 56
+        doc = obj_to_doc(self.tested)
+        self.assertEqual(doc.attrib["MetaDataVersionOID"], str(self.tested.metadata_version_oid))
 
     def test_only_accepts_subjectdata(self):
         """Test that only SubjectData can be inserted"""
