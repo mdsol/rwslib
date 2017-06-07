@@ -682,6 +682,14 @@ class TestLocationRef(unittest.TestCase):
         self.assertEqual(doc.attrib['LocationOID'], "Gainesville")
         self.assertEqual(doc.tag, "LocationRef")
 
+    def test_builder_int_oid(self):
+        """Test building XML"""
+        tested = LocationRef(12)
+        doc = obj_to_doc(tested)
+
+        self.assertEqual(doc.attrib['LocationOID'], "12")
+        self.assertEqual(doc.tag, "LocationRef")
+
 
 class TestReasonForChange(unittest.TestCase):
     def test_accepts_no_children(self):
