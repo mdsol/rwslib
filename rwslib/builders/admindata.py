@@ -55,7 +55,7 @@ class MetaDataVersionRef(ODMElement):
         """
         :param str study_oid: References the :class:`Study` that uses this metadata version.
         :param str metadata_version_oid: References the :class:`MetaDataVersion` (within the above Study).
-        :param datetime effective_date: Effective Date for this version and Site
+        :param datetime.datetime effective_date: Effective Date for this version and Site
         """
         super(MetaDataVersionRef, self).__init__()
         self.study_oid = study_oid
@@ -77,7 +77,7 @@ class Location(ODMElement, LastUpdateMixin):
     """
     def __init__(self, oid, name,
                  location_type=None,
-                 metadata_versions=[]):
+                 metadata_versions=None):
         """
         :param str oid: OID for the Location, referenced in :class:`LocationRef`
         :param str name: Name for the Location
@@ -91,8 +91,12 @@ class Location(ODMElement, LastUpdateMixin):
         if location_type:
             self.location_type = location_type
         self.metadata_versions = []
-        for mdv in metadata_versions:
-            self << mdv
+        if metadata_versions:
+            if isinstance(metadata_versions, (tuple, list)):
+                for mdv in metadata_versions:
+                    self << mdv
+            elif isinstance(metadata_versions, (MetaDataVersionRef,)):
+                self << metadata_versions
 
     @property
     def location_type(self):
@@ -133,7 +137,7 @@ class Address(ODMElement):
     """
     The user's postal address.
     """
-    def __init__(self, street_names=[], city=None, state_prov=None, country=None, postal_code=None, other_text=None):
+    def __init__(self, street_names=None, city=None, state_prov=None, country=None, postal_code=None, other_text=None):
         """
         :param list(Address) street_names: User street names 
         :param City city: User City
@@ -143,7 +147,7 @@ class Address(ODMElement):
         :param OtherText other_text: User Other Text
         """
         super(Address, self).__init__()
-        self.street_names = street_names
+        self.street_names = street_names or []
         self.city = city
         self.state_prov = state_prov
         self.country = country
@@ -154,8 +158,8 @@ class Address(ODMElement):
         """Build XML by appending to builder"""
         params = dict()
         builder.start(self.__class__.__name__, params)
-        for strt in self.street_names:
-            strt.build(builder)
+        for street in self.street_names:
+            street.build(builder)
         # build the children
         for child in ('city', 'country', 'state_prov', 'postal_code', 'other_text'):
             if getattr(self, child) is not None:
