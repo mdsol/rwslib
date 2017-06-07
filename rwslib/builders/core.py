@@ -16,8 +16,10 @@ class ODM(ODMElement):
     FILETYPE_TRANSACTIONAL = 'Transactional'
     FILETYPE_SNAPSHOT = 'Snapshot'
 
-    def __init__(self, originator, description="", creationdatetime=now_to_iso8601(),
-                 fileoid=None, filetype=None,
+    def __init__(self, originator, description="",
+                 creationdatetime=None,
+                 fileoid=None,
+                 filetype=None,
                  granularity=GranularityType.AllClinicalData,
                  source_system=None, source_system_version=None):
         """
@@ -34,7 +36,7 @@ class ODM(ODMElement):
         """
         self.originator = originator  # Required
         self.description = description
-        self.creationdatetime = creationdatetime
+        self.creationdatetime = creationdatetime or now_to_iso8601()
         self.source_system = source_system
         self.source_system_version = source_system_version
         # filetype will always be "Transactional"

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import datetime
 import sys
+
+from mock import patch
 
 from rwslib.tests.common import obj_to_doc
 
@@ -113,3 +116,17 @@ class TestODM(unittest.TestCase):
         tested = obj_to_doc(obj=obj)
         self.assertEqual("Battlestar", tested.get('SourceSystem'))
         self.assertEqual("1.04", tested.get('SourceSystemVersion'))
+
+    def test_creation_datetime(self):
+        """Create multiple ODM and get different datetimes"""
+        obj_1 = ODM("Test User", fileoid="1234", source_system="Battlestar", source_system_version="1.04")
+        tested_1 = obj_to_doc(obj=obj_1)
+        with patch('rwslib.builders.common.datetime') as mock_dt:
+            # offset the time to ensure we don't overlap
+            mock_dt.utcnow.return_value = datetime.datetime.utcnow() + datetime.timedelta(seconds=61)
+            obj_2 = ODM("Test User", fileoid="1235", source_system="Battlestar", source_system_version="1.04")
+            tested_2 = obj_to_doc(obj=obj_2)
+        self.assertEqual(tested_1.get('Originator'), tested_2.get('Originator'))
+        self.assertEqual(tested_1.get('SourceSystem'), tested_2.get('SourceSystem'))
+        self.assertNotEqual(tested_1.get('FileOID'), tested_2.get('FileOID'))
+        self.assertNotEqual(tested_1.get('CreationDateTime'), tested_2.get('CreationDateTime'))
