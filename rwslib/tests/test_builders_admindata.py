@@ -67,6 +67,42 @@ class TestLocation(unittest.TestCase):
         # this is an enum
         self.assertEqual("Site", tested.get('LocationType'))
 
+    def test_create_location_with_metadata_version_refs(self):
+        """Create a Location with mutiple MetaDataVersionRef"""
+        mdv1 = MetaDataVersionRef(study_oid="Mediflex(Prod)",
+                                  metadata_version_oid="1234",
+                                  effective_date=datetime.datetime(2017, 1, 1))
+        mdv2 = MetaDataVersionRef(study_oid="Mediflex(Prod)",
+                                  metadata_version_oid="1235",
+                                  effective_date=datetime.datetime(2017, 2, 1))
+        obj = Location("Site1",
+                       "Site One",
+                       location_type=LocationType.Site,
+                       metadata_versions=(mdv1, mdv2))
+        tested = obj_to_doc(obj)
+        self.assertEqual("Location", tested.tag)
+        # this is an enum
+        self.assertEqual("Site", tested.get('LocationType'))
+        self.assertEqual(2, len(tested))
+
+    def test_create_location_with_metadata_version_ref(self):
+        """Create a Location with single MetaDataVersionRef"""
+        mdv1 = MetaDataVersionRef(study_oid="Mediflex(Prod)",
+                                  metadata_version_oid="1234",
+                                  effective_date=datetime.datetime(2017, 1, 1))
+        mdv2 = MetaDataVersionRef(study_oid="Mediflex(Prod)",
+                                  metadata_version_oid="1235",
+                                  effective_date=datetime.datetime(2017, 2, 1))
+        obj = Location("Site1",
+                       "Site One",
+                       location_type=LocationType.Site,
+                       metadata_versions=mdv1)
+        tested = obj_to_doc(obj)
+        self.assertEqual("Location", tested.tag)
+        # this is an enum
+        self.assertEqual("Site", tested.get('LocationType'))
+        self.assertEqual(1, len(tested))
+
 
 class TestUser(unittest.TestCase):
 
