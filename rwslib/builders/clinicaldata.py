@@ -880,7 +880,7 @@ class LocationRef(ODMElement):
         """
         Build XML by appending to builder
         """
-        builder.start("LocationRef", dict(LocationOID=self.oid))
+        builder.start("LocationRef", dict(LocationOID=str(self.oid)))
         builder.end("LocationRef")
 
 
