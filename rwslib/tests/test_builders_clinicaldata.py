@@ -1224,3 +1224,24 @@ class TestSourceID(unittest.TestCase):
         self.assertEqual("AuditRecord", tested.tag)
         self.assertEqual("SourceID", list(tested)[-1].tag)
         self.assertEqual("12345", list(tested)[-1].text)
+
+
+class TestSiteRef(unittest.TestCase):
+
+    def test_uuid_type(self):
+        """We can define a SiteRef using a UUID"""
+        siteref = SiteRef(oid="E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B")
+        siteref.add_attribute("LocationOIDType", "SiteUUID")
+        tested = obj_to_doc(siteref)
+        self.assertEqual("SiteRef", tested.tag)
+        self.assertEqual("E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B", tested.get('LocationOID'))
+        self.assertEqual("SiteUUID", tested.get('mdsol:LocationOIDType'))
+
+    def test_uuid_type(self):
+        """We can define a SiteRef using a UUID"""
+        siteref = SiteRef(oid="E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B")
+        siteref.add_attribute("LocationOIDType", "SiteUUID")
+        tested = obj_to_doc(siteref)
+        self.assertEqual("SiteRef", tested.tag)
+        self.assertEqual("E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B", tested.get('LocationOID'))
+        self.assertEqual("SiteUUID", tested.get('mdsol:LocationOIDType'))
