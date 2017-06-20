@@ -22,7 +22,7 @@ class MODMExtensionRegistry(enum.Enum):
     FormData = ["FormUUID", "DataPageName", "DataPageID"]
     ItemGroupData = ["ItemGroupUUID", "RecordID"]
     ItemData = ["ItemUUID"]
-    SiteRef = ["SiteStartDate", "SiteCloseDate"]
+    SiteRef = ["SiteStartDate", "SiteCloseDate", "LocationOIDType"]
     Location = ["SiteStartDate", "SiteCloseDate"]
 
 
