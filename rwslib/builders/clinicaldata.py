@@ -887,6 +887,8 @@ class LocationRef(ODMElement):
 class SiteRef(ODMElement, LastUpdateMixin):
     """
     Reference to a :class:`Location`
+    .. note:: The `mdsol:LocationOIDType` attribute should be used to indicate the type of `LocationOID`
+     The default value is `SiteName`, and the value `SiteUUID` implies that the `LocationOID`
     """
 
     def __init__(self, oid):
