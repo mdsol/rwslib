@@ -188,7 +188,8 @@ class TestMODMStudyEventData(TestCase):
                           "InstanceName", "VisitTargetDate", "InstanceId",
                           "InstanceOverDue", "InstanceStartWindow", "InstanceEndWindow",
                           "InstanceClose", "InstanceAccess", "StudyEventDate",
-                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]:
+                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                          "VisitFirstDataEntryDate"]:
             obj = StudyEventData("VISIT1")
             if "UUID" in attribute:
                 obj.add_attribute(attribute, uuid.uuid4())

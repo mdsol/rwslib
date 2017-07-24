@@ -20,7 +20,8 @@ class MODMExtensionRegistry(enum.Enum):
                       "InstanceName", "VisitTargetDate", "InstanceId",
                       "InstanceOverDue", "InstanceStartWindow", "InstanceEndWindow",
                       "InstanceClose", "InstanceAccess", "StudyEventDate",
-                      "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+                      "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                      "VisitFirstDataEntryDate"]
     SubjectData = ["SubjectName", "Status",
                    "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
     FormData = ["FormUUID", "DataPageName", "DataPageID",
