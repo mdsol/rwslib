@@ -13,21 +13,27 @@ class MODMExtensionRegistry(enum.Enum):
     """
     StudyEventDef = ["ArmAssociation"]
     StudyEventRef = ["ArmAssociation"]
-    ClinicalData = ["ExternalStudyID", "StudyUUID", "AuditSubCategoryName"]
+    ClinicalData = ["ExternalStudyID", "StudyUUID", "AuditSubCategoryName",
+                    "StudyName", "ClientDivisionUUID", "ClientDivisionSchemeUUID",
+                    "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
     StudyEventData = ["VisitOpenDate", "VisitCloseDate", "StudyEventUUID",
                       "InstanceName", "VisitTargetDate", "InstanceId",
-                      "InstanceOverDue", "InstanceStartWindow","InstanceEndWindow"
-                      "InstanceClose", "InstanceAccess", "StudyEventDate"]
-    SubjectData = ["SubjectName", "Status"]
-    FormData = ["FormUUID", "DataPageName", "DataPageID"]
-    ItemGroupData = ["ItemGroupUUID", "RecordID"]
-    ItemData = ["ItemUUID"]
+                      "InstanceOverDue", "InstanceStartWindow", "InstanceEndWindow",
+                      "InstanceClose", "InstanceAccess", "StudyEventDate",
+                      "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+    SubjectData = ["SubjectName", "Status",
+                   "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+    FormData = ["FormUUID", "DataPageName", "DataPageID",
+                "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+    ItemGroupData = ["ItemGroupUUID", "RecordID",
+                     "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+    ItemData = ["ItemUUID",
+                "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
     SiteRef = ["SiteStartDate", "SiteCloseDate", "LocationOIDType"]
     Location = ["SiteStartDate", "SiteCloseDate"]
 
 
 class MODMAttribute(object):
-
     def __init__(self, attribute, value):
         self.attribute = attribute
         self.raw_value = value
@@ -44,7 +50,6 @@ class MODMAttribute(object):
 
 
 class MODMMixin(object):
-
     @property
     def attributes(self):
         if not hasattr(self, "_attributes"):
@@ -65,7 +70,6 @@ class MODMMixin(object):
 
 
 class LastUpdateMixin(MODMMixin):
-
     @property
     def last_update_time(self):
         """
@@ -87,7 +91,7 @@ class LastUpdateMixin(MODMMixin):
         """
         Set the Update Time from the local clock (in UTC)
         """
-        if update_time and isinstance(update_time, (datetime.datetime, )):
+        if update_time and isinstance(update_time, (datetime.datetime,)):
             self.last_update_time = update_time
         else:
             self.last_update_time = datetime.datetime.utcnow()
@@ -104,7 +108,6 @@ class LastUpdateMixin(MODMMixin):
 
 
 class MilestoneMixin(MODMMixin):
-
     @property
     def milestones(self):
         if not hasattr(self, "_milestones"):
