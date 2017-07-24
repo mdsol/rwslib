@@ -92,13 +92,13 @@ xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns="http://www.cdisc.org/n
   </ClinicalData>
 </ODM>"""
 
-        #path = "datasets/rwscmd_getdata.odm?StudyOID=Fixitol(Dev)&SubjectKey=001&IncludeIDs=0&IncludeValues=0"
+        # path = "datasets/rwscmd_getdata.odm?StudyOID=Fixitol(Dev)&SubjectKey=001&IncludeIDs=0&IncludeValues=0"
         path = "datasets/rwscmd_getdata.odm"
 
         httpretty.register_uri(
             httpretty.GET,
             "https://innovate.mdsol.com/RaveWebServices/" + path,
-            #"https://innovate.mdsol.com/RaveWebServices",
+            # "https://innovate.mdsol.com/RaveWebServices",
             status=200,
             body=odm)
 
@@ -313,6 +313,7 @@ class TestAutofill(unittest.TestCase):
               SubjectNumberInStudy="1103" SubjectNumberInStudySite="55">
         </Response>"""
 
+        # NOTE: HTTPretty is not supported on Python3, need to migrate this (get weird breakages in Travis)
         httpretty.enable()
 
         httpretty.register_uri(
@@ -340,8 +341,9 @@ class TestAutofill(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
 
     def test_autofill_steps(self):
-        result = self.runner.invoke(rwscmd.rws, ['--verbose', 'https://innovate.mdsol.com', 'autofill', '--steps', '1',
-                                                 'Test', 'Prod', '001'],
+        result = self.runner.invoke(rwscmd.rws,
+                                    ['--verbose', 'https://innovate.mdsol.com', 'autofill', '--steps', '1',
+                                     'Test', 'Prod', '001'],
                                     input="defuser\npassword\n")
 
         self.assertIn("Step 1\nGetting data list\nGetting metadata version 1\nGenerating data", result.output)
