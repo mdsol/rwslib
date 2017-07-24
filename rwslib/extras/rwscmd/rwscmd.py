@@ -16,9 +16,22 @@ import click
 GET_DATA_DATASET = 'rwscmd_getdata.odm'
 
 
+class GetDataConfigurableDataset(ConfigurableDatasetRequest):
+    VALID_DATASET_FORMATS = ("odm")
+
+    def __init__(self, dataset, study, environment, subject, params=None):
+        dataset_name, dataset_format = dataset.split('.')
+        studyoid = "{}({})".format(study, environment)
+        if params is None:
+            params = {}
+        params.update(dict(StudyOID=studyoid, SubjectKey=subject))
+        super(GetDataConfigurableDataset, self).__init__(dataset_name, dataset_format, params)
+
+
 @click.group()
 @click.option('--username', '-u', prompt=True, default='', envvar='RWSCMD_USERNAME', help='Rave login')
-@click.option('--password', '-p', prompt=True, default='', hide_input=True, envvar='RWSCMD_PASSWORD', help='Rave password')
+@click.option('--password', '-p', prompt=True, default='', hide_input=True, envvar='RWSCMD_PASSWORD',
+              help='Rave password')
 @click.option('--virtual_dir', default=None, envvar='RWSCMD_VIRTUAL_DIR',
               help='RWS virtual directory, defaults to RaveWebServices')
 @click.option('--raw/--list', default=False,
@@ -51,21 +64,24 @@ def rws(ctx, url, username, password, raw, verbose, output, virtual_dir):
 
 
 def get_data(ctx, study, environment, subject):
-    """Call rwscmd_getdata custom dataset to retrieve currently enterable, empty fields"""
-    studyoid = "{}({})".format(study, environment)
-    client = ctx.obj['RWS'] #: type: RWSConnection
-    cfg =  ConfigurableDatasetRequest(GET_DATA_DATASET.split('.')[0],
-                                      dataset_format=GET_DATA_DATASET.split('.')[1],
-                                      params=dict(StudyOID=studyoid,
-                                                  SubjectKey=subject,
-                                                  IncludeIDs=0,
-                                                  IncludeValues=0))
+    """
+    Call rwscmd_getdata custom dataset to retrieve currently enterable, empty fields
+    """
+    cfg = GetDataConfigurableDataset(GET_DATA_DATASET,
+                                     study,
+                                     environment,
+                                     subject,
+                                     params=dict(IncludeIDs=0,
+                                                 IncludeValues=0))
     # path = "datasets/{}?StudyOID={}&SubjectKey={}" \
     #        "&IncludeIDs=0&IncludeValues=0".format(GET_DATA_DATASET, studyoid, subject)
     # url = make_url(ctx.obj['RWS'].base_url, path)
 
     if ctx.obj['VERBOSE']:
         click.echo('Getting data list')
+    # Get the client instance
+    client = ctx.obj['RWS']  #: type: RWSConnection
+    # Client rolls in the base_url
     resp = client.send_request(cfg)
     # resp = requests.get(url, auth=HTTPBasicAuth(ctx.obj['USERNAME'], ctx.obj['PASSWORD']))
 
@@ -95,7 +111,7 @@ def rws_call(ctx, method, default_attr=None):
             click.echo(result)
 
     except RWSException as e:
-        click.echo(e.message)
+        click.echo(str(e))
 
 
 @rws.command()
@@ -121,9 +137,9 @@ def data(ctx, path):
         try:
             click.echo(get_data(ctx, path[0], path[1], path[2]))
         except RWSException as e:
-            click.echo(e.message)
+            click.echo(str(e))
         except requests.exceptions.HTTPError as e:
-            click.echo(e.message)
+            click.echo(str(e))
     else:
         click.echo('Too many arguments')
 
