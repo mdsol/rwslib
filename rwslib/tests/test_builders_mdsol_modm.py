@@ -184,7 +184,7 @@ class TestMODMStudyEventData(TestCase):
 
     def test_modm_attributes(self):
         """Each modm attribute is settable"""
-        for attribute in ["VisitOpenDate", "VisitCloseDate", "StudyEventUUID",
+        for attribute in ["StartWindowDate", "EndWindowDate", "StudyEventUUID",
                           "InstanceName", "VisitTargetDate", "InstanceId",
                           "InstanceOverDue", "InstanceStartWindow", "InstanceEndWindow",
                           "InstanceClose", "InstanceAccess", "StudyEventDate",
@@ -412,7 +412,6 @@ class TestMODMItemData(TestCase):
         idata_zero = list(tested)[0]
         self.assertEqual('Annotation', list(idata_zero)[0].tag)
         anno = list(idata_zero)[0]
-        print(list(anno))
         self.assertEqual(1, len(list(anno)))
 
 
