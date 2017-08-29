@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import random
 import uuid
 from unittest import TestCase
 
@@ -16,6 +17,8 @@ import unittest
 
 # create a Faker
 fake = Faker()
+
+YesNoRave = ('Yes', 'No')
 
 
 class TestMdsolQuery(unittest.TestCase):
@@ -76,17 +79,20 @@ class TestMODMClinicalData(TestCase):
         """Each modm attribute is settable"""
         for attribute in ["ExternalStudyID", "StudyUUID", "AuditSubCategoryName",
                           "StudyName", "ClientDivisionUUID", "ClientDivisionSchemeUUID",
-                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]:
-            clindata = ClinicalData("Mediflex", "Prod", metadata_version_oid="1012")
+                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                          "IsSDVRequired", "IsSDVComplete"]:
+            data = ClinicalData("Mediflex", "Prod", metadata_version_oid="1012")
             if "UUID" in attribute:
-                clindata.add_attribute(attribute, uuid.uuid4())
+                data.add_attribute(attribute, uuid.uuid4())
             elif "Date" in attribute:
-                clindata.add_attribute(attribute, fake.date_time_this_year(before_now=True,
-                                                                           after_now=False,
-                                                                           tzinfo=None))
+                data.add_attribute(attribute, fake.date_time_this_year(before_now=True,
+                                                                       after_now=False,
+                                                                       tzinfo=None))
+            elif attribute.startswith('Is'):
+                data.add_attribute(attribute, random.choice(YesNoRave))
             else:
-                clindata.add_attribute(attribute, "Blargle")
-            tested = obj_to_doc(clindata)
+                data.add_attribute(attribute, "Blargle")
+            tested = obj_to_doc(data)
             self.assertIsNotNone(tested.get("mdsol:{}".format(attribute)))
 
 
@@ -116,17 +122,20 @@ class TestMODMSubjectData(TestCase):
     def test_modm_attributes(self):
         """Each modm attribute is settable"""
         for attribute in ["SubjectName", "Status",
-                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]:
-            obj = SubjectData("Subject 1", "Site 1")
+                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                          "IsSDVRequired", "IsSDVComplete"]:
+            data = SubjectData("Subject 1", "Site 1")
             if "UUID" in attribute:
-                obj.add_attribute(attribute, uuid.uuid4())
+                data.add_attribute(attribute, uuid.uuid4())
             elif "Date" in attribute:
-                obj.add_attribute(attribute, fake.date_time_this_year(before_now=True,
-                                                                      after_now=False,
-                                                                      tzinfo=None))
+                data.add_attribute(attribute, fake.date_time_this_year(before_now=True,
+                                                                       after_now=False,
+                                                                       tzinfo=None))
+            elif attribute.startswith('Is'):
+                data.add_attribute(attribute, random.choice(YesNoRave))
             else:
-                obj.add_attribute(attribute, "Blargle")
-            tested = obj_to_doc(obj)
+                data.add_attribute(attribute, "Blargle")
+            tested = obj_to_doc(data)
             self.assertIsNotNone(tested.get("mdsol:{}".format(attribute)))
 
     def test_invalid_modm_attributes(self):
@@ -189,17 +198,19 @@ class TestMODMStudyEventData(TestCase):
                           "InstanceOverDue", "InstanceStartWindow", "InstanceEndWindow",
                           "InstanceClose", "InstanceAccess", "StudyEventDate",
                           "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
-                          "VisitFirstDataEntryDate"]:
-            obj = StudyEventData("VISIT1")
+                          "VisitFirstDataEntryDate", "IsSDVComplete", "IsSDVRequired"]:
+            data = StudyEventData("VISIT1")
             if "UUID" in attribute:
-                obj.add_attribute(attribute, uuid.uuid4())
+                data.add_attribute(attribute, uuid.uuid4())
             elif "Date" in attribute:
-                obj.add_attribute(attribute, fake.date_time_this_year(before_now=True,
-                                                                      after_now=False,
-                                                                      tzinfo=None))
+                data.add_attribute(attribute, fake.date_time_this_year(before_now=True,
+                                                                       after_now=False,
+                                                                       tzinfo=None))
+            elif attribute.startswith('Is'):
+                data.add_attribute(attribute, random.choice(YesNoRave))
             else:
-                obj.add_attribute(attribute, "Blargle")
-            tested = obj_to_doc(obj)
+                data.add_attribute(attribute, "Blargle")
+            tested = obj_to_doc(data)
             self.assertIsNotNone(tested.get("mdsol:{}".format(attribute)))
 
     def test_invalid_modm_attributes(self):
@@ -258,17 +269,20 @@ class TestMODMFormData(TestCase):
     def test_modm_attributes(self):
         """Each modm attribute is settable"""
         for attribute in ["FormUUID", "DataPageName", "DataPageID",
-                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]:
-            obj = FormData(formoid="DM")
+                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate", "IsSDVRequired",
+                          "IsSDVComplete"]:
+            data = FormData(formoid="DM")
             if "UUID" in attribute:
-                obj.add_attribute(attribute, uuid.uuid4())
+                data.add_attribute(attribute, uuid.uuid4())
             elif "Date" in attribute:
-                obj.add_attribute(attribute, fake.date_time_this_year(before_now=True,
-                                                                      after_now=False,
-                                                                      tzinfo=None))
+                data.add_attribute(attribute, fake.date_time_this_year(before_now=True,
+                                                                       after_now=False,
+                                                                       tzinfo=None))
+            elif attribute.startswith('Is'):
+                data.add_attribute(attribute, random.choice(YesNoRave))
             else:
-                obj.add_attribute(attribute, "Blargle")
-            tested = obj_to_doc(obj)
+                data.add_attribute(attribute, "Blargle")
+            tested = obj_to_doc(data)
             self.assertIsNotNone(tested.get("mdsol:{}".format(attribute)))
 
     def test_invalid_modm_attributes(self):
@@ -323,6 +337,40 @@ class TestMODMItemGroupData(TestCase):
         annotation = list(tested)[0]
         self.assertEqual('Informed Consent', list(list(annotation)[0])[0].text)
         self.assertEqual('Study Start', list(list(annotation)[1])[0].text)
+
+    def test_modm_attributes(self):
+        """Each modm attribute is settable"""
+        for attribute in ["ItemGroupUUID", "RecordID",
+                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                          "IsSDVRequired", "IsSDVComplete"]:
+            data = ItemGroupData(itemgroupoid="DM")
+            if "UUID" in attribute:
+                data.add_attribute(attribute, uuid.uuid4())
+            elif "Date" in attribute:
+                data.add_attribute(attribute, fake.date_time_this_year(before_now=True,
+                                                                       after_now=False,
+                                                                       tzinfo=None))
+            elif attribute.startswith('Is'):
+                data.add_attribute(attribute, random.choice(YesNoRave))
+            else:
+                data.add_attribute(attribute, "Blargle")
+            tested = obj_to_doc(data)
+            self.assertIsNotNone(tested.get("mdsol:{}".format(attribute)))
+
+    def test_invalid_modm_attributes(self):
+        """Each invalid modm attribute raises an exception"""
+        for attribute in ["StudyUUID"]:
+            obj = ItemGroupData(itemgroupoid="DM")
+            with self.assertRaises(ValueError) as exc:
+                if "UUID" in attribute:
+                    obj.add_attribute(attribute, uuid.uuid4())
+                elif "Date" in attribute:
+                    obj.add_attribute(attribute, fake.date_time_this_year(before_now=True,
+                                                                          after_now=False,
+                                                                          tzinfo=None))
+                else:
+                    obj.add_attribute(attribute, "Blargle")
+            self.assertEqual("Can't add {} to ItemGroupData".format(attribute), str(exc.exception))
 
 
 class TestMODMItemData(TestCase):
@@ -413,6 +461,40 @@ class TestMODMItemData(TestCase):
         self.assertEqual('Annotation', list(idata_zero)[0].tag)
         anno = list(idata_zero)[0]
         self.assertEqual(1, len(list(anno)))
+
+    def test_modm_attributes(self):
+        """Each modm attribute is settable"""
+        for attribute in ["ItemUUID",
+                          "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                          "IsSDVRequired", "IsSDVComplete"]:
+            data = ItemData(itemoid="BRTHDAT", value="12 DEC 1975")
+            if "UUID" in attribute:
+                data.add_attribute(attribute, uuid.uuid4())
+            elif "Date" in attribute:
+                data.add_attribute(attribute, fake.date_time_this_year(before_now=True,
+                                                                       after_now=False,
+                                                                       tzinfo=None))
+            elif attribute.startswith('Is'):
+                data.add_attribute(attribute, random.choice(YesNoRave))
+            else:
+                data.add_attribute(attribute, "Blargle")
+            tested = obj_to_doc(data)
+            self.assertIsNotNone(tested.get("mdsol:{}".format(attribute)))
+
+    def test_invalid_modm_attributes(self):
+        """Each invalid modm attribute raises an exception"""
+        for attribute in ["StudyUUID"]:
+            obj = ItemData(itemoid="BRTHDAT", value="12 DEC 1975")
+            with self.assertRaises(ValueError) as exc:
+                if "UUID" in attribute:
+                    obj.add_attribute(attribute, uuid.uuid4())
+                elif "Date" in attribute:
+                    obj.add_attribute(attribute, fake.date_time_this_year(before_now=True,
+                                                                          after_now=False,
+                                                                          tzinfo=None))
+                else:
+                    obj.add_attribute(attribute, "Blargle")
+            self.assertEqual("Can't add {} to ItemData".format(attribute), str(exc.exception))
 
 
 class TestMODMLocation(unittest.TestCase):
