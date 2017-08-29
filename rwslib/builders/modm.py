@@ -15,21 +15,27 @@ class MODMExtensionRegistry(enum.Enum):
     StudyEventRef = ["ArmAssociation"]
     ClinicalData = ["ExternalStudyID", "StudyUUID", "AuditSubCategoryName",
                     "StudyName", "ClientDivisionUUID", "ClientDivisionSchemeUUID",
-                    "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+                    "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                    "IsSDVRequired", "IsSDVComplete"]
     StudyEventData = ["StartWindowDate", "EndWindowDate", "StudyEventUUID",
                       "InstanceName", "VisitTargetDate", "InstanceId",
                       "InstanceOverDue", "InstanceStartWindow", "InstanceEndWindow",
                       "InstanceClose", "InstanceAccess", "StudyEventDate",
                       "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
-                      "VisitFirstDataEntryDate"]
+                      "VisitFirstDataEntryDate",
+                      "IsSDVRequired", "IsSDVComplete"]
     SubjectData = ["SubjectName", "Status",
-                   "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+                   "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                   "IsSDVRequired", "IsSDVComplete"]
     FormData = ["FormUUID", "DataPageName", "DataPageID",
-                "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+                "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                "IsSDVRequired", "IsSDVComplete"]
     ItemGroupData = ["ItemGroupUUID", "RecordID",
-                     "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+                     "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                     "IsSDVRequired", "IsSDVComplete"]
     ItemData = ["ItemUUID",
-                "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
+                "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
+                "IsSDVRequired", "IsSDVComplete"]
     SiteRef = ["SiteStartDate", "SiteCloseDate", "LocationOIDType"]
     Location = ["SiteStartDate", "SiteCloseDate"]
 
@@ -58,7 +64,11 @@ class MODMMixin(object):
         return self._attributes
 
     def add_attribute(self, attribute, value):
-        if attribute not in MODMExtensionRegistry[self.__class__.__name__].value:
+        class_name = self.__class__.__name__
+        if class_name.startswith('ItemData'):
+            # ItemData* Elements
+            class_name = 'ItemData'
+        if attribute not in MODMExtensionRegistry[class_name].value:
             raise ValueError("Can't add {} to {}".format(attribute, self.__class__.__name__))
         self.attributes.append(MODMAttribute(attribute, value))
 
