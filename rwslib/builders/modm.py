@@ -16,7 +16,7 @@ class MODMExtensionRegistry(enum.Enum):
     ClinicalData = ["ExternalStudyID", "StudyUUID", "AuditSubCategoryName",
                     "StudyName", "ClientDivisionUUID", "ClientDivisionSchemeUUID",
                     "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate"]
-    StudyEventData = ["VisitOpenDate", "VisitCloseDate", "StudyEventUUID",
+    StudyEventData = ["StartWindowDate", "EndWindowDate", "StudyEventUUID",
                       "InstanceName", "VisitTargetDate", "InstanceId",
                       "InstanceOverDue", "InstanceStartWindow", "InstanceEndWindow",
                       "InstanceClose", "InstanceAccess", "StudyEventDate",
