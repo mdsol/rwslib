@@ -392,7 +392,7 @@ class TestAutofill(unittest.TestCase):
             result = self.runner.invoke(rwscmd.rws,
                                         ['--verbose', 'https://innovate.mdsol.com', 'autofill', '--steps', '1',
                                          '--metadata', 'odm.xml', 'Test', 'Prod', '001'],
-                                        input="defuser\npassword\n", catch_exceptions=False)
+                                        input=u"defuser\npassword\n", catch_exceptions=False)
         self.assertFalse(result.exception)
         self.assertIn("Step 1\nGetting data list\nGenerating data", result.output)
         self.assertNotIn("Step 2", result.output)
