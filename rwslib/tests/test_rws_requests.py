@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+from httpretty import httpretty
+
+from rwslib import RWSConnection, rws_requests, AuthorizationException
+
 __author__ = 'glow'
 
 import unittest
@@ -11,7 +15,7 @@ except ImportError:
 
 import requests
 from rwslib.rwsobjects import RWSPostResponse, RWSSubjects, RWSSubjectListItem, \
-    RWSStudyMetadataVersions, RWSStudies, RWSResponse
+    RWSStudyMetadataVersions, RWSStudies, RWSResponse, RWSException
 from rwslib.rws_requests import RWSRequest, StudySubjectsRequest, check_dataset_type, SubjectDatasetRequest, \
     VersionDatasetRequest, StudyDatasetRequest, PostDataRequest, PostMetadataRequest, \
     GlobalLibraryVersionRequest, GlobalLibraryVersionsRequest, GlobalLibraryDraftsRequest, \
@@ -801,19 +805,34 @@ class TestTimeout(unittest.TestCase):
     """
     Strictly belongs in test_rwslib but it interacts with HttPretty which is used in that unit
     """
-    def test_timeout(self):
-        """Test against an external website to verify timeout (mocking doesn't help as far as I can work out)"""
-        import rwslib
 
-        # Test that unauthorised request times out
-        rave = rwslib.RWSConnection('http://innovate.mdsol.com')
-        with self.assertRaises(requests.exceptions.Timeout):
-            rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(), timeout=0.0001, verify=False)
+    def test_connect_timeout(self):
+        """Test against an external website to verify connect timeout"""
+        rave = RWSConnection('https://innovate.mdsol.com')
+        with mock.patch("requests.sessions.Session.get") as mock_get:
+            mock_get.side_effect = requests.exceptions.ConnectTimeout()
+            with self.assertRaises(RWSException) as exc:
+                rave.send_request(rws_requests.ClinicalStudiesRequest(), verify=False,retries=0)
+        self.assertEqual('Server Connection Timeout', str(exc.exception))
 
-        # Raise timeout and check no timeout occurs.  An exception will be raised because the request is unauthorised
-        with self.assertRaises(rwslib.AuthorizationException):
-            rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest(), timeout=3600, verify=False)
+    def test_read_timeout(self):
+        """Test against an external website to verify read timeout"""
+        rave = RWSConnection('https://innovate.mdsol.com')
+        with mock.patch("requests.sessions.Session.get") as mock_get:
+            mock_get.side_effect = requests.exceptions.ReadTimeout()
+            with self.assertRaises(RWSException) as exc:
+                rave.send_request(rws_requests.ClinicalStudiesRequest(), verify=False,retries=0)
+        self.assertEqual('Server Read Timeout', str(exc.exception))
 
+    def test_no_timeout_unauth(self):
+        """No timeout raised, then we get the Authorisation Exception """
+        rave = RWSConnection('https://innovate.mdsol.com')
+        with mock.patch("requests.sessions.Session.get") as mock_get:
+            mock_get.return_value = mock.MagicMock(requests.models.Response, status_code=401,
+                                                   headers={}, text='Authorization Header not provided')
+            with self.assertRaises(AuthorizationException) as exc:
+                rave.send_request(rws_requests.ClinicalStudiesRequest(), timeout=3600, verify=False, retries=0)
+        self.assertEqual('Authorization Header not provided', str(exc.exception))
 
 if __name__ == '__main__':
     unittest.main()

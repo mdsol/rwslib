@@ -74,6 +74,7 @@ class RWSConnection(object):
         full_url = make_url(self.base_url, request_object.url_path())
         if request_object.requires_authorization:
             kwargs['auth'] = self.auth
+            # TODO: Look at different connect and read timeouts?
             kwargs['timeout'] = timeout
             kwargs.update(request_object.args())
 
@@ -93,7 +94,15 @@ class RWSConnection(object):
                   "POST": session.post}[request_object.method]
 
         start_time = time.time()
-        r = action(full_url, **kwargs)
+
+        try:
+            r = action(full_url, **kwargs)
+        except (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout) as exc:
+            if isinstance(exc, (requests.exceptions.ConnectTimeout,)):
+                raise RWSException("Server Connection Timeout", "Connection timeout for {}".format(full_url))
+            elif isinstance(exc, (requests.exceptions.ReadTimeout,)):
+                raise RWSException("Server Read Timeout", "Read timeout for {}".format(full_url))
+
         self.request_time = time.time() - start_time
         self.last_result = r #see also r.elapsed for timedelta object.
 
