@@ -10,3 +10,13 @@ python:
 install: "python setup.py install"
 # command to run tests
 script: "python setup.py test"
+
+# Automated Deployment to PyPI on tag
+deploy:
+  user: glow-mdsol
+  password:
+    secure: aQgdQqAFPXcV/N11Id151C27754T2YZ8SFzfv3cng7mDDvaEceGfPhyrADT6F+KGhezZEsrcb4iRfHUNk1QXlh8t/LKmmDg0q33tQsJXJKDuNiZ76KWwdfmYhX6eb51COCUHom8O7W01IaoBVyb/nBC8W4dfwCRF7BEVZ9Xyt5k5/l4vLL8Shp8AyREruEo+hMhjtt7m/c1jvSwjcLri0TpfR+bjK4LIYH2W+Dv8Gtuy4IlsZ6tUpPRq5L29HcuRzOopX/WD5emR9LP0pYpt5tWVyWxaC03CW3SZ5RQmwhwFFTqZFj8NprcAGNrlp2b+Ak1bRZs8qGfmDgcHe6pdtZYOTc+szZx6bVGUQrWy1jAtBS8JvSzHnS9VYRP9ryk1CkZffqQnPlHhKlwQOqtmkMS5Yed2cTQJCPkcoEbSy5a1nKKfxHnCJlI7a3GA4SLzgcH6lsV1WVMxyk6hVBl3DNkEycOTmSmzR63hVZBib9W3LBhivkMPHbHMRVJEFNugLLFmkS3xX/mph7sXqpGGs4LugEphxq413nT6aTp/2Q3a0IX9TQteqnyQO6JYa06/RKGkRnPm+F4A2Cx6JshpzattjgrBTKvZER+cGPB3D9ndBw54wE9reera7HvSKhP6lZTG3ZwJUdcnZhcHjKfNcEXnz6WipqVVBe9X5JHGVSQ=
+  on:
+    tags: true
+  distributions: sdist bdist_wheel
+
