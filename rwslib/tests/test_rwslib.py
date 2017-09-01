@@ -32,11 +32,10 @@ class TestVersion(unittest.TestCase):
 
     def test_connection_failure(self):
         """Test we get a failure if we do not retry"""
-        with mock.patch("rwslib.requests") as mockr:
-            session = mockr.Session.return_value
-            session.get.side_effect = requests.ConnectionError
+        with mock.patch("requests.sessions.Session.get") as mock_get:
+            mock_get.side_effect = requests.exceptions.ConnectionError()
             rave = rwslib.RWSConnection('https://innovate.mdsol.com')
-            with self.assertRaises(requests.ConnectionError) as exc:
+            with self.assertRaises(requests.exceptions.ConnectionError) as exc:
                 v = rave.send_request(rwslib.rws_requests.VersionRequest())
 
     """Test with only mdsol sub-domain"""
