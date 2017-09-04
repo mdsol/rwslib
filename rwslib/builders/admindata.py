@@ -295,35 +295,30 @@ class LoginName(SimpleChildElement):
     """
     The user's login identification.
     """
-    pass
 
 
 class DisplayName(SimpleChildElement):
     """
     A short displayable name for the user.
     """
-    pass
 
 
 class FullName(SimpleChildElement):
     """
     The user's full formal name.
     """
-    pass
 
 
 class FirstName(SimpleChildElement):
     """
     The user's initial given name or all given names.
     """
-    pass
 
 
 class LastName(SimpleChildElement):
     """
     The user's surname (family name).
     """
-    pass
 
 
 class Organization(SimpleChildElement):
