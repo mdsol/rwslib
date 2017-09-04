@@ -16,7 +16,10 @@ class DataType(enum.Enum):
 
 
 class QueryStatusType(enum.Enum):
-    """MdsolQuery action type"""
+    """
+    MdsolQuery action type
+    Applies to a :class:`MdsolQuery`
+    """
     Open = "Open"
     Cancelled = "Cancelled"
     Answered = "Answered"
@@ -25,7 +28,10 @@ class QueryStatusType(enum.Enum):
 
 
 class StepType(enum.Enum):
-    """Edit/Derivation step types"""
+    """
+    Edit/Derivation step types
+    Applies to a :class:`MdsolCheckStep`, :class:`MdsolDerivationStep`
+    """
     CustomFunction = "CustomFunction"
     IsEmpty = "IsEmpty"
     IsNotEmpty = "IsNotEmpty"
@@ -131,6 +137,10 @@ VALID_DERIVATION_STEPS = [
 
 
 class ActionType(enum.Enum):
+    """
+    CheckAction types
+    Applies to a :class:`CheckAction`
+    """
     OpenQuery = "OpenQuery"
     RequireReview = "RequireReview"
     RequireVerification = "RequireVerification"
@@ -198,16 +208,28 @@ ALL_ACTIONS = [
 
 
 class RangeCheckComparatorType(enum.Enum):
+    """
+    Range Check Enumeration
+    Applies to a :class:`RangeCheck`
+    """
     LessThanEqualTo = 'LE'
     GreaterThanEqualTo = 'GE'
 
 
 class RangeCheckType(enum.Enum):
+    """
+    Range Check Type Enumeration
+    Applies to a :class:`RangeCheck`
+    """
     Soft = 'Soft'
     Hard = 'Hard'
 
 
 class ControlType(enum.Enum):
+    """
+    CRF Control Type Enumeration
+    Applies to a :class:`ItemDef`
+    """
     CheckBox = 'CheckBox'
     Text = 'Text'
     DateTime = 'DateTime'
@@ -223,6 +245,10 @@ class ControlType(enum.Enum):
 
 
 class LogicalRecordPositionType(enum.Enum):
+    """
+    Logical Record Position (LRP) Type Enumeration
+    Applies to a :class:`MdsolDerivationDef`, :class:`MdsolDerivationStep`, :class:`MdsolCheckStep`
+    """
     MaxBySubject = 'MaxBySubject'
     MaxByInstance = 'MaxByInstance'
     MaxByDataPage = 'MaxByDataPage'
@@ -236,6 +262,10 @@ class LogicalRecordPositionType(enum.Enum):
 
 
 class ProtocolDeviationStatus(enum.Enum):
+    """
+    Protocol Deviation Status Enumeration
+    Applies to a :class:`MdsolProtocolDeviation`
+    """
     Open = "Open"
     Removed = "Removed"
 
@@ -256,6 +286,10 @@ LOGICAL_RECORD_POSITIONS = [
 
 
 class LocationType(enum.Enum):
+    """
+    Location Type Enumeration
+    Applies to a :class:`Location`
+    """
     Sponsor = 'Sponsor'
     Site = 'Site'
     CRO = 'CRO'
@@ -264,6 +298,10 @@ class LocationType(enum.Enum):
 
 
 class UserType(enum.Enum):
+    """
+    User Type Enumeration
+    Applies to a :class:`User`
+    """
     Sponsor = 'Sponsor'
     Investigator = 'Investigator'
     Lab = 'Lab'
@@ -271,7 +309,11 @@ class UserType(enum.Enum):
 
 
 class GranularityType(enum.Enum):
-    All =  'All'
+    """
+    ODM Granularity Type Enumeration
+    Applies to a :class:`ODM`
+    """
+    All = 'All'
     Metadata = 'Metadata'
     AdminData = 'AdminData'
     ReferenceData = 'ReferenceData'
