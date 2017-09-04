@@ -54,7 +54,7 @@ class MetaDataVersionRef(ODMElement):
     def __init__(self, study_oid, metadata_version_oid, effective_date):
         """
         :param str study_oid: References the :class:`Study` that uses this metadata version.
-        :param str metadata_version_oid: References the :class:`MetaDataVersion` (within the above Study).
+        :param str metadata_version_oid: References the :class:`rwslib.builders.MetaDataVersion` (within the above Study).
         :param datetime.datetime effective_date: Effective Date for this version and Site
         """
         super(MetaDataVersionRef, self).__init__()
@@ -82,7 +82,7 @@ class Location(ODMElement, LastUpdateMixin):
         :param str oid: OID for the Location, referenced in :class:`LocationRef`
         :param str name: Name for the Location
         :param rwslib.builder_constants.LocationType location_type: Type for this Location
-        :param list(MetaDataVersion) metadata_versions: The :class:`MetaDataVersionRef` for this Location
+        :param list(MetaDataVersionRef) metadata_versions: The :class:`MetaDataVersionRef` for this Location
         """
         super(Location, self).__init__()
         self.oid = oid
@@ -275,7 +275,7 @@ class User(ODMElement):
 
 class SimpleChildElement(ODMElement):
     """
-    Generic Element
+    Generic Element, for elements we're not ready to flesh out in the builders
     """
     def __init__(self, text):
         self.text = text
