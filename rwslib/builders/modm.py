@@ -53,6 +53,8 @@ class MODMAttribute(object):
     def value(self):
         if isinstance(self.raw_value, (datetime.datetime, datetime.date)):
             return self.raw_value.isoformat()
+        elif isinstance(self.raw_value, (bool,)):
+            return 'Yes' if self.raw_value else 'No'
         return self.raw_value
 
 

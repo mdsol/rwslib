@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import uuid
-from unittest import TestCase
+from unittest import TestCase, mock
 
 from faker import Faker
 
@@ -480,6 +480,15 @@ class TestMODMItemData(TestCase):
                 data.add_attribute(attribute, "Blargle")
             tested = obj_to_doc(data)
             self.assertIsNotNone(tested.get("mdsol:{}".format(attribute)))
+
+    def test_modm_bool_attribute(self):
+        """A boolean gets mapped to Yes or No"""
+        data = ItemData(itemoid="BRTHDAT", value="12 DEC 1975")
+        data.add_attribute("IsSDVRequired", True)
+        data.add_attribute("IsSDVComplete", False)
+        tested = obj_to_doc(data)
+        self.assertEqual(tested.get("mdsol:IsSDVRequired"), "Yes")
+        self.assertEqual(tested.get("mdsol:IsSDVComplete"), "No")
 
     def test_invalid_modm_attributes(self):
         """Each invalid modm attribute raises an exception"""
