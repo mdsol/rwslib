@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import uuid
-from unittest import TestCase, mock
+from unittest import TestCase
 
 from faker import Faker
 
