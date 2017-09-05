@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-__author__ = 'isparks'
-import unittest
-from rwslib.builders import *
-from rwslib.builder_constants import *
-from xml.etree import cElementTree as ET
-from rwslib.tests.test_builders import obj_to_doc, bool_to_yes_no
 
+__author__ = 'isparks'
+
+import unittest
+
+from rwslib.builders.metadata import *
+from rwslib.builders.constants import DataType, LogicalRecordPositionType, StepType
+from rwslib.builders.clinicaldata import ItemData
+
+from rwslib.tests.test_builders import obj_to_doc
 
 # Metadata object tests
 
@@ -1227,5 +1230,22 @@ class TestStudy(unittest.TestCase):
         self.assertEqual(doc.getchildren()[2].tag, "MetaDataVersion")
 
 
-if __name__ == '__main__':
-    unittest.main()
+class TestAlias(unittest.TestCase):
+
+    def test_alias(self):
+        """Create an Alias"""
+        obj = Alias(context="SDTM", name="DM.BRTHDTC")
+        doc = obj_to_doc(obj)
+        self.assertEqual('Alias', doc.tag)
+        self.assertEqual('SDTM', doc.get('Context'))
+        self.assertEqual('DM.BRTHDTC', doc.get('Name'))
+
+    def test_add_alias_to_item(self):
+        """Add an Alias to an ItemDef"""
+        obj = ItemDef(oid="DM.BRTHDAT", name="Date of Birth", datatype=DataType.Date,
+                      date_time_format="dd MMM yyyy")
+        obj << Alias(context="SDTM", name="DM.BRTHDTC")
+        doc = obj_to_doc(obj)
+        self.assertEqual('ItemDef', doc.tag)
+        self.assertEqual('Alias', list(doc)[0].tag)
+

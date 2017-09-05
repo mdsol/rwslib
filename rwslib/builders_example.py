@@ -2,6 +2,9 @@
 __author__ = 'isparks'
 
 from rwslib.builders import *
+from rwslib.builders.constants import DataType
+from datetime import datetime
+
 
 def example_clinical_data(study_name, environment):
     """Test demonstrating building clinical data"""
@@ -228,7 +231,8 @@ if __name__ == '__main__':
         projectname = 'Mediflex'
         odm_definition = example_clinical_data(projectname,"DEV")
         request = PostDataRequest(str(odm_definition))
-    print str(odm_definition)
+    # Uncomment this to see the generated ODM
+    # print(str(odm_definition))
 
     response = r.send_request(request)
     print(str(response))

@@ -92,10 +92,13 @@ xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns="http://www.cdisc.org/n
   </ClinicalData>
 </ODM>"""
 
-        path = "datasets/rwscmd_getdata.odm?StudyOID=Fixitol(Dev)&SubjectKey=001&IncludeIDs=0&IncludeValues=0"
+        # path = "datasets/rwscmd_getdata.odm?StudyOID=Fixitol(Dev)&SubjectKey=001&IncludeIDs=0&IncludeValues=0"
+        path = "datasets/rwscmd_getdata.odm"
 
         httpretty.register_uri(
-            httpretty.GET, "https://innovate.mdsol.com/RaveWebServices/" + path,
+            httpretty.GET,
+            "https://innovate.mdsol.com/RaveWebServices/" + path,
+            # "https://innovate.mdsol.com/RaveWebServices",
             status=200,
             body=odm)
 
@@ -301,7 +304,7 @@ class TestAutofill(unittest.TestCase):
   </ClinicalData>
 </ODM>"""
 
-        self.path = "datasets/rwscmd_getdata.odm?StudyOID=Test(Prod)&SubjectKey=001&IncludeIDs=0&IncludeValues=0"
+        self.path = "datasets/rwscmd_getdata.odm"
 
         self.response_content = """<Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
               InboundODMFileOID=""
@@ -310,6 +313,7 @@ class TestAutofill(unittest.TestCase):
               SubjectNumberInStudy="1103" SubjectNumberInStudySite="55">
         </Response>"""
 
+        # NOTE: HTTPretty is not supported on Python3, need to migrate this (get weird breakages in Travis)
         httpretty.enable()
 
         httpretty.register_uri(
@@ -329,7 +333,7 @@ class TestAutofill(unittest.TestCase):
 
     def test_autofill(self):
         result = self.runner.invoke(rwscmd.rws,
-                                    ['--verbose', 'https://innovate.mdsol.com', 'autofill', 'Test', 'Prod', '001'],
+                                    ["--verbose", 'https://innovate.mdsol.com', 'autofill', 'Test', 'Prod', '001'],
                                     input="defuser\npassword\n")
         self.assertIn("Step 1\nGetting data list\nGetting metadata version 1\nGenerating data", result.output)
         self.assertIn("Step 10\nGetting data list\nGenerating data", result.output)
@@ -337,8 +341,9 @@ class TestAutofill(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
 
     def test_autofill_steps(self):
-        result = self.runner.invoke(rwscmd.rws, ['--verbose', 'https://innovate.mdsol.com', 'autofill', '--steps', '1',
-                                                 'Test', 'Prod', '001'],
+        result = self.runner.invoke(rwscmd.rws,
+                                    ['--verbose', 'https://innovate.mdsol.com', 'autofill', '--steps', '1',
+                                     'Test', 'Prod', '001'],
                                     input="defuser\npassword\n")
 
         self.assertIn("Step 1\nGetting data list\nGetting metadata version 1\nGenerating data", result.output)
@@ -387,7 +392,7 @@ class TestAutofill(unittest.TestCase):
             result = self.runner.invoke(rwscmd.rws,
                                         ['--verbose', 'https://innovate.mdsol.com', 'autofill', '--steps', '1',
                                          '--metadata', 'odm.xml', 'Test', 'Prod', '001'],
-                                        input="defuser\npassword\n")
+                                        input=u"defuser\npassword\n", catch_exceptions=False)
         self.assertFalse(result.exception)
         self.assertIn("Step 1\nGetting data list\nGenerating data", result.output)
         self.assertNotIn("Step 2", result.output)
