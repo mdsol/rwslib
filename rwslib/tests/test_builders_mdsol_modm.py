@@ -123,7 +123,7 @@ class TestMODMSubjectData(TestCase):
         """Each modm attribute is settable"""
         for attribute in ["SubjectName", "Status",
                           "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
-                          "IsSDVRequired", "IsSDVComplete"]:
+                          "IsSDVRequired", "IsSDVComplete", "SubjectUUID"]:
             data = SubjectData("Subject 1", "Site 1")
             if "UUID" in attribute:
                 data.add_attribute(attribute, uuid.uuid4())

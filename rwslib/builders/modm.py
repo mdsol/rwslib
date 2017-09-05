@@ -25,7 +25,7 @@ class MODMExtensionRegistry(enum.Enum):
                       "IsSDVRequired", "IsSDVComplete"]
     SubjectData = ["SubjectName", "Status",
                    "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
-                   "IsSDVRequired", "IsSDVComplete"]
+                   "IsSDVRequired", "IsSDVComplete", "SubjectUUID"]
     FormData = ["FormUUID", "DataPageName", "DataPageID",
                 "SDRCompleteDate", "SDVCompleteDate", "LockCompleteDate",
                 "IsSDVRequired", "IsSDVComplete"]
