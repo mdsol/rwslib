@@ -38,6 +38,7 @@ setup(
     install_requires=['requests', 'lxml', 'httpretty', 'six', 'click', 'faker', 'enum34'],
     tests_require=['mock'],
     license=open('LICENSE.txt').read(),
+    url='https://github.com/mdsol/rwslib/',
     zip_safe=False,
     test_suite='rwslib.tests.all_tests',
     classifiers=(
