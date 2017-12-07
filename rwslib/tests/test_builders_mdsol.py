@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from rwslib.builder_constants import QueryStatusType, ProtocolDeviationStatus
-from rwslib.builders import MdsolQuery, ODM, ClinicalData, SubjectData, StudyEventData, FormData, ItemGroupData, \
-    ItemData, MdsolProtocolDeviation
+from rwslib.builders.constants import ProtocolDeviationStatus, QueryStatusType
+from rwslib.builders.clinicaldata import ItemData, MdsolProtocolDeviation, MdsolQuery
 from rwslib.tests.common import obj_to_doc
-
-__author__ = 'glow'
 
 
 class TestMdsolQuery(unittest.TestCase):

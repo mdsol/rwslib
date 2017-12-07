@@ -17,7 +17,7 @@ def typeof_rave_data(value):
     since we're trying to replace like with like when scrambling."""
 
     # Test if value is a date
-    for format in ['%d %b %Y', '%b %Y', '%Y', '%d %m %Y', '%m %Y','%d/%b/%Y', '%b/%Y', '%d/%m/%Y', '%m/%Y' ]:
+    for format in ['%d %b %Y', '%b %Y', '%Y', '%d %m %Y', '%m %Y', '%d/%b/%Y', '%b/%Y', '%d/%m/%Y', '%m/%Y']:
         try:
             datetime.datetime.strptime(value, format)
             if len(value) == 4 and (int(value) < 1900 or int(value) > 2030):
@@ -41,7 +41,7 @@ def typeof_rave_data(value):
     # Test if value is a integer
     try:
         if ((isinstance(value, str) and isinstance(int(value), int)) \
-                or isinstance(value, int)):
+                    or isinstance(value, int)):
             return ('int', None)
     except ValueError:
         pass
@@ -63,40 +63,45 @@ def typeof_rave_data(value):
 
 class Scramble():
     def __init__(self, metadata=None):
-        #If initialized with metadata, store relevant formats and lookup information
+        # If initialized with metadata, store relevant formats and lookup information
         if metadata:
             self.metadata = etree.fromstring(metadata)
         else:
             self.metadata = None
 
-
     def scramble_int(self, length):
         """Return random integer up to specified number of digits"""
         return str(fake.random_number(length))
-
 
     def scramble_float(self, length, sd=0):
         """Return random float in specified format"""
         if sd == 0:
             return str(fake.random_number(length))
         else:
-            return str(fake.pyfloat(length-sd, sd, positive=True))
-
+            return str(fake.pyfloat(length - sd, sd, positive=True))
 
     def scramble_date(self, value, format='%d %b %Y'):
         """Return random date """
-        return fake.date_time_between(start_date="-1y", end_date=value).strftime(format).upper()
-
+        # faker method signature changed
+        if value == '':
+            # handle the empty string by defaulting to 'now' and 1 year ago
+            end_date = 'now'
+            start_date = '-1y'
+        else:
+            # specified end date, and one year prior
+            end_date = datetime.datetime.strptime(value, format).date()
+            start_date = end_date - datetime.timedelta(days=365)
+        fake_date = fake.date_time_between(start_date=start_date,
+                                           end_date=end_date).strftime(format).upper()
+        return fake_date
 
     def scramble_time(self, format='%H:%M:%S'):
         """Return random time"""
         return fake.time(pattern=format)
 
-
     def scramble_string(self, length):
         """Return random string"""
         return fake.text(length) if length > 5 else ''.join([fake.random_letter() for n in range(0, length)])
-
 
     def scramble_value(self, value):
         """Duck-type value and scramble appropriately"""
@@ -118,7 +123,6 @@ class Scramble():
         except:
             return ""
 
-
     def scramble_subjectname(self, value):
         """Scramble subject name with a consistent one-way hash"""
         # md5 will give a consistent obscured value.
@@ -126,7 +130,6 @@ class Scramble():
         # TODO:  leave 'New Subject' un-encoded?
         md5 = hashlib.md5(value)
         return md5.hexdigest()
-
 
     def scramble_codelist(self, codelist):
         """Return random element from code list"""
@@ -141,13 +144,12 @@ class Scramble():
 
         return fake.random_element(codes)
 
-
     def scramble_itemdata(self, oid, value):
         """If metadata provided, use it to scramble the value based on data type"""
         if self.metadata is not None:
             path = ".//{0}[@{1}='{2}']".format(E_ODM.ITEM_DEF.value, A_ODM.OID.value, oid)
             elem = self.metadata.find(path)
-            #for elem in self.metadata.iter(E_ODM.ITEM_DEF.value):
+            # for elem in self.metadata.iter(E_ODM.ITEM_DEF.value):
             datatype = elem.get(A_ODM.DATATYPE.value)
 
             codelist = None
@@ -163,9 +165,9 @@ class Scramble():
 
             if A_ODM.DATETIME_FORMAT.value in elem.keys():
                 dt_format = elem.get(A_ODM.DATETIME_FORMAT.value)
-                for fmt in [('yyyy', '%Y'), ('MMM', '%b'), ('dd', '%d'), ('HH', '%H'), ('nn', '%M'), ('ss', '%S'), ('-', '')]:
+                for fmt in [('yyyy', '%Y'), ('MMM', '%b'), ('dd', '%d'), ('HH', '%H'), ('nn', '%M'), ('ss', '%S'),
+                            ('-', '')]:
                     dt_format = dt_format.replace(fmt[0], fmt[1])
-
 
             if codelist is not None:
                 return self.scramble_codelist(codelist)
@@ -183,7 +185,7 @@ class Scramble():
                 return self.scramble_date(value, dt_format)
 
             elif datatype in ['time']:
-                return self.scramble_time( dt_format)
+                return self.scramble_time(dt_format)
 
             else:
                 return self.scramble_value(value)
@@ -191,11 +193,9 @@ class Scramble():
         else:
             return self.scramble_value(value)
 
-
     def scramble_query_value(self, value):
         """Return random text for query"""
         return self.scramble_value(value)
-
 
     def fill_empty(self, fixed_values, input):
         """Fill in random values for all empty-valued ItemData elements in an ODM document"""
