@@ -16,6 +16,7 @@ if sys.argv[-1] == 'publish':
 packages = [
     'rwslib',
     'rwslib.rws_requests',
+    'rwslib.builders',
     'rwslib.extras',
     'rwslib.extras.audit_event',
     'rwslib.extras.rwscmd',
