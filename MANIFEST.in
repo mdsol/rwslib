@@ -2,3 +2,4 @@ include README.md
 include LICENSE.txt
 include AUTHORS.rst
 include rwslib/extras/audit_event/README.md
+include rwslib/builders/README.md
