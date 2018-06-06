@@ -6,9 +6,11 @@ python:
   - "3.6"
 
 # command to install dependencies
-install: "python setup.py install"
+install:
+  - python setup.py install
 # command to run tests
-script: "python setup.py test"
+script:
+  - python setup.py test
 
 # Automated Deployment to PyPI on tag
 deploy:
