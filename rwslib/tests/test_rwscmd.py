@@ -2,11 +2,12 @@
 
 __author__ = 'anewbigging'
 
-import sys
-from click.testing import CliRunner
-from rwslib.extras.rwscmd import rwscmd
-import httpretty
 import unittest
+
+import httpretty
+from click.testing import CliRunner
+
+from rwslib.extras.rwscmd import rwscmd
 
 
 class TestRWSCMD(unittest.TestCase):
