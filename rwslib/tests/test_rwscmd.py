@@ -2,11 +2,12 @@
 
 __author__ = 'anewbigging'
 
-import sys
-from click.testing import CliRunner
-from rwslib.extras.rwscmd import rwscmd
-import httpretty
 import unittest
+
+import httpretty
+from click.testing import CliRunner
+
+from rwslib.extras.rwscmd import rwscmd
 
 
 class TestRWSCMD(unittest.TestCase):
@@ -335,8 +336,12 @@ class TestAutofill(unittest.TestCase):
         result = self.runner.invoke(rwscmd.rws,
                                     ["--verbose", 'https://innovate.mdsol.com', 'autofill', 'Test', 'Prod', '001'],
                                     input="defuser\npassword\n")
-        self.assertIn("Step 1\nGetting data list\nGetting metadata version 1\nGenerating data", result.output)
-        self.assertIn("Step 10\nGetting data list\nGenerating data", result.output)
+        output = result.output
+        self.assertIn("Step 1\nGetting data list", output)
+        self.assertIn("Getting metadata version 1", output)
+        self.assertIn("Step 10\nGetting data list", output)
+        self.assertIn("Generating data", output)
+        self.assertEqual(10, output.count("Generating data"))
         self.assertNotIn("Step 11", result.output)
         self.assertEqual(result.exit_code, 0)
 
@@ -346,7 +351,9 @@ class TestAutofill(unittest.TestCase):
                                      'Test', 'Prod', '001'],
                                     input="defuser\npassword\n")
 
-        self.assertIn("Step 1\nGetting data list\nGetting metadata version 1\nGenerating data", result.output)
+        self.assertIn("Step 1\nGetting data list", result.output)
+        self.assertIn("Getting metadata version 1\n", result.output)
+        self.assertIn("Generating data", result.output)
         self.assertNotIn("Step 2", result.output)
         self.assertEqual(result.exit_code, 0)
 
@@ -379,7 +386,9 @@ class TestAutofill(unittest.TestCase):
                                         input=u"defuser\npassword\n", catch_exceptions=False)
 
         self.assertFalse(result.exception)
-        self.assertIn("Step 1\nGetting data list\nGetting metadata version 1\nGenerating data", result.output)
+        self.assertIn("Step 1\nGetting data list", result.output)
+        self.assertIn("Getting metadata version 1", result.output)
+        self.assertIn("Generating data", result.output)
         self.assertIn('Fixing YN to value: 99', result.output)
         self.assertNotIn("Step 2", result.output)
         self.assertEqual(result.exit_code, 0)
@@ -394,7 +403,8 @@ class TestAutofill(unittest.TestCase):
                                          '--metadata', 'odm.xml', 'Test', 'Prod', '001'],
                                         input=u"defuser\npassword\n", catch_exceptions=False)
         self.assertFalse(result.exception)
-        self.assertIn("Step 1\nGetting data list\nGenerating data", result.output)
+        self.assertIn("Step 1\nGetting data list", result.output)
+        self.assertIn("Generating data", result.output)
         self.assertNotIn("Step 2", result.output)
         self.assertEqual(result.exit_code, 0)
 
