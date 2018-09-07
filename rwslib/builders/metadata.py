@@ -1292,7 +1292,7 @@ class CodeList(ODMElement):
         """
         :param str oid: CodeList OID
         :param str name: Name of CodeList
-        :param str datatype: DataType restricts the values that can appear in the CodeList whether internal or external
+        :param DataType datatype: DataType restricts the values that can appear in the CodeList whether internal or external
             (*integer* | *float* | *text* | *string* )
         :param str sas_format_name: SASFormatName must be a legal SAS format for CodeList
         """
