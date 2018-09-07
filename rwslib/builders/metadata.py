@@ -892,7 +892,7 @@ class ItemDef(ODMElement):
         """
         :param str oid: OID for ItemDef
         :param str name: Name for ItemDef
-        :param str datatype: Datatype for ItemDef
+        :param DataType datatype: Datatype for ItemDef
         :param int length: Max. Length of content expected in Item Value
         :param int significant_digits: Max. Number of significant digits in Item Value
         :param str sas_field_name: SAS Name for the ItemDef
