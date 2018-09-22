@@ -326,11 +326,10 @@ class TestMeasurementUnitRef(unittest.TestCase):
             MeasurementUnitRef("KG") << object()
 
     def test_build(self):
-        tested = MeasurementUnitRef("KG", order_number=1)
+        tested = MeasurementUnitRef("KG")
         doc = obj_to_doc(tested)
         self.assertEqual(doc.tag, "MeasurementUnitRef")
         self.assertEqual("KG", doc.attrib['MeasurementUnitOID'])
-        self.assertEqual("1", doc.attrib['mdsol:OrderNumber'])
 
 
 class TestCodeListRef(unittest.TestCase):

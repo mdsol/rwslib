@@ -1163,19 +1163,14 @@ class MeasurementUnitRef(ODMElement):
     A reference to a measurement unit definition (:class:`MeasurementUnit`).
     """
 
-    def __init__(self, oid, order_number=None):
+    def __init__(self, oid):
         """
         :param str oid: :class:`MeasurementUnit` OID
-        :param order_number: :attr:`OrderNumber` for MeasurementUnitRef
         """
         self.oid = oid
-        self.order_number = order_number
 
     def build(self, builder):
         params = dict(MeasurementUnitOID=self.oid)
-        if self.order_number is not None:
-            params['mdsol:OrderNumber'] = str(self.order_number)
-
         builder.start('MeasurementUnitRef', params)
         builder.end('MeasurementUnitRef')
 
