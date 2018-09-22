@@ -25,6 +25,7 @@ Contents:
    odm_adapter
    rwscmd
    classes
+   classes_builders
 
 Indices and tables
 ==================
