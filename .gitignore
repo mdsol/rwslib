@@ -18,3 +18,9 @@ htmlcov
 
 # coverage
 .coverage
+
+# VirtualEnvs!
+venv
+
+# TOX
+.tox
