@@ -672,7 +672,7 @@ class ItemGroupRef(ODMElement):
     The ItemGroupRefs within a single FormDef must not have duplicate ItemGroupOIDs nor OrderNumbers.
     """
 
-    def __init__(self, oid, order_number, mandatory=True):
+    def __init__(self, oid, order_number=None, mandatory=True):
         #: OID for the referred :class:`ItemGroupDef`
         """
         :param str oid: OID for the referenced :class:`ItemGroupDef`
@@ -685,9 +685,10 @@ class ItemGroupRef(ODMElement):
 
     def build(self, builder):
         params = dict(ItemGroupOID=self.oid,
-                      OrderNumber=str(self.order_number),
                       Mandatory=bool_to_yes_no(self.mandatory),
                       )
+        if self.order_number is not None:
+            params['OrderNumber'] = str(self.order_number)
         builder.start("ItemGroupRef", params)
         builder.end("ItemGroupRef")
 

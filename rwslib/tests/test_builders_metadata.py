@@ -211,6 +211,12 @@ class TestItemGroupRef(unittest.TestCase):
         with self.assertRaises(ValueError):
             ItemGroupRef("ItemGroup1", 1) << object()
 
+    def test_optional_order_number(self):
+        igr = ItemGroupRef("ItemGroup1")
+        doc = obj_to_doc(igr)
+        self.assertEqual("ItemGroup1", doc.attrib['ItemGroupOID'])
+        self.assertNotIn('OrderNumber', doc.attrib)
+
     def test_builder(self):
         tested = ItemGroupRef("ItemGroup1", 1, mandatory=True)
         doc = obj_to_doc(tested)
