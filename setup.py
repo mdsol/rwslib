@@ -23,8 +23,8 @@ packages = [
 ]
 
 rwsinit = open('rwslib/__init__.py').read()
-author = re.search("__author__ = '([^']+)'", rwsinit).group(1)
-version = re.search("__version__ = '([^']+)'", rwsinit).group(1)
+author = re.search("__author__ = \"([^\"]+)\"", rwsinit).group(1)
+version = re.search("__version__ = \"([^\"]+)\"", rwsinit).group(1)
 
 setup(
     name='rwslib',
