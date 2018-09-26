@@ -145,6 +145,18 @@ class TestStudyEventRef(unittest.TestCase):
         with self.assertRaises(ValueError):
             StudyEventRef("OID", 2, False) << object()
 
+    def test_optional_order_number(self):
+        ser = StudyEventRef("OID")
+        doc = obj_to_doc(ser)
+        self.assertIsNone(doc.get('OrderNumber'))
+        self.assertEquals("No", doc.get('Mandatory'))
+
+    def test_mandatory_study_event_ref(self):
+        ser = StudyEventRef("OID", mandatory=True)
+        doc = obj_to_doc(ser)
+        self.assertIsNone(doc.get('OrderNumber'))
+        self.assertEquals("Yes", doc.get('Mandatory'))
+
 
 class TestProtocol(unittest.TestCase):
     def test_can_accept_studyeventref_child(self):
