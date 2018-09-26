@@ -3,6 +3,22 @@ Contributing to rwslib
 
 Thank you for considering contributing to rwslib.
 
+Developer Setup
+---------------
+1. Clone the repository
+   ```
+   git clone https://github.com/mdsol/rwslib
+   ```
+2. Create a Virtual Env for the Local instance
+    ```bash
+    $ python -m venv venv
+    $ source venv/bin/activate
+    ```
+3. Install the development dependencies
+    ```bash
+    $ pip install -r requirements-dev.txt
+    ```
+4. Enjoy !!!
 
 Pull Requests
 -------------
