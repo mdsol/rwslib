@@ -461,7 +461,7 @@ class StudyEventRef(ODMElement):
     def build(self, builder):
         """Build XML by appending to builder"""
         params = dict(StudyEventOID=self.oid, Mandatory=bool_to_yes_no(self.mandatory))
-        if self._order_number:
+        if self._order_number is not None:
             params["OrderNumber"] = self._order_number
         builder.start("StudyEventRef", params)
         builder.end("StudyEventRef")
