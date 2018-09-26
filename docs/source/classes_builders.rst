@@ -4,7 +4,7 @@ Class Reference for Builders
 Metadata Builders
 =================
 
-Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
+.. note:: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
 
 .. automodule:: rwslib.builders.metadata
     :members:
@@ -13,7 +13,7 @@ Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific ex
 Clinical Data Builders
 ======================
 
-Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
+.. note:: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
 
 .. automodule:: rwslib.builders.clinicaldata
     :members:
@@ -23,7 +23,7 @@ Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific ex
 Medidata Extensions to ODM (MODM) Builders
 ==========================================
 
-Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
+.. note:: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
 
 .. automodule:: rwslib.builders.clinicaldata
     :members:
@@ -33,7 +33,7 @@ Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific ex
 Administrative Data Builders
 ============================
 
-Note: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
+.. note:: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
 
 .. automodule:: rwslib.builders.admindata
     :members:
