@@ -24,7 +24,10 @@ from six.moves.urllib_parse import urlencode
 
 
 def check_dataset_type(dataset_type):
-    """Datasets may only be regular or raw"""
+    """
+    Datasets may only be regular or raw
+    :type dataset_type: str
+    """
     if dataset_type.lower() not in ["regular", "raw"]:
         raise ValueError("Dataset type not 'regular' or 'raw' is %s" % dataset_type)
 
@@ -218,7 +221,6 @@ class VersionRequestBase(RWSAuthorizedGetRequest):
 
     def __init__(self, project_name, oid):
         """
-
         :param str project_name: Project Name
         :param int oid: Metadata version OID (CRF Draft Number)
         """
@@ -274,6 +276,9 @@ class StudyDraftsRequest(RWSAuthorizedGetRequest):
     """Return the list of study drafts"""
 
     def __init__(self, project_name):
+        """
+        :param str project_name: Project Name
+        """
         self.project_name = project_name
 
     def url_path(self):
@@ -292,6 +297,9 @@ class StudyVersionsRequest(RWSAuthorizedGetRequest):
     """Return the list of study versions"""
 
     def __init__(self, project_name):
+        """
+        :param str project_name: Project Name
+        """
         self.project_name = project_name
 
     def url_path(self):
@@ -345,6 +353,9 @@ class GlobalLibraryDraftsRequest(RWSAuthorizedGetRequest):
     """Return the list of global library drafts"""
 
     def __init__(self, project_name):
+        """
+        :param str project_name: Project Name
+        """
         self.project_name = project_name
 
     def url_path(self):
@@ -363,6 +374,9 @@ class GlobalLibraryVersionsRequest(RWSAuthorizedGetRequest):
     """Return the list of global library versions"""
 
     def __init__(self, project_name):
+        """
+        :param str project_name: Project Name
+        """
         self.project_name = project_name
 
     def url_path(self):
@@ -390,6 +404,11 @@ class PostMetadataRequest(RWSAuthorizedPostRequest):
     """Post an ODM data transaction to Rave, get back an RWSResponse object"""
 
     def __init__(self, project_name, data, headers={"Content-type": "text/xml"}):
+        """
+        :param str project_name: Project Name
+        :param str data: Data to dispatch
+        :param dict headers: Headers to pass to client
+        """
         self.project_name = project_name
         self.data = data
         self.headers = headers
@@ -505,7 +524,7 @@ class PostDataRequest(RWSAuthorizedPostRequest):
     def __init__(self, data, headers={"Content-type": "text/xml"}):
         """
         Post an ODM to a RWS endpoint
-        :param str data: Data to POST
+        :param bytes data: Data to POST
         :param dict headers: Headers to add to request
         """
         self.data = data
@@ -589,6 +608,22 @@ class StudyDatasetRequest(ODMDatasetBase):
         decodesuffix=None,
         stdsuffix=None,
     ):
+        """
+        :param str project_name: Name of the Rave Study
+        :param str environment_name: Name of the Rave Study Environment
+        :param str dataset_type: Dataset type, one of 'regular' or 'raw'
+        :param str start: Start date for the Report (iso8601)
+        :param str rawsuffix: Adds raw data values to a full or incremental dataset, and identifies these
+            values with {rawsuffix}.
+        :param str formoid: FormOID for which to report
+        :param str versionitem: Adds the subject's CRF version to the dataset, and identifies it with {version-item}
+        :param str codelistsuffix: Adds code list OIDS for fields that use a code list to the dataset,
+            and identifies these values with {codelistsuffix}.
+        :param str decodesuffix: Add decoded values of items that have an associated code list to the dataset,
+            and identifies these values with {decodesuffix}.
+        :param str stdsuffix: Adds standard data values to a full or incremental dataset, and identifies these
+            values with {stdsuffix}.
+        """
         self.project_name = project_name
         self.environment_name = environment_name
 
@@ -632,6 +667,23 @@ class VersionDatasetRequest(ODMDatasetBase):
         decodesuffix=None,
         stdsuffix=None,
     ):
+        """
+        :param str project_name: Name of the Rave Study
+        :param str environment_name: Name of the Rave Study Environment
+        :param str dataset_type: Dataset type, one of 'regular' or 'raw'
+        :param str start: Start date for the Report (iso8601)
+        :param str rawsuffix: Adds raw data values to a full or incremental dataset, and identifies these
+            values with {rawsuffix}.
+        :param str formoid: FormOID for which to report
+        :param str versionitem: Adds the subject's CRF version to the dataset, and identifies it with {version-item}
+        :param str codelistsuffix: Adds code list OIDS for fields that use a code list to the dataset,
+            and identifies these values with {codelistsuffix}.
+        :param str decodesuffix: Add decoded values of items that have an associated code list to the dataset,
+            and identifies these values with {decodesuffix}.
+        :param str stdsuffix: Adds standard data values to a full or incremental dataset, and identifies these
+            values with {stdsuffix}.
+        :param str version_oid: version for which to report
+        """
         self.project_name = project_name
         self.environment_name = environment_name
         self.version_oid = version_oid
@@ -683,6 +735,23 @@ class SubjectDatasetRequest(ODMDatasetBase):
         decodesuffix=None,
         stdsuffix=None,
     ):
+        """
+        :param str project_name: Name of the Rave Study
+        :param str environment_name: Name of the Rave Study Environment
+        :param str dataset_type: Dataset type, one of 'regular' or 'raw'
+        :param str start: Start date for the Report (iso8601)
+        :param str rawsuffix: Adds raw data values to a full or incremental dataset, and identifies these
+            values with {rawsuffix}.
+        :param str formoid: FormOID for which to report
+        :param str versionitem: Adds the subject's CRF version to the dataset, and identifies it with {version-item}
+        :param str codelistsuffix: Adds code list OIDS for fields that use a code list to the dataset,
+            and identifies these values with {codelistsuffix}.
+        :param str decodesuffix: Add decoded values of items that have an associated code list to the dataset,
+            and identifies these values with {decodesuffix}.
+        :param str stdsuffix: Adds standard data values to a full or incremental dataset, and identifies these
+            values with {stdsuffix}.
+        :param str subjectkey: Subject Key for subject for which to report
+        """
         self.project_name = project_name
         self.environment_name = environment_name
         self.subjectkey = subjectkey
