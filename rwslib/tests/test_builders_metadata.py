@@ -149,19 +149,19 @@ class TestStudyEventRef(unittest.TestCase):
         ser = StudyEventRef("OID")
         doc = obj_to_doc(ser)
         self.assertIsNone(doc.get('OrderNumber'))
-        self.assertEquals("No", doc.get('Mandatory'))
+        self.assertEqual("No", doc.get('Mandatory'))
 
     def test_zero_order_number(self):
         """Not that it's entirely sensible, but it's cleaner"""
         ser = StudyEventRef("OID", order_number=0)
         doc = obj_to_doc(ser)
-        self.assertEquals("0", str(doc.get('OrderNumber')))
+        self.assertEqual("0", str(doc.get('OrderNumber')))
 
     def test_mandatory_study_event_ref(self):
         ser = StudyEventRef("OID", mandatory=True)
         doc = obj_to_doc(ser)
         self.assertIsNone(doc.get('OrderNumber'))
-        self.assertEquals("Yes", doc.get('Mandatory'))
+        self.assertEqual("Yes", doc.get('Mandatory'))
 
 
 class TestProtocol(unittest.TestCase):
