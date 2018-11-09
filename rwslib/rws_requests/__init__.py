@@ -31,12 +31,13 @@ def check_dataset_type(dataset_type):
 
 def format_date_argument(date_element):
     """
-    Take a date as either a datetime.date/datetime or a string and return it as a
-     iso8601 formatted value
-    :param date_element: passed argument
+    Take a date as either a datetime.date/datetime or a string and return it as a iso8601 formatted value
+    :param Union[datetime.date, datetime.datetime] date_element: passed argument
+    :rtype str
     :return:
     """
     if not isinstance(date_element, (datetime.datetime, datetime.date)):
+        # TODO:
         if "T" in date_element:
             _date = datetime.datetime.strptime(date_element, "%Y-%m-%dT%H:%M:%S")
         else:
@@ -216,6 +217,11 @@ class VersionRequestBase(RWSAuthorizedGetRequest):
     """Base class for study and library metadata version requests"""
 
     def __init__(self, project_name, oid):
+        """
+
+        :param str project_name: Project Name
+        :param int oid: Metadata version OID (CRF Draft Number)
+        """
         self.project_name = project_name
         self._oid = None  # Oid is a version OID, an integer identifier
         self.oid = oid
@@ -428,8 +434,17 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
         links=False,
     ):
         """
-        If status == True then ?status=all
-        if include then include parameter is also added to query string
+        :param str project_name: Project/Study Name
+        :param str environment_name: Study Environment Name (eg `Prod`)
+        :param bool status: Add subject level workflow status
+        :param str include: Query option to add to `include` parameter (see INCLUDE_OPTIONS for allowed values)
+        :param str subject_key_type: Type of SubjectKey to have in the response (one of `SubjectName` or `SubjectUUID`)
+        :param bool links: Add Deep Links to Output ODM
+
+        .. note::
+            If status == True then ?status=all
+            If include then include parameter is also added to query string
+
         """
 
         self.project_name = project_name
@@ -488,6 +503,11 @@ class PostDataRequest(RWSAuthorizedPostRequest):
     """Post an ODM data transaction to Rave, get back an RWSResponse object"""
 
     def __init__(self, data, headers={"Content-type": "text/xml"}):
+        """
+        Post an ODM to a RWS endpoint
+        :param str data: Data to POST
+        :param dict headers: Headers to add to request
+        """
         self.data = data
         self.headers = headers
 
@@ -497,6 +517,10 @@ class PostDataRequest(RWSAuthorizedPostRequest):
         return kw
 
     def url_path(self):
+        """
+        Generate the Target Endpoint
+        :return: Generated Endpoint
+        """
         return make_url("webservice.aspx?PostODMClinicalData")
 
     def result(self, response):

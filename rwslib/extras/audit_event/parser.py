@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import six
+
 __author__ = 'isparks'
 
 from lxml import etree
@@ -7,13 +9,6 @@ from rwslib.extras.audit_event.context import (Context, Subject, Event,
                                                 Form, ItemGroup, Item,
                                                 Query, Review, Comment,
                                                 ProtocolDeviation)
-
-
-try:
-    basestring
-except NameError:
-    #  3
-    basestring = (str, bytes)
 
 # Constants
 ODM_NS = '{http://www.cdisc.org/ns/odm/v1.3}'
@@ -42,7 +37,7 @@ def yes_no_none(value):
 
 def make_int(value, missing=-1):
     """Convert string value to long, '' to missing"""
-    if isinstance(value, basestring):
+    if isinstance(value, six.string_types):
         if not value.strip():
             return missing
     elif value is None:

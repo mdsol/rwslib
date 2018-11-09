@@ -35,15 +35,21 @@ class RWSConnection(object):
         auth=None,
         virtual_dir="RaveWebServices",
     ):
-        """Create a connection to Rave
+        """
+        Create a connection to Rave
 
-          If the domain does not start with http then it is assumed to be the name of the medidata
-          url and https:// will be added as a prefix and .mdsol.com will be added as a postfix.
+        :param str domain: Rave URL Name
+        :param str username: Rave User Login
+        :param str password: Rave User password
+        :param str auth: Authentication tuple (usually something like `(username, password)`
+        :param str virtual_dir: Name of the Rave Web Services prefix (usually `RaveWebServices`, but can be customised)
 
-          e.g.
+        .. note::
+            If the `domain` does not start with http then it is assumed to be the name of the Medidata
+            url and https:// will be added as a prefix and .mdsol.com will be added as a postfix.
 
-          innovate      = https://innovate.mdsol.com
-          http://mytest = http:/mytest
+            * innovate => https://innovate.mdsol.com
+            * http://mytest => http:/mytest
 
         """
 

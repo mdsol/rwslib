@@ -23,8 +23,8 @@ packages = [
 ]
 
 rwsinit = open("rwslib/__init__.py").read()
-author = re.search(r"__author__ = \"([^']+)\"", rwsinit).group(1)
-version = re.search(r"__version__ = \"([^']+)\"", rwsinit).group(1)
+author = re.search(r"__author__ = \"([^\"]+)\"", rwsinit).group(1)
+version = re.search(r"__version__ = \"([^\"]+)\"", rwsinit).group(1)
 
 setup(
     name="rwslib",
@@ -36,30 +36,28 @@ setup(
     packages=packages,
     package_dir={"rwslib": "rwslib"},
     include_package_data=True,
-    install_requires=(
-        "requests",
-        "lxml",
-        "httpretty",
-        "six",
-        "click",
-        "faker",
-        "enum34; python_version < '3.4'",
-    ),
-    tests_require=["mock"],
-    license=open("LICENSE.txt").read(),
-    url="https://github.com/mdsol/rwslib/",
+    install_requires=['requests',
+                      'lxml',
+                      'six',
+                      'click',
+                      'faker',
+                      "enum34; python_version < '3.4'",
+                      ],
+    tests_require=['mock', 'httpretty'],
+    license=open('LICENSE.txt').read(),
+    url='https://github.com/mdsol/rwslib/',
     zip_safe=False,
-    test_suite="rwslib.tests.all_tests",
+    test_suite='rwslib.tests.all_tests',
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "Natural Language :: English",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: Implementation :: PyPy",
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     entry_points="""
     [console_scripts]

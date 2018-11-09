@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'isparks'
+__author__ = "isparks"
 
 import unittest
 
@@ -8,20 +8,20 @@ from rwslib.builders import *
 from rwslib.tests.common import obj_to_doc
 from datetime import datetime
 
+
 class TestClinicalData(unittest.TestCase):
     """Test ClinicalData classes"""
 
     def setUp(self):
         self.tested = ClinicalData("STUDY1", "DEV")(
             SubjectData("SITE1", "SUBJECT1")(
-                StudyEventData('VISIT_1')(
+                StudyEventData("VISIT_1")(
                     FormData("TESTFORM_A")(
                         ItemGroupData()(
-                            ItemData("Field1", "ValueA"),
-                            ItemData("Field2", "ValueB")
+                            ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB")
                         ),
                         ItemGroupData(item_group_repeat_key=2)(
-                            ItemData("Field3", "ValueC"),
+                            ItemData("Field3", "ValueC")
                         ),
                     )
                 )
@@ -39,9 +39,11 @@ class TestClinicalData(unittest.TestCase):
         """
         Test we can handle a MDV as a String
         """
-        self.tested.metadata_version_oid = '2'
+        self.tested.metadata_version_oid = "2"
         doc = obj_to_doc(self.tested)
-        self.assertEqual(doc.attrib["MetaDataVersionOID"], self.tested.metadata_version_oid)
+        self.assertEqual(
+            doc.attrib["MetaDataVersionOID"], self.tested.metadata_version_oid
+        )
 
     def test_metadata_version_oid_as_int(self):
         """
@@ -49,7 +51,9 @@ class TestClinicalData(unittest.TestCase):
         """
         self.tested.metadata_version_oid = 56
         doc = obj_to_doc(self.tested)
-        self.assertEqual(doc.attrib["MetaDataVersionOID"], str(self.tested.metadata_version_oid))
+        self.assertEqual(
+            doc.attrib["MetaDataVersionOID"], str(self.tested.metadata_version_oid)
+        )
 
     def test_only_accepts_subjectdata(self):
         """Test that only SubjectData can be inserted"""
@@ -68,10 +72,10 @@ class TestClinicalData(unittest.TestCase):
     def test_add_to_odm(self):
         """We can add multiple ClinicalData to an ODM"""
         odm = ODM("Some test case")
-        odm  << ClinicalData("Study1", "Dev")
-        odm  << ClinicalData("Study1", "Dev")
+        odm << ClinicalData("Study1", "Dev")
+        odm << ClinicalData("Study1", "Dev")
         tested = obj_to_doc(odm)
-        self.assertEqual('ODM', tested.tag)
+        self.assertEqual("ODM", tested.tag)
         self.assertTrue(2, len(list(tested)))
 
 
@@ -80,14 +84,13 @@ class TestSubjectData(unittest.TestCase):
 
     def setUp(self):
         self.tested = SubjectData("SITE1", "SUBJECT1")(
-            StudyEventData('VISIT_1')(
+            StudyEventData("VISIT_1")(
                 FormData("TESTFORM_A")(
                     ItemGroupData()(
-                        ItemData("Field1", "ValueA"),
-                        ItemData("Field2", "ValueB")
+                        ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB")
                     ),
                     ItemGroupData(item_group_repeat_key=2)(
-                        ItemData("Field3", "ValueC"),
+                        ItemData("Field3", "ValueC")
                     ),
                 )
             )
@@ -104,7 +107,7 @@ class TestSubjectData(unittest.TestCase):
         """Test transaction type will not allow you to set to invalid choice"""
 
         def do():
-            self.tested.transaction_type = 'UpDateSert'
+            self.tested.transaction_type = "UpDateSert"
 
         self.assertRaises(AttributeError, do)
 
@@ -116,7 +119,7 @@ class TestSubjectData(unittest.TestCase):
         """According to docs does not permit upserts"""
 
         def do():
-            SubjectData("SITEA", "SUB1", transaction_type='upsert')
+            SubjectData("SITEA", "SUB1", transaction_type="upsert")
 
         self.assertRaises(AttributeError, do)
 
@@ -147,45 +150,57 @@ class TestSubjectData(unittest.TestCase):
 
     def test_accepts_auditrecord(self):
         """Test that AuditRecord can be inserted"""
-        ar = AuditRecord(used_imputation_method=False,
-                         identifier='ABC1',
-                         include_file_oid=False)(
-            UserRef('test_user'),
-            LocationRef('test_site'),
+        ar = AuditRecord(
+            used_imputation_method=False, identifier="ABC1", include_file_oid=False
+        )(
+            UserRef("test_user"),
+            LocationRef("test_site"),
             ReasonForChange("Testing"),
-            DateTimeStamp(datetime.now())
+            DateTimeStamp(datetime.now()),
         )
         self.tested << ar
         self.assertEqual(self.tested.audit_record, ar)
         t = obj_to_doc(self.tested)
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 3)  # 1 StudyEventData + 1 SiteRef + 1 AuditRecord
+        self.assertTrue(
+            len(list(t)) == 3
+        )  # 1 StudyEventData + 1 SiteRef + 1 AuditRecord
 
     def test_add_annotations(self):
         """Test we can add one or more annotations"""
-        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
+        flags = [
+            Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
+            for i in range(0, 3)
+        ]
         for i in range(0, 4):
-            self.tested << Annotation(comment=Comment("Some Comment %s" % i), flags=flags)
+            self.tested << Annotation(
+                comment=Comment("Some Comment %s" % i), flags=flags
+            )
         t = obj_to_doc(self.tested)
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 6)  # 1 StudyEventData + 1 SiteRef + 4 annotations
+        self.assertTrue(
+            len(list(t)) == 6
+        )  # 1 StudyEventData + 1 SiteRef + 4 annotations
 
     def test_add_signature(self):
         """Test we can add one signature"""
-        self.tested << Signature(signature_id="Some ID",
-                                 user_ref=UserRef(oid="AUser"),
-                                 location_ref=LocationRef(oid="ALocation"),
-                                 signature_ref=SignatureRef(oid="ASignature"),
-                                 date_time_stamp=DateTimeStamp(date_time=datetime(year=2016,
-                                                                                  month=12,
-                                                                                  day=25,
-                                                                                  hour=12,
-                                                                                  minute=0,
-                                                                                  second=0)))
+        self.tested << Signature(
+            signature_id="Some ID",
+            user_ref=UserRef(oid="AUser"),
+            location_ref=LocationRef(oid="ALocation"),
+            signature_ref=SignatureRef(oid="ASignature"),
+            date_time_stamp=DateTimeStamp(
+                date_time=datetime(
+                    year=2016, month=12, day=25, hour=12, minute=0, second=0
+                )
+            ),
+        )
         t = obj_to_doc(self.tested)
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 3)  # 1 studyeventdata + 1 SiteRef + 1 signature
+        self.assertTrue(len(list(t)) == 3)  # 1 studyeventdata + 1 SiteRef + 1 signature
 
     def test_multiple_subject_data(self):
         """We can add multiple SubjectData to the Clinical Data"""
@@ -195,25 +210,23 @@ class TestSubjectData(unittest.TestCase):
         doc = obj_to_doc(cd)
         self.assertEqual(2, len(doc))
 
+
 class TestStudyEventData(unittest.TestCase):
     """Test StudyEventData classes"""
 
     def setUp(self):
-        self.tested = StudyEventData('VISIT_1')(
+        self.tested = StudyEventData("VISIT_1")(
             FormData("TESTFORM_A")(
                 ItemGroupData()(
-                    ItemData("Field1", "ValueA"),
-                    ItemData("Field2", "ValueB")
+                    ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB")
                 ),
-                ItemGroupData(item_group_repeat_key=2)(
-                    ItemData("Field3", "ValueC"),
-                ),
+                ItemGroupData(item_group_repeat_key=2)(ItemData("Field3", "ValueC")),
             )
         )
 
     def test_transaction_type(self):
         """Test transaction type inserted if set"""
-        self.tested.transaction_type = 'Update'
+        self.tested.transaction_type = "Update"
         doc = obj_to_doc(self.tested)
         self.assertEqual(doc.attrib["TransactionType"], self.tested.transaction_type)
 
@@ -226,37 +239,31 @@ class TestStudyEventData(unittest.TestCase):
 
     def test_study_event_repeat_key(self):
         """ If supplied we export the study event repeat key"""
-        tested = StudyEventData('VISIT_1', study_event_repeat_key="1")(
+        tested = StudyEventData("VISIT_1", study_event_repeat_key="1")(
             FormData("TESTFORM_A")(
                 ItemGroupData()(
-                    ItemData("Field1", "ValueA"),
-                    ItemData("Field2", "ValueB")
+                    ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB")
                 ),
-                ItemGroupData(item_group_repeat_key=2)(
-                    ItemData("Field3", "ValueC"),
-                ),
+                ItemGroupData(item_group_repeat_key=2)(ItemData("Field3", "ValueC")),
             )
         )
         t = obj_to_doc(tested)
         self.assertEqual("StudyEventData", t.tag)
-        self.assertEqual("1", t.attrib['StudyEventRepeatKey'])
+        self.assertEqual("1", t.attrib["StudyEventRepeatKey"])
 
     def test_study_event_repeat_key_as_int(self):
         """ If supplied we export the study event repeat key"""
-        tested = StudyEventData('VISIT_1', study_event_repeat_key=1)(
+        tested = StudyEventData("VISIT_1", study_event_repeat_key=1)(
             FormData("TESTFORM_A")(
                 ItemGroupData()(
-                    ItemData("Field1", "ValueA"),
-                    ItemData("Field2", "ValueB")
+                    ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB")
                 ),
-                ItemGroupData(item_group_repeat_key=2)(
-                    ItemData("Field3", "ValueC"),
-                ),
+                ItemGroupData(item_group_repeat_key=2)(ItemData("Field3", "ValueC")),
             )
         )
         t = obj_to_doc(tested)
         self.assertEqual("StudyEventData", t.tag)
-        self.assertEqual("1", t.attrib['StudyEventRepeatKey'])
+        self.assertEqual("1", t.attrib["StudyEventRepeatKey"])
 
     def test_only_add_formdata_once(self):
         """Test that an FormData object can only be added once"""
@@ -270,35 +277,43 @@ class TestStudyEventData(unittest.TestCase):
 
     def test_add_annotations(self):
         """Test we can add one or more annotations"""
-        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
+        flags = [
+            Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
+            for i in range(0, 3)
+        ]
         for i in range(0, 4):
-            self.tested << Annotation(comment=Comment("Some Comment %s" % i), flags=flags)
+            self.tested << Annotation(
+                comment=Comment("Some Comment %s" % i), flags=flags
+            )
         t = obj_to_doc(self.tested)
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 5)  # one formdata + 4 annotations
+        self.assertTrue(len(list(t)) == 5)  # one formdata + 4 annotations
 
     def test_add_signature(self):
         """Test we can add one signature"""
-        self.tested << Signature(signature_id="Some ID",
-                                 user_ref=UserRef(oid="AUser"),
-                                 location_ref=LocationRef(oid="ALocation"),
-                                 signature_ref=SignatureRef(oid="ASignature"),
-                                 date_time_stamp=DateTimeStamp(date_time=datetime(year=2016,
-                                                                                  month=12,
-                                                                                  day=25,
-                                                                                  hour=12,
-                                                                                  minute=0,
-                                                                                  second=0)))
+        self.tested << Signature(
+            signature_id="Some ID",
+            user_ref=UserRef(oid="AUser"),
+            location_ref=LocationRef(oid="ALocation"),
+            signature_ref=SignatureRef(oid="ASignature"),
+            date_time_stamp=DateTimeStamp(
+                date_time=datetime(
+                    year=2016, month=12, day=25, hour=12, minute=0, second=0
+                )
+            ),
+        )
         t = obj_to_doc(self.tested)
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 2)  # 1 formdata + 1 signature
+        self.assertTrue(len(list(t)) == 2)  # 1 formdata + 1 signature
 
     def test_invalid_transaction_type_direct_assign(self):
         """Test transaction type will not allow you to set to invalid choice"""
 
         def do():
-            self.tested.transaction_type = 'upsert'
+            self.tested.transaction_type = "upsert"
 
         self.assertRaises(AttributeError, do)
 
@@ -306,7 +321,7 @@ class TestStudyEventData(unittest.TestCase):
         """According to docs does not permit upserts"""
 
         def do():
-            StudyEventData("V2", transaction_type='upsert')
+            StudyEventData("V2", transaction_type="upsert")
 
         self.assertRaises(AttributeError, do)
 
@@ -325,16 +340,9 @@ class TestFormData(unittest.TestCase):
 
     def setUp(self):
         self.tested = FormData("TESTFORM_A")(
-            ItemGroupData()(
-                ItemData("Field1", "ValueA"),
-                ItemData("Field2", "ValueB")
-            ),
-            ItemGroupData()(
-                ItemData("Field3", "ValueC"),
-            ),
-            ItemGroupData()(
-                ItemData("Field4", "ValueD"),
-            ),
+            ItemGroupData()(ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB")),
+            ItemGroupData()(ItemData("Field3", "ValueC")),
+            ItemGroupData()(ItemData("Field4", "ValueD")),
         )
 
     def test_children(self):
@@ -345,7 +353,7 @@ class TestFormData(unittest.TestCase):
         """Can only be insert, update, upsert not context"""
 
         def do():
-            FormData("MYFORM", transaction_type='context')
+            FormData("MYFORM", transaction_type="context")
 
         self.assertRaises(AttributeError, do)
 
@@ -376,7 +384,7 @@ class TestFormData(unittest.TestCase):
 
     def test_transaction_type(self):
         """Test transaction type inserted if set"""
-        self.tested.transaction_type = 'Update'
+        self.tested.transaction_type = "Update"
         doc = obj_to_doc(self.tested)
         self.assertEqual(doc.attrib["TransactionType"], self.tested.transaction_type)
 
@@ -384,46 +392,51 @@ class TestFormData(unittest.TestCase):
         """Test transaction type will not allow you to set to invalid choice"""
 
         def do():
-            self.tested.transaction_type = 'invalid'
+            self.tested.transaction_type = "invalid"
 
         self.assertRaises(AttributeError, do)
 
     def test_form_repeat_key(self):
         """Test transaction type inserted if set"""
         tested = FormData("TESTFORM_A", form_repeat_key=9)(
-            ItemGroupData()(
-                ItemData("Field1", "ValueA"),
-                ItemData("Field2", "ValueB")
-            )
+            ItemGroupData()(ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB"))
         )
         doc = obj_to_doc(tested)
         self.assertEqual(doc.attrib["FormRepeatKey"], "9")
 
     def test_add_annotations(self):
         """Test we can add one or more annotations"""
-        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
+        flags = [
+            Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
+            for i in range(0, 3)
+        ]
         for i in range(0, 4):
-            self.tested << Annotation(comment=Comment("Some Comment %s" % i), flags=flags)
+            self.tested << Annotation(
+                comment=Comment("Some Comment %s" % i), flags=flags
+            )
         t = obj_to_doc(self.tested)
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 7)  # three igdata + 4 annotations
+        self.assertTrue(len(list(t)) == 7)  # three igdata + 4 annotations
 
     def test_add_signature(self):
         """Test we can add one signature"""
-        self.tested << Signature(signature_id="Some ID",
-                                 user_ref=UserRef(oid="AUser"),
-                                 location_ref=LocationRef(oid="ALocation"),
-                                 signature_ref=SignatureRef(oid="ASignature"),
-                                 date_time_stamp=DateTimeStamp(date_time=datetime(year=2016,
-                                                                                  month=12,
-                                                                                  day=25,
-                                                                                  hour=12,
-                                                                                  minute=0,
-                                                                                  second=0)))
+        self.tested << Signature(
+            signature_id="Some ID",
+            user_ref=UserRef(oid="AUser"),
+            location_ref=LocationRef(oid="ALocation"),
+            signature_ref=SignatureRef(oid="ASignature"),
+            date_time_stamp=DateTimeStamp(
+                date_time=datetime(
+                    year=2016, month=12, day=25, hour=12, minute=0, second=0
+                )
+            ),
+        )
         t = obj_to_doc(self.tested)
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 4)  # three igdata + 1 signature
+        self.assertTrue(len(list(t)) == 4)  # three igdata + 1 signature
 
 
 class TestItemGroupData(unittest.TestCase):
@@ -431,8 +444,7 @@ class TestItemGroupData(unittest.TestCase):
 
     def setUp(self):
         self.tested = ItemGroupData()(
-            ItemData("Field1", "ValueA"),
-            ItemData("Field2", "ValueB")
+            ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB")
         )
 
     def test_children(self):
@@ -457,7 +469,7 @@ class TestItemGroupData(unittest.TestCase):
 
     def test_invalid_transaction_type(self):
         def do():
-            ItemGroupData(transaction_type='invalid')
+            ItemGroupData(transaction_type="invalid")
 
         self.assertRaises(AttributeError, do)
 
@@ -469,7 +481,7 @@ class TestItemGroupData(unittest.TestCase):
 
     def test_transaction_type(self):
         """Test transaction type inserted if set"""
-        self.tested.transaction_type = 'Context'
+        self.tested.transaction_type = "Context"
         doc = obj_to_doc(self.tested, "TESTFORM")
         self.assertEqual(doc.attrib["TransactionType"], "Context")
 
@@ -484,64 +496,86 @@ class TestItemGroupData(unittest.TestCase):
 
     def test_add_annotations(self):
         """Test we can add one or more annotations"""
-        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
+        flags = [
+            Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
+            for i in range(0, 3)
+        ]
         for i in range(0, 4):
-            self.tested << Annotation(comment=Comment("Some Comment %s" % i), flags=flags)
+            self.tested << Annotation(
+                comment=Comment("Some Comment %s" % i), flags=flags
+            )
         t = obj_to_doc(self.tested, "TESTFORM")
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 6)  # two itemdata + 4 annotations
+        self.assertTrue(len(list(t)) == 6)  # two itemdata + 4 annotations
 
     def test_add_annotations_on_create_multiple(self):
         """Test we can add one or more annotations at initialisation"""
-        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
-        annotations = [Annotation(comment=Comment("Some Comment %s" % i), flags=flags) for i in range(0, 4)]
+        flags = [
+            Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
+            for i in range(0, 3)
+        ]
+        annotations = [
+            Annotation(comment=Comment("Some Comment %s" % i), flags=flags)
+            for i in range(0, 4)
+        ]
         # add a list of annotations
         igd = ItemGroupData(annotations=annotations)(
-            ItemData("Field1", "ValueA"),
-            ItemData("Field2", "ValueB")
+            ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB")
         )
         t = obj_to_doc(igd, "TESTFORM")
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 6)  # two itemdata + 4 annotations
+        self.assertTrue(len(list(t)) == 6)  # two itemdata + 4 annotations
 
     def test_add_annotations_on_create_single(self):
         """Test we can add one or more annotations at initialisation with one"""
-        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
-        annotations = [Annotation(comment=Comment("Some Comment %s" % i), flags=flags) for i in range(0, 4)]
+        flags = [
+            Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
+            for i in range(0, 3)
+        ]
+        annotations = [
+            Annotation(comment=Comment("Some Comment %s" % i), flags=flags)
+            for i in range(0, 4)
+        ]
         # add a list of annotations
         igd = ItemGroupData(annotations=annotations[0])(
-            ItemData("Field1", "ValueA"),
-            ItemData("Field2", "ValueB")
+            ItemData("Field1", "ValueA"), ItemData("Field2", "ValueB")
         )
         t = obj_to_doc(igd, "TESTFORM")
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 3)  # two itemdata + 4 annotations
+        self.assertTrue(len(list(t)) == 3)  # two itemdata + 4 annotations
 
     def test_add_signature(self):
         """Test we can add one signature"""
-        self.tested << Signature(signature_id="Some ID",
-                                 user_ref=UserRef(oid="AUser"),
-                                 location_ref=LocationRef(oid="ALocation"),
-                                 signature_ref=SignatureRef(oid="ASignature"),
-                                 date_time_stamp=DateTimeStamp(date_time=datetime(year=2016,
-                                                                                  month=12,
-                                                                                  day=25,
-                                                                                  hour=12,
-                                                                                  minute=0,
-                                                                                  second=0)))
+        self.tested << Signature(
+            signature_id="Some ID",
+            user_ref=UserRef(oid="AUser"),
+            location_ref=LocationRef(oid="ALocation"),
+            signature_ref=SignatureRef(oid="ASignature"),
+            date_time_stamp=DateTimeStamp(
+                date_time=datetime(
+                    year=2016, month=12, day=25, hour=12, minute=0, second=0
+                )
+            ),
+        )
         t = obj_to_doc(self.tested, "TESTFORM")
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 3)  # two itemdata + 1 signature
+        self.assertTrue(len(list(t)) == 3)  # two itemdata + 1 signature
 
 
 class TestItemData(unittest.TestCase):
     """Test ItemData classes"""
 
     def setUp(self):
-        self.tested = ItemData('FIELDA', "TEST")
+        self.tested = ItemData("FIELDA", "TEST")
 
     def test_basic(self):
         tested = self.tested
@@ -574,63 +608,65 @@ class TestItemData(unittest.TestCase):
 
         # Check IsNull attribute is missing
         def do():
-            doc.attrib['IsNull']
+            doc.attrib["IsNull"]
 
         self.assertRaises(KeyError, do)
 
     def test_specify(self):
         """Test specify"""
-        specify_value = 'A Specify'
+        specify_value = "A Specify"
         self.tested.specify_value = specify_value
         doc = obj_to_doc(self.tested)
-        self.assertEqual(doc.attrib['mdsol:SpecifyValue'], specify_value)
+        self.assertEqual(doc.attrib["mdsol:SpecifyValue"], specify_value)
 
     def test_freeze_lock_verify(self):
-        tested = ItemData('FIELDA', "TEST", lock=True, verify=True, freeze=False)
+        tested = ItemData("FIELDA", "TEST", lock=True, verify=True, freeze=False)
         self.assertEqual(tested.lock, True)
         self.assertEqual(tested.freeze, False)
         self.assertEqual(tested.verify, True)
 
     def test_builder(self):
         """Test building XML"""
-        tested = ItemData('FIELDA', "TEST", lock=True, verify=True, freeze=False)
+        tested = ItemData("FIELDA", "TEST", lock=True, verify=True, freeze=False)
 
-        tested << AuditRecord(edit_point=AuditRecord.EDIT_DATA_MANAGEMENT,
-                              used_imputation_method=False,
-                              identifier="x2011",
-                              include_file_oid=False)(
+        tested << AuditRecord(
+            edit_point=AuditRecord.EDIT_DATA_MANAGEMENT,
+            used_imputation_method=False,
+            identifier="x2011",
+            include_file_oid=False,
+        )(
             UserRef("Fred"),
             LocationRef("Site102"),
             ReasonForChange("Data Entry Error"),
-            DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80))
+            DateTimeStamp(datetime(2015, 9, 11, 10, 15, 22, 80)),
         )
         tested << MdsolQuery()
         tested << MeasurementUnitRef("Celsius")
 
         doc = obj_to_doc(tested)
 
-        self.assertEqual(doc.attrib['ItemOID'], "FIELDA")
-        self.assertEqual(doc.attrib['Value'], "TEST")
-        self.assertEqual(doc.attrib['mdsol:Verify'], "Yes")
-        self.assertEqual(doc.attrib['mdsol:Lock'], "Yes")
-        self.assertEqual(doc.attrib['mdsol:Freeze'], "No")
+        self.assertEqual(doc.attrib["ItemOID"], "FIELDA")
+        self.assertEqual(doc.attrib["Value"], "TEST")
+        self.assertEqual(doc.attrib["mdsol:Verify"], "Yes")
+        self.assertEqual(doc.attrib["mdsol:Lock"], "Yes")
+        self.assertEqual(doc.attrib["mdsol:Freeze"], "No")
         self.assertEqual(doc.tag, "ItemData")
-        self.assertEqual("AuditRecord", doc.getchildren()[0].tag)
-        self.assertEqual("MeasurementUnitRef", doc.getchildren()[1].tag)
-        self.assertEqual("mdsol:Query", doc.getchildren()[2].tag)
+        self.assertEqual("AuditRecord", list(doc)[0].tag)
+        self.assertEqual("MeasurementUnitRef", list(doc)[1].tag)
+        self.assertEqual("mdsol:Query", list(doc)[2].tag)
 
     def test_transaction_type(self):
         tested = self.tested
-        tested.transaction_type = 'Update'
+        tested.transaction_type = "Update"
         doc = obj_to_doc(tested)
-        self.assertEqual(doc.attrib['TransactionType'], "Update")
+        self.assertEqual(doc.attrib["TransactionType"], "Update")
 
     def test_null_value(self):
         """Null or empty string values are treated specially with IsNull property and no value"""
         tested = self.tested
-        tested.value = ''
+        tested.value = ""
         doc = obj_to_doc(tested)
-        self.assertEqual(doc.attrib['IsNull'], "Yes")
+        self.assertEqual(doc.attrib["IsNull"], "Yes")
 
         # Check Value attribute is also missing
         def do():
@@ -640,19 +676,26 @@ class TestItemData(unittest.TestCase):
 
     def test_invalid_transaction_type(self):
         def do():
-            ItemData("A", "val", transaction_type='invalid')
+            ItemData("A", "val", transaction_type="invalid")
 
         self.assertRaises(AttributeError, do)
 
     def test_add_annotations(self):
         """Test we can add one or more annotations"""
-        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
+        flags = [
+            Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
+            for i in range(0, 3)
+        ]
         for i in range(0, 4):
-            self.tested << Annotation(comment=Comment("Some Comment %s" % i), flags=flags)
+            self.tested << Annotation(
+                comment=Comment("Some Comment %s" % i), flags=flags
+            )
         t = obj_to_doc(self.tested)
         self.assertEqual(self.__class__.__name__[4:], t.tag)
-        self.assertTrue(len(t.getchildren()) == 4)  # one formdata + 4 annotations
+        self.assertTrue(len(list(t)) == 4)  # one formdata + 4 annotations
 
 
 class TestUserRef(unittest.TestCase):
@@ -662,10 +705,10 @@ class TestUserRef(unittest.TestCase):
 
     def test_builder(self):
         """Test building XML"""
-        tested = UserRef('Fred')
+        tested = UserRef("Fred")
         doc = obj_to_doc(tested)
 
-        self.assertEqual(doc.attrib['UserOID'], "Fred")
+        self.assertEqual(doc.attrib["UserOID"], "Fred")
         self.assertEqual(doc.tag, "UserRef")
 
 
@@ -676,10 +719,10 @@ class TestLocationRef(unittest.TestCase):
 
     def test_builder(self):
         """Test building XML"""
-        tested = LocationRef('Gainesville')
+        tested = LocationRef("Gainesville")
         doc = obj_to_doc(tested)
 
-        self.assertEqual(doc.attrib['LocationOID'], "Gainesville")
+        self.assertEqual(doc.attrib["LocationOID"], "Gainesville")
         self.assertEqual(doc.tag, "LocationRef")
 
     def test_builder_int_oid(self):
@@ -687,7 +730,7 @@ class TestLocationRef(unittest.TestCase):
         tested = LocationRef(12)
         doc = obj_to_doc(tested)
 
-        self.assertEqual(doc.attrib['LocationOID'], "12")
+        self.assertEqual(doc.attrib["LocationOID"], "12")
         self.assertEqual(doc.tag, "LocationRef")
 
 
@@ -728,10 +771,12 @@ class TestDateTimeStamp(unittest.TestCase):
 
 class TestAuditRecord(unittest.TestCase):
     def setUp(self):
-        self.tested = AuditRecord(edit_point=AuditRecord.EDIT_DATA_MANAGEMENT,
-                                  used_imputation_method=False,
-                                  identifier='X2011',
-                                  include_file_oid=False)
+        self.tested = AuditRecord(
+            edit_point=AuditRecord.EDIT_DATA_MANAGEMENT,
+            used_imputation_method=False,
+            identifier="X2011",
+            include_file_oid=False,
+        )
         self.tested << UserRef("Fred")
         self.tested << LocationRef("Site102")
         self.tested << ReasonForChange("Data Entry Error")
@@ -739,18 +784,18 @@ class TestAuditRecord(unittest.TestCase):
 
     def test_identifier_must_not_start_digit(self):
         with self.assertRaises(AttributeError):
-            AuditRecord(identifier='2011')
+            AuditRecord(identifier="2011")
 
         with self.assertRaises(AttributeError):
-            AuditRecord(identifier='*Hello')
+            AuditRecord(identifier="*Hello")
 
         # Underscore OK
-        ar = AuditRecord(identifier='_Hello')
-        self.assertEqual('_Hello', ar.audit_id)
+        ar = AuditRecord(identifier="_Hello")
+        self.assertEqual("_Hello", ar.audit_id)
 
         # Letter OK
-        ar = AuditRecord(identifier='Hello')
-        self.assertEqual('Hello', ar.audit_id)
+        ar = AuditRecord(identifier="Hello")
+        self.assertEqual("Hello", ar.audit_id)
 
     def test_accepts_no_invalid_children(self):
         with self.assertRaises(ValueError):
@@ -758,7 +803,7 @@ class TestAuditRecord(unittest.TestCase):
 
     def test_invalid_edit_point(self):
         with self.assertRaises(AttributeError):
-            AuditRecord(edit_point='Blah')
+            AuditRecord(edit_point="Blah")
 
     def test_builder(self):
         doc = obj_to_doc(self.tested)
@@ -766,10 +811,10 @@ class TestAuditRecord(unittest.TestCase):
         self.assertEqual(AuditRecord.EDIT_DATA_MANAGEMENT, doc.attrib["EditPoint"])
         self.assertEqual("No", doc.attrib["UsedImputationMethod"])
         self.assertEqual("No", doc.attrib["mdsol:IncludeFileOID"])
-        self.assertEqual("UserRef", doc.getchildren()[0].tag)
-        self.assertEqual("LocationRef", doc.getchildren()[1].tag)
-        self.assertEqual("DateTimeStamp", doc.getchildren()[2].tag)
-        self.assertEqual("ReasonForChange", doc.getchildren()[3].tag)
+        self.assertEqual("UserRef", list(doc)[0].tag)
+        self.assertEqual("LocationRef", list(doc)[1].tag)
+        self.assertEqual("DateTimeStamp", list(doc)[2].tag)
+        self.assertEqual("ReasonForChange", list(doc)[3].tag)
 
     def test_no_user_ref(self):
         """Test with no user ref should fail on build with a ValueError"""
@@ -799,71 +844,78 @@ class TestSignatureRef(unittest.TestCase):
         t = SignatureRef("ASIGNATURE")
         doc = obj_to_doc(t)
         self.assertEqual("SignatureRef", doc.tag)
-        self.assertEqual("ASIGNATURE", doc.attrib['SignatureOID'])
+        self.assertEqual("ASIGNATURE", doc.attrib["SignatureOID"])
 
 
 class TestSignature(unittest.TestCase):
     def test_creates_expected_element(self):
         """We create a Signature element"""
-        t = Signature(signature_id="Some ID",
-                      user_ref=UserRef(oid="AUser"),
-                      location_ref=LocationRef(oid="ALocation"),
-                      signature_ref=SignatureRef(oid="ASignature"),
-                      date_time_stamp=DateTimeStamp(date_time=datetime(year=2016,
-                                                                       month=12,
-                                                                       day=25,
-                                                                       hour=12,
-                                                                       minute=0,
-                                                                       second=0)))
+        t = Signature(
+            signature_id="Some ID",
+            user_ref=UserRef(oid="AUser"),
+            location_ref=LocationRef(oid="ALocation"),
+            signature_ref=SignatureRef(oid="ASignature"),
+            date_time_stamp=DateTimeStamp(
+                date_time=datetime(
+                    year=2016, month=12, day=25, hour=12, minute=0, second=0
+                )
+            ),
+        )
         doc = obj_to_doc(t)
-        self.assertEqual('Signature', doc.tag)
-        self.assertEqual('Some ID', doc.attrib['ID'])
+        self.assertEqual("Signature", doc.tag)
+        self.assertEqual("Some ID", doc.attrib["ID"])
         # all four elements are present
-        self.assertTrue(len(doc.getchildren()) == 4)
+        self.assertTrue(len(list(doc)) == 4)
 
     def test_creates_expected_element_no_id(self):
         """We create a Signature element without an ID"""
-        t = Signature(user_ref=UserRef(oid="AUser"),
-                      location_ref=LocationRef(oid="ALocation"),
-                      signature_ref=SignatureRef(oid="ASignature"),
-                      date_time_stamp=DateTimeStamp(date_time=datetime(year=2016,
-                                                                       month=12,
-                                                                       day=25,
-                                                                       hour=12,
-                                                                       minute=0,
-                                                                       second=0)))
+        t = Signature(
+            user_ref=UserRef(oid="AUser"),
+            location_ref=LocationRef(oid="ALocation"),
+            signature_ref=SignatureRef(oid="ASignature"),
+            date_time_stamp=DateTimeStamp(
+                date_time=datetime(
+                    year=2016, month=12, day=25, hour=12, minute=0, second=0
+                )
+            ),
+        )
         doc = obj_to_doc(t)
-        self.assertEqual('Signature', doc.tag)
-        self.assertTrue('ID' not in doc.attrib)
+        self.assertEqual("Signature", doc.tag)
+        self.assertTrue("ID" not in doc.attrib)
         # all four elements are present
-        self.assertTrue(len(doc.getchildren()) == 4)
+        self.assertTrue(len(list(doc)) == 4)
 
     def test_all_elements_are_required(self):
         """All the sub-elements are required"""
-        all = dict(user_ref=UserRef(oid="AUser"),
-                   location_ref=LocationRef(oid="ALocation"),
-                   signature_ref=SignatureRef(oid="ASignature"),
-                   date_time_stamp=DateTimeStamp(date_time=datetime(year=2016,
-                                                                    month=12,
-                                                                    day=25,
-                                                                    hour=12,
-                                                                    minute=0,
-                                                                    second=0)))
+        all = dict(
+            user_ref=UserRef(oid="AUser"),
+            location_ref=LocationRef(oid="ALocation"),
+            signature_ref=SignatureRef(oid="ASignature"),
+            date_time_stamp=DateTimeStamp(
+                date_time=datetime(
+                    year=2016, month=12, day=25, hour=12, minute=0, second=0
+                )
+            ),
+        )
         t0 = Signature()
         with self.assertRaises(ValueError) as exc:
             doc = obj_to_doc(t0)
         self.assertEqual("User Reference not set.", str(exc.exception))
-        t1 = Signature(user_ref=all.get('user_ref'))
+        t1 = Signature(user_ref=all.get("user_ref"))
         with self.assertRaises(ValueError) as exc:
             doc = obj_to_doc(t1)
         self.assertEqual("Location Reference not set.", str(exc.exception))
-        t2 = Signature(user_ref=all.get('user_ref'), location_ref=all.get('location_ref'))
+        t2 = Signature(
+            user_ref=all.get("user_ref"), location_ref=all.get("location_ref")
+        )
         with self.assertRaises(ValueError) as exc:
             doc = obj_to_doc(t2)
         self.assertEqual("Signature Reference not set.", str(exc.exception))
-        t3 = Signature(user_ref=all.get('user_ref'),
-                       location_ref=all.get('location_ref'),
-                       signature_ref=all.get('signature_ref'))
+        t3 = Signature(
+            user_ref=all.get("user_ref"),
+            location_ref=all.get("location_ref"),
+            signature_ref=all.get("signature_ref"),
+        )
         with self.assertRaises(ValueError) as exc:
             doc = obj_to_doc(t3)
         self.assertEqual("DateTime not set.", str(exc.exception))
@@ -871,30 +923,33 @@ class TestSignature(unittest.TestCase):
     def test_signature_builder(self):
         """"""
         tested = Signature(signature_id="Some ID")
-        all = dict(user_ref=UserRef(oid="AUser"),
-                   location_ref=LocationRef(oid="ALocation"),
-                   signature_ref=SignatureRef(oid="ASignature"),
-                   date_time_stamp=DateTimeStamp(date_time=datetime(year=2016,
-                                                                    month=12,
-                                                                    day=25,
-                                                                    hour=12,
-                                                                    minute=0,
-                                                                    second=0)))
+        all = dict(
+            user_ref=UserRef(oid="AUser"),
+            location_ref=LocationRef(oid="ALocation"),
+            signature_ref=SignatureRef(oid="ASignature"),
+            date_time_stamp=DateTimeStamp(
+                date_time=datetime(
+                    year=2016, month=12, day=25, hour=12, minute=0, second=0
+                )
+            ),
+        )
         for child in all.values():
             tested << child
         doc = obj_to_doc(tested)
-        self.assertEqual('Signature', doc.tag)
-        self.assertEqual('Some ID', doc.attrib['ID'])
+        self.assertEqual("Signature", doc.tag)
+        self.assertEqual("Some ID", doc.attrib["ID"])
         # all four elements are present
-        self.assertTrue(len(doc.getchildren()) == 4)
+        self.assertTrue(len(list(doc)) == 4)
 
     def test_signature_builder_with_invalid_input(self):
         """"""
         tested = Signature(signature_id="Some ID")
         with self.assertRaises(ValueError) as exc:
             tested << ItemData(itemoid="GENDER", value="MALE")
-        self.assertEqual("Signature cannot accept a child element of type ItemData",
-                         str(exc.exception))
+        self.assertEqual(
+            "Signature cannot accept a child element of type ItemData",
+            str(exc.exception),
+        )
 
 
 class TestAnnotation(unittest.TestCase):
@@ -902,45 +957,50 @@ class TestAnnotation(unittest.TestCase):
 
     def test_happy_path(self):
         """ Simple Annotation with a single flag and comment"""
-        tested = Annotation(annotation_id="APPLE",
-                            seqnum=1)
-        f = Flag(flag_value=FlagValue("Some value", codelist_oid="ANOID"),
-                 flag_type=FlagType("Some type", codelist_oid="ANOTHEROID"))
+        tested = Annotation(annotation_id="APPLE", seqnum=1)
+        f = Flag(
+            flag_value=FlagValue("Some value", codelist_oid="ANOID"),
+            flag_type=FlagType("Some type", codelist_oid="ANOTHEROID"),
+        )
         c = Comment("Some Comment")
         tested << f
         tested << c
         t = obj_to_doc(tested)
-        self.assertEqual('Annotation', t.tag)
-        self.assertEqual('1', t.attrib['SeqNum'])
-        self.assertEqual("APPLE", t.attrib['ID'])
-        self.assertTrue(len(t.getchildren()) == 2)
+        self.assertEqual("Annotation", t.tag)
+        self.assertEqual("1", t.attrib["SeqNum"])
+        self.assertEqual("APPLE", t.attrib["ID"])
+        self.assertTrue(len(list(t)) == 2)
 
     def test_happy_path_id_optional(self):
         """ Simple Annotation with a single flag and comment, no ID"""
         tested = Annotation(seqnum=1)
-        f = Flag(flag_value=FlagValue("Some value", codelist_oid="ANOID"),
-                 flag_type=FlagType("Some type", codelist_oid="ANOTHEROID"))
+        f = Flag(
+            flag_value=FlagValue("Some value", codelist_oid="ANOID"),
+            flag_type=FlagType("Some type", codelist_oid="ANOTHEROID"),
+        )
         c = Comment("Some Comment")
         tested << f
         tested << c
         t = obj_to_doc(tested)
-        self.assertEqual('Annotation', t.tag)
-        self.assertEqual('1', t.attrib['SeqNum'])
+        self.assertEqual("Annotation", t.tag)
+        self.assertEqual("1", t.attrib["SeqNum"])
         self.assertNotIn("ID", t.attrib)
-        self.assertTrue(len(t.getchildren()) == 2)
+        self.assertTrue(len(list(t)) == 2)
 
     def test_happy_path_seqnum_defaulted(self):
         """ Simple Annotation with a single flag and comment, SeqNum missing"""
         tested = Annotation()
-        f = Flag(flag_value=FlagValue("Some value", codelist_oid="ANOID"),
-                 flag_type=FlagType("Some type", codelist_oid="ANOTHEROID"))
+        f = Flag(
+            flag_value=FlagValue("Some value", codelist_oid="ANOID"),
+            flag_type=FlagType("Some type", codelist_oid="ANOTHEROID"),
+        )
         c = Comment("Some Comment")
         tested << f
         tested << c
         t = obj_to_doc(tested)
-        self.assertEqual('Annotation', t.tag)
-        self.assertEqual('1', t.attrib['SeqNum'])
-        self.assertTrue(len(t.getchildren()) == 2)
+        self.assertEqual("Annotation", t.tag)
+        self.assertEqual("1", t.attrib["SeqNum"])
+        self.assertTrue(len(list(t)) == 2)
 
     def test_happy_path_multiple_flags(self):
         """ Simple Annotation with a multiple flags and comment"""
@@ -948,69 +1008,89 @@ class TestAnnotation(unittest.TestCase):
         c = Comment("Some Comment")
         # Add some flags
         for i in range(0, 3):
-            tested << Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                           flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i))
+            tested << Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
         tested << c
         t = obj_to_doc(tested)
-        self.assertEqual('Annotation', t.tag)
-        self.assertTrue(len(t.getchildren()) == 4)
+        self.assertEqual("Annotation", t.tag)
+        self.assertTrue(len(list(t)) == 4)
 
     def test_happy_path_multiple_flags_on_init(self):
         """ Simple Annotation with a multiple flags and comment created at init"""
-        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
+        flags = [
+            Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
+            for i in range(0, 3)
+        ]
         tested = Annotation(comment=Comment("Some Comment"), flags=flags)
         t = obj_to_doc(tested)
-        self.assertEqual('Annotation', t.tag)
-        self.assertTrue(len(t.getchildren()) == 4)
+        self.assertEqual("Annotation", t.tag)
+        self.assertTrue(len(list(t)) == 4)
 
     def test_happy_path_flag_on_init(self):
         """ Simple Annotation with a single flag and comment created at init"""
-        flags = [Flag(flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
-                      flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i)) for i in range(0, 3)]
+        flags = [
+            Flag(
+                flag_value=FlagValue("Some value %s" % i, codelist_oid="ANOID%s" % i),
+                flag_type=FlagType("Some type %s" % i, codelist_oid="ANOTHEROID%s" % i),
+            )
+            for i in range(0, 3)
+        ]
         tested = Annotation(comment=Comment("Some Comment"), flags=flags[0])
         t = obj_to_doc(tested)
-        self.assertEqual('Annotation', t.tag)
-        self.assertTrue(len(t.getchildren()) == 2)
+        self.assertEqual("Annotation", t.tag)
+        self.assertTrue(len(list(t)) == 2)
 
     def test_not_flag_on_init(self):
         """ Simple Annotation with not a flag raises an exception and comment created at init"""
         notflags = ItemData(itemoid="GENDER", value="MALE")
         with self.assertRaises(AttributeError) as exc:
             tested = Annotation(comment=Comment("Some Comment"), flags=notflags)
-        self.assertEqual("Flags attribute should be an iterable or Flag",
-                         str(exc.exception))
+        self.assertEqual(
+            "Flags attribute should be an iterable or Flag", str(exc.exception)
+        )
 
     def test_only_accept_valid_children(self):
         """ Annotation can only take one or more Flags and one Comment"""
-        tested = Annotation(annotation_id='An Annotation')
+        tested = Annotation(annotation_id="An Annotation")
         with self.assertRaises(ValueError) as exc:
             tested << ItemData(itemoid="GENDER", value="MALE")
-        self.assertEqual("Annotation cannot accept a child element of type ItemData",
-                         str(exc.exception))
+        self.assertEqual(
+            "Annotation cannot accept a child element of type ItemData",
+            str(exc.exception),
+        )
         tested << Comment("A comment")
         with self.assertRaises(ValueError) as exc:
             tested << Comment("Another Comment")
-        self.assertEqual("Annotation already has a Comment element set.",
-                         str(exc.exception))
+        self.assertEqual(
+            "Annotation already has a Comment element set.", str(exc.exception)
+        )
 
     def test_only_valid_id_accepted(self):
         """ Annotation ID must be a non empty string"""
-        for nonsense in ('', '     '):
+        for nonsense in ("", "     "):
             with self.assertRaises(AttributeError) as exc:
                 tested = Annotation(annotation_id=nonsense)
-            self.assertEqual("Invalid ID value supplied",
-                             str(exc.exception),
-                             "Value should raise with '%s'" % nonsense)
+            self.assertEqual(
+                "Invalid ID value supplied",
+                str(exc.exception),
+                "Value should raise with '%s'" % nonsense,
+            )
 
     def test_only_valid_seqnum_accepted(self):
         """ Annotation ID must be a non empty string"""
-        for nonsense in ('apple', '     ', -1):
+        for nonsense in ("apple", "     ", -1):
             with self.assertRaises(AttributeError) as exc:
                 tested = Annotation(seqnum=nonsense)
-            self.assertEqual("Invalid SeqNum value supplied",
-                             str(exc.exception),
-                             "Value should raise with '%s'" % nonsense)
+            self.assertEqual(
+                "Invalid SeqNum value supplied",
+                str(exc.exception),
+                "Value should raise with '%s'" % nonsense,
+            )
 
     def test_need_flags(self):
         """ Annotation needs a Flag """
@@ -1021,21 +1101,32 @@ class TestAnnotation(unittest.TestCase):
 
     def test_transaction_type(self):
         """ Annotation can take a transaction type """
-        tested = Annotation(flags=Flag(flag_value=FlagValue("Some value", codelist_oid="ANOID"),
-                                       flag_type=FlagType("Some type", codelist_oid="ANOTHEROID")),
-                            comment=Comment("A comment"), transaction_type='Update')
+        tested = Annotation(
+            flags=Flag(
+                flag_value=FlagValue("Some value", codelist_oid="ANOID"),
+                flag_type=FlagType("Some type", codelist_oid="ANOTHEROID"),
+            ),
+            comment=Comment("A comment"),
+            transaction_type="Update",
+        )
         t = obj_to_doc(tested)
         self.assertEqual("Annotation", t.tag)
-        self.assertEqual("Update", t.attrib['TransactionType'])
+        self.assertEqual("Update", t.attrib["TransactionType"])
 
 
 class TestAnnotations(unittest.TestCase):
     def test_happy_path(self):
         """We create a Annotations object and add annotations to it"""
         obj = Annotations()
-        obj << Annotation(annotation_id="1")(Flag()(FlagValue("test 1", codelist_oid="MILESTONE")))
-        obj << Annotation(annotation_id="2")(Flag()(FlagValue("test 2", codelist_oid="MILESTONE")))
-        obj << Annotation(annotation_id="3")(Flag()(FlagValue("test 3", codelist_oid="MILESTONE")))
+        obj << Annotation(annotation_id="1")(
+            Flag()(FlagValue("test 1", codelist_oid="MILESTONE"))
+        )
+        obj << Annotation(annotation_id="2")(
+            Flag()(FlagValue("test 2", codelist_oid="MILESTONE"))
+        )
+        obj << Annotation(annotation_id="3")(
+            Flag()(FlagValue("test 3", codelist_oid="MILESTONE"))
+        )
         tested = obj_to_doc(obj)
         self.assertEqual("Annotations", tested.tag)
         self.assertEqual(3, len(list(tested)))
@@ -1045,7 +1136,9 @@ class TestAnnotations(unittest.TestCase):
         obj = Annotations()
         with self.assertRaises(ValueError) as exc:
             obj << Flag()(FlagValue("test 1", codelist_oid="MILESTONE"))
-        self.assertEqual("Annotations cannot accept a child element of type Flag", str(exc.exception))
+        self.assertEqual(
+            "Annotations cannot accept a child element of type Flag", str(exc.exception)
+        )
 
 
 class TestFlag(unittest.TestCase):
@@ -1057,8 +1150,8 @@ class TestFlag(unittest.TestCase):
         tested << FlagValue("Some value", codelist_oid="ANOID")
         tested << FlagType("Some type", codelist_oid="ANOTHEROID")
         t = obj_to_doc(tested)
-        self.assertEqual('Flag', t.tag)
-        self.assertTrue(len(t.getchildren()) == 2)
+        self.assertEqual("Flag", t.tag)
+        self.assertTrue(len(list(t)) == 2)
 
     def test_no_value(self):
         """No FlagValue is an exception"""
@@ -1073,19 +1166,22 @@ class TestFlag(unittest.TestCase):
         tested = Flag()
         with self.assertRaises(ValueError) as exc:
             tested << ItemData(itemoid="GENDER", value="MALE")
-        self.assertEqual("Flag cannot accept a child element of type ItemData",
-                         str(exc.exception))
+        self.assertEqual(
+            "Flag cannot accept a child element of type ItemData", str(exc.exception)
+        )
 
     def test_only_expected_types_instance_vars(self):
         """We can only add Flag-type elements"""
         with self.assertRaises(ValueError) as exc:
             tested = Flag(flag_type=ItemData(itemoid="GENDER", value="MALE"))
-        self.assertEqual("Flag cannot accept a child element of type ItemData",
-                         str(exc.exception))
+        self.assertEqual(
+            "Flag cannot accept a child element of type ItemData", str(exc.exception)
+        )
         with self.assertRaises(ValueError) as exc:
             tested = Flag(flag_value=ItemData(itemoid="GENDER", value="MALE"))
-        self.assertEqual("Flag cannot accept a child element of type ItemData",
-                         str(exc.exception))
+        self.assertEqual(
+            "Flag cannot accept a child element of type ItemData", str(exc.exception)
+        )
 
 
 class TestFlagType(unittest.TestCase):
@@ -1096,9 +1192,9 @@ class TestFlagType(unittest.TestCase):
         tested = FlagType("A Type")
         tested.codelist_oid = "ANOID"
         t = obj_to_doc(tested)
-        self.assertEqual('FlagType', t.tag)
-        self.assertEqual('ANOID', t.attrib['CodeListOID'])
-        self.assertEqual('A Type', t.text)
+        self.assertEqual("FlagType", t.tag)
+        self.assertEqual("ANOID", t.attrib["CodeListOID"])
+        self.assertEqual("A Type", t.text)
 
     def test_no_oid_exception(self):
         """Create a FlagType object without a CodeListOID is an exception"""
@@ -1110,7 +1206,7 @@ class TestFlagType(unittest.TestCase):
     def test_invalid_oid_exception(self):
         """Assigning a nonsensical value is an error"""
         tested = FlagType("A Type")
-        for nonsense in (None, '', '   '):
+        for nonsense in (None, "", "   "):
             with self.assertRaises(AttributeError) as exc:
                 tested.codelist_oid = nonsense
             self.assertEqual("Empty CodeListOID value is invalid.", str(exc.exception))
@@ -1118,7 +1214,7 @@ class TestFlagType(unittest.TestCase):
     def test_invalid_oid_exception_at_creation(self):
         """Assigning a nonsensical value is an error"""
         with self.assertRaises(AttributeError) as exc:
-            tested = FlagType("A Type", codelist_oid='')
+            tested = FlagType("A Type", codelist_oid="")
         self.assertEqual("Empty CodeListOID value is invalid.", str(exc.exception))
 
 
@@ -1130,9 +1226,9 @@ class TestFlagValue(unittest.TestCase):
         tested = FlagValue("A Value")
         tested.codelist_oid = "ANOID"
         t = obj_to_doc(tested)
-        self.assertEqual('FlagValue', t.tag)
-        self.assertEqual('ANOID', t.attrib['CodeListOID'])
-        self.assertEqual('A Value', t.text)
+        self.assertEqual("FlagValue", t.tag)
+        self.assertEqual("ANOID", t.attrib["CodeListOID"])
+        self.assertEqual("A Value", t.text)
 
     def test_no_oid_exception(self):
         """Create a FlagType object without a CodeListOID is an exception"""
@@ -1144,7 +1240,7 @@ class TestFlagValue(unittest.TestCase):
     def test_invalid_oid_exception(self):
         """Assigning a nonsensical value is an error"""
         tested = FlagValue("A Type")
-        for nonsense in (None, '', '   '):
+        for nonsense in (None, "", "   "):
             with self.assertRaises(AttributeError) as exc:
                 tested.codelist_oid = nonsense
             self.assertEqual("Empty CodeListOID value is invalid.", str(exc.exception))
@@ -1152,7 +1248,7 @@ class TestFlagValue(unittest.TestCase):
     def test_invalid_oid_exception_at_creation(self):
         """Assigning a nonsensical value is an error"""
         with self.assertRaises(AttributeError) as exc:
-            tested = FlagValue("A Value", codelist_oid='')
+            tested = FlagValue("A Value", codelist_oid="")
         self.assertEqual("Empty CodeListOID value is invalid.", str(exc.exception))
 
 
@@ -1162,47 +1258,47 @@ class TestComment(unittest.TestCase):
     def test_happy_path(self):
         """Creating a valid Comment, no problems"""
         tested = Comment()
-        tested.text = 'Some comment'
-        tested.sponsor_or_site = 'Site'
+        tested.text = "Some comment"
+        tested.sponsor_or_site = "Site"
         t = obj_to_doc(tested)
-        self.assertEqual('Comment', t.tag)
-        self.assertEqual('Site', t.attrib['SponsorOrSite'])
-        self.assertEqual('Some comment', t.text)
+        self.assertEqual("Comment", t.tag)
+        self.assertEqual("Site", t.attrib["SponsorOrSite"])
+        self.assertEqual("Some comment", t.text)
 
     def test_happy_path_no_commenter(self):
         """Creating a valid Comment without a commenter, no problems"""
         tested = Comment()
-        tested.text = 'Some comment'
+        tested.text = "Some comment"
         t = obj_to_doc(tested)
-        self.assertEqual('Comment', t.tag)
-        self.assertNotIn('SponsorOrSite', t.attrib)
-        self.assertEqual('Some comment', t.text)
+        self.assertEqual("Comment", t.tag)
+        self.assertNotIn("SponsorOrSite", t.attrib)
+        self.assertEqual("Some comment", t.text)
 
     def test_invalid_commenter(self):
         """Creating a valid Comment with an invalid commenter, get an exception"""
         tested = Comment()
-        tested.text = 'Some comment'
+        tested.text = "Some comment"
         with self.assertRaises(AttributeError) as exc:
-            tested.sponsor_or_site = 'Some guy off the street'
-        self.assertEqual("Comment sponsor_or_site value of Some guy off the street is not valid",
-                         str(exc.exception))
+            tested.sponsor_or_site = "Some guy off the street"
+        self.assertEqual(
+            "Comment sponsor_or_site value of Some guy off the street is not valid",
+            str(exc.exception),
+        )
 
     def test_invalid_no_comment(self):
         """Creating a invalid Comment, get an exception"""
         tested = Comment()
         with self.assertRaises(ValueError) as exc:
             t = obj_to_doc(tested)
-        self.assertEqual("Text is not set.",
-                         str(exc.exception))
+        self.assertEqual("Text is not set.", str(exc.exception))
 
     def test_invalid_text_comment(self):
         """Creating a Comment with invalid text, get an exception"""
         tested = Comment()
-        for nonsense in (None, '', '    '):
+        for nonsense in (None, "", "    "):
             with self.assertRaises(AttributeError) as exc:
                 tested.text = nonsense
-            self.assertEqual("Empty text value is invalid.",
-                             str(exc.exception))
+            self.assertEqual("Empty text value is invalid.", str(exc.exception))
 
 
 class TestSourceID(unittest.TestCase):
@@ -1210,8 +1306,8 @@ class TestSourceID(unittest.TestCase):
         """We can create a source ID"""
         obj = SourceID("12345")
         tested = obj_to_doc(obj)
-        self.assertEqual('SourceID', tested.tag)
-        self.assertEqual('12345', tested.text)
+        self.assertEqual("SourceID", tested.tag)
+        self.assertEqual("12345", tested.text)
 
     def test_add_to_audit(self):
         """We can add a SourceID to an Audit"""
@@ -1227,6 +1323,16 @@ class TestSourceID(unittest.TestCase):
 
 
 class TestSiteRef(unittest.TestCase):
+    def test_uuid_type(self):
+        """We can define a SiteRef using a UUID"""
+        siteref = SiteRef(oid="E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B")
+        siteref.add_attribute("LocationOIDType", "SiteUUID")
+        tested = obj_to_doc(siteref)
+        self.assertEqual("SiteRef", tested.tag)
+        self.assertEqual(
+            "E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B", tested.get("LocationOID")
+        )
+        self.assertEqual("SiteUUID", tested.get("mdsol:LocationOIDType"))
 
     def test_uuid_type(self):
         """We can define a SiteRef using a UUID"""
@@ -1234,14 +1340,7 @@ class TestSiteRef(unittest.TestCase):
         siteref.add_attribute("LocationOIDType", "SiteUUID")
         tested = obj_to_doc(siteref)
         self.assertEqual("SiteRef", tested.tag)
-        self.assertEqual("E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B", tested.get('LocationOID'))
-        self.assertEqual("SiteUUID", tested.get('mdsol:LocationOIDType'))
-
-    def test_uuid_type(self):
-        """We can define a SiteRef using a UUID"""
-        siteref = SiteRef(oid="E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B")
-        siteref.add_attribute("LocationOIDType", "SiteUUID")
-        tested = obj_to_doc(siteref)
-        self.assertEqual("SiteRef", tested.tag)
-        self.assertEqual("E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B", tested.get('LocationOID'))
-        self.assertEqual("SiteUUID", tested.get('mdsol:LocationOIDType'))
+        self.assertEqual(
+            "E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B", tested.get("LocationOID")
+        )
+        self.assertEqual("SiteUUID", tested.get("mdsol:LocationOIDType"))

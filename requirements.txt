@@ -1,9 +1,6 @@
 lxml
 requests
-httpretty
-tox
 six
-enum34
-mock
+enum34; python_version < '3.4'
 click
 faker
