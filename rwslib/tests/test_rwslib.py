@@ -158,7 +158,7 @@ class TestErrorResponse(unittest.TestCase):
     def test_400_error_error_response(self):
         """Parse the IIS Response Error structure"""
 
-        text = """<Response
+        text = b"""<Response
         ReferenceNumber="5b1fa9a3-0cf3-46b6-8304-37c2e3b7d04f5"
         InboundODMFileOID="1"
         IsTransactionSuccessful = "0"
@@ -185,7 +185,7 @@ class TestErrorResponse(unittest.TestCase):
     def test_400_error_iis_error(self):
         """Test that when we don't attempt to XMLParse a non-xml response"""
 
-        text = """
+        text = b"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -354,7 +354,7 @@ class TestErrorResponse(unittest.TestCase):
         # Now my test
         rave = rwslib.RWSConnection("https://innovate.mdsol.com")
         with self.assertRaises(rwslib.RWSException) as exc:
-            v = rave.send_request(rwslib.rws_requests.PostDataRequest("<ODM/>"))
+            v = rave.send_request(rwslib.rws_requests.PostDataRequest(b"<ODM/>"))
         self.assertEqual("You shall not pass", str(exc.exception))
 
     @httpretty.activate
@@ -439,7 +439,7 @@ class TestErrorResponse(unittest.TestCase):
         result = r.send_request(
             StudyDatasetRequest("RWS_Training_Japan", "PROD", formoid="SURGERY")
         )
-        self.assertEqual(content, result)
+        self.assertEqual(content.decode('utf-8'), result)
 
 
 if __name__ == "__main__":
