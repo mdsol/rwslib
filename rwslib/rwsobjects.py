@@ -30,23 +30,23 @@ def getEnvironmentFromNameAndProtocol(studyname, protocolname):
 def parseXMLString(xml):
     """
     Parse XML string, return root
-    :param str: Passed in XML
+    :param bytes xml: Passed in XML
     """
-
-    # Remove BOM if it exists (different requests seem to have different BOMs)
-    unichr_captured = ""
-
     if not xml.strip():
-        return u""
-
-    while xml[0] != u"<":
-        unichr_captured += xml[0]
-        xml = xml[1:]
-    parser = etree.XMLParser(ns_clean=True, collect_ids=False, huge_tree=True)
+        return xml
+    # Create a parser
+    parser = etree.XMLParser(
+        ns_clean=True, collect_ids=False, huge_tree=True, encoding="utf-8"
+    )
     try:
-        return etree.fromstring(xml.encode("utf-8"), parser=parser)
+        # if it is already bytes
+        parsed = etree.fromstring(xml, parser=parser)
+    except ValueError:
+        # if it's a string, make it into bytes
+        parsed = etree.fromstring(xml.encode("utf-8"), parser=parser)
     except etree.XMLSyntaxError:
         raise Exception(xml)
+    return parsed
 
 
 class RWSException(Exception):
@@ -70,6 +70,10 @@ class XMLRepr(object):
         """
         self.root = parseXMLString(xml)
 
+    def __unicode__(self):
+        """String representation of same"""
+        return etree.tostring(self.root, encoding="utf-8")
+
     def __str__(self):
         """String representation of same"""
         return etree.tostring(self.root, encoding="utf-8").decode("utf-8")
@@ -79,6 +83,10 @@ class ODMDoc(XMLRepr):
     """A base ODM document"""
 
     def __init__(self, xml):
+        """
+        Abstract Doc Class
+        :param bytes xml: Input content
+        """
         # Call base class
         XMLRepr.__init__(self, xml)
         r_get = self.root.get
@@ -321,9 +329,7 @@ class RWSStudyListItem(object):
             projecttype=elem.get(MEDI_NS + "ProjectType", "Project"),
             studyname=studyname,
             protocolname=protocolname,
-            environment=getEnvironmentFromNameAndProtocol(
-                studyname, protocolname
-            ),
+            environment=getEnvironmentFromNameAndProtocol(studyname, protocolname),
         )
 
         return self
@@ -422,7 +428,7 @@ class RWSStudyMetadataVersions(list, ODMDoc, RWSStudyListItem):
 
         root = self.root  # type: lxml.etree._Element
 
-        e_study = root.find(ODM_NS + "Study") # type: lxml.etree._Element
+        e_study = root.find(ODM_NS + "Study")  # type: lxml.etree._Element
 
         # Quick way to grab the elements here, nasty though
         self.study = RWSStudyListItem.fromElement(e_study)
