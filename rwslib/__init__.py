@@ -106,7 +106,7 @@ class RWSConnection(object):
         start_time = time.time()
 
         try:
-            r = action(full_url, **kwargs)
+            r = action(full_url, **kwargs)  # type: requests.models.Response
         except (
             requests.exceptions.ConnectTimeout,
             requests.exceptions.ReadTimeout,
@@ -124,6 +124,8 @@ class RWSConnection(object):
         self.request_time = time.time() - start_time
         self.last_result = r  # see also r.elapsed for timedelta object.
 
+        # ensure the response.text is usable
+        r.encoding = "utf-8-sig"
         if r.status_code in [400, 404]:
             # Is it a RWS response?
             if r.text.startswith("<Response"):
