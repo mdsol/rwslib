@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__author__ = 'isparks'
+__author__ = "isparks"
 
 import unittest
 
@@ -7,51 +7,51 @@ from rwslib import rwsobjects
 
 
 class TestParse(unittest.TestCase):
-
     def test_parse_with_bom(self):
         """Test parser can throw away BOM"""
-        text = u"""\xef\xbb\xbf<?xml version="1.0" encoding="utf-8"?><ODM/>"""
+        text = b"""\xef\xbb\xbf<?xml version="1.0" encoding="utf-8"?><ODM/>"""
         self.assertEqual("ODM", rwsobjects.parseXMLString(text).tag)
 
     def test_parse_without_bom(self):
         """Test parser can throw away BOM"""
-        text = u"""<?xml version="1.0" encoding="utf-8"?><ODM/>"""
+        text = b"""<?xml version="1.0" encoding="utf-8"?><ODM/>"""
         self.assertEqual("ODM", rwsobjects.parseXMLString(text).tag)
 
     def test_parse_empty_string(self):
-        text = u""""""
+        text = b""""""
         self.assertEqual("", rwsobjects.parseXMLString(text))
 
 
 class TestParseEnvironment(unittest.TestCase):
     """Test for extraction of environment"""
+
     def test_simple(self):
-        env = rwsobjects.getEnvironmentFromNameAndProtocol('TEST (DEV)', 'TEST')
-        self.assertEqual(env, 'DEV')
+        env = rwsobjects.getEnvironmentFromNameAndProtocol("TEST (DEV)", "TEST")
+        self.assertEqual(env, "DEV")
 
     def test_braces_in_name(self):
-        env = rwsobjects.getEnvironmentFromNameAndProtocol('TEST (1) (ZZZ)', 'TEST (1)')
-        self.assertEqual(env, 'ZZZ')
+        env = rwsobjects.getEnvironmentFromNameAndProtocol("TEST (1) (ZZZ)", "TEST (1)")
+        self.assertEqual(env, "ZZZ")
 
     def test_single_right_brace_in_name(self):
-        env = rwsobjects.getEnvironmentFromNameAndProtocol('TEST :) (PROD)', 'TEST :)')
-        self.assertEqual(env, 'PROD')
+        env = rwsobjects.getEnvironmentFromNameAndProtocol("TEST :) (PROD)", "TEST :)")
+        self.assertEqual(env, "PROD")
 
     def test_single_left_brace_in_name(self):
-        env = rwsobjects.getEnvironmentFromNameAndProtocol('TEST :( (PROD)', 'TEST :(')
-        self.assertEqual(env, 'PROD')
+        env = rwsobjects.getEnvironmentFromNameAndProtocol("TEST :( (PROD)", "TEST :(")
+        self.assertEqual(env, "PROD")
 
     def test_braces_tight_spaces(self):
-        env = rwsobjects.getEnvironmentFromNameAndProtocol('TEST(99)(AUX)', 'TEST(99)')
-        self.assertEqual(env, 'AUX')
+        env = rwsobjects.getEnvironmentFromNameAndProtocol("TEST(99)(AUX)", "TEST(99)")
+        self.assertEqual(env, "AUX")
 
     def test_no_env(self):
         """Note. This is probably not wanted behaviour but I am documenting here!
            What this is saying is that the study name is TEST(99) and there is no
            environment supplied.
         """
-        env = rwsobjects.getEnvironmentFromNameAndProtocol('TEST(99)', 'TEST(99)')
-        self.assertEqual(env, '')
+        env = rwsobjects.getEnvironmentFromNameAndProtocol("TEST(99)", "TEST(99)")
+        self.assertEqual(env, "")
 
 
 class TestRWSErrorResponse(unittest.TestCase):
@@ -78,7 +78,7 @@ class TestRWSError(unittest.TestCase):
     """Test that RWSError correctly reads an error response"""
 
     def test_parse(self):
-        text = """<?xml version="1.0" encoding="utf-8"?>
+        text = b"""<?xml version="1.0" encoding="utf-8"?>
          <ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
          FileType="Snapshot"
          CreationDateTime="2013-04-08T10:28:49.578-00:00"
@@ -92,7 +92,9 @@ class TestRWSError(unittest.TestCase):
         self.assertEqual("1.3", err.ODMVersion)
         self.assertEqual("Snapshot", err.filetype)
         self.assertEqual("4d13722a-ceb6-4419-a917-b6ad5d0bc30e", err.fileoid)
-        self.assertEqual("Incorrect login and password combination. [RWS00008]", err.errordescription)
+        self.assertEqual(
+            "Incorrect login and password combination. [RWS00008]", err.errordescription
+        )
         self.assertEqual("2013-04-08T10:28:49.578-00:00", err.creationdatetime)
 
 
@@ -100,7 +102,7 @@ class TestRWSResponse(unittest.TestCase):
     """Test that RWSResponse correctly reads an RWS response"""
 
     def test_parse(self):
-        text = """<Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+        text = b"""<Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
               InboundODMFileOID=""
               IsTransactionSuccessful="1"
               SuccessStatistics="Rave objects touched: Subjects=1; Folders=2; Forms=3; Fields=4; LogLines=5" NewRecords="">
@@ -108,7 +110,9 @@ class TestRWSResponse(unittest.TestCase):
 
         response = rwsobjects.RWSResponse(text)
 
-        self.assertEqual("82e942b0-48e8-4cf4-b299-51e2b6a89a1b", response.referencenumber)
+        self.assertEqual(
+            "82e942b0-48e8-4cf4-b299-51e2b6a89a1b", response.referencenumber
+        )
         self.assertEqual(True, response.istransactionsuccessful)
         self.assertEqual(1, response.subjects_touched)
         self.assertEqual(2, response.folders_touched)
@@ -148,7 +152,9 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(3, len(subjects))
         self.assertEqual(True, subjects[0].touched)
         self.assertEqual(False, subjects[0].overdue)
-        self.assertEqual(None, subjects[1].overdue)  # Example where status was not asked for.
+        self.assertEqual(
+            None, subjects[1].overdue
+        )  # Example where status was not asked for.
         self.assertEqual(True, subjects[2].incomplete)
         self.assertEqual(text, str(subjects))
 
@@ -180,8 +186,12 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(3, len(subjects))
         self.assertEqual(True, subjects[0].touched)
         self.assertEqual(False, subjects[0].overdue)
-        self.assertEqual(None, subjects[1].overdue)     # Example where status was not asked for.
-        self.assertEqual(0, len(subjects[1].links))     # Example where link was not asked for
+        self.assertEqual(
+            None, subjects[1].overdue
+        )  # Example where status was not asked for.
+        self.assertEqual(
+            0, len(subjects[1].links)
+        )  # Example where link was not asked for
         self.assertEqual(True, subjects[2].incomplete)
         self.assertEqual(text, str(subjects))
         self.assertEqual("1", subjects[0].subject_name)
@@ -216,7 +226,9 @@ class TestRWSSubjects(unittest.TestCase):
         self.assertEqual(3, len(subjects))
         self.assertEqual(True, subjects[0].touched)
         self.assertEqual(False, subjects[0].overdue)
-        self.assertEqual(None, subjects[1].overdue)     #Example where status was not asked for.
+        self.assertEqual(
+            None, subjects[1].overdue
+        )  # Example where status was not asked for.
         self.assertEqual(True, subjects[2].incomplete)
         self.assertEqual(text, str(subjects))
         self.assertEqual("1", subjects[0].subject_name)
@@ -253,9 +265,18 @@ class TestRWSSubjects(unittest.TestCase):
 
         subjects = rwsobjects.RWSSubjects(text)
 
-        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=1234", subjects[0].links[0])
-        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=5678", subjects[1].links[0])
-        self.assertEqual("http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=9012", subjects[2].links[0])
+        self.assertEqual(
+            "http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=1234",
+            subjects[0].links[0],
+        )
+        self.assertEqual(
+            "http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=5678",
+            subjects[1].links[0],
+        )
+        self.assertEqual(
+            "http://innovate.mdsol.com/MedidataRAVE/HandleLink.aspx?page=SubjectPage.aspx?ID=9012",
+            subjects[2].links[0],
+        )
 
 
 class TestMetaDataVersions(unittest.TestCase):
@@ -280,8 +301,9 @@ class TestMetaDataVersions(unittest.TestCase):
         self.assertEqual("1.3", metadata.ODMVersion)
         self.assertEqual("IANTEST", metadata.study.oid)
         self.assertEqual(3, len(metadata))
-        self.assertEqual("Demo_Draft1",metadata[1].name)
-        self.assertEqual("1165",metadata[2].oid)
+        self.assertEqual("Demo_Draft1", metadata[1].name)
+        self.assertEqual("1165", metadata[2].oid)
+
 
 class TestRWSPostResponse(unittest.TestCase):
     def test_parse(self):
@@ -325,9 +347,15 @@ class TestRWSPostErrorResponse(unittest.TestCase):
         """
 
         parsed = rwsobjects.RWSPostErrorResponse(text)
-        self.assertEqual("5b1fa9a3-0cf3-46b6-8304-37c2e3b7d04f5", parsed.referencenumber)
-        self.assertEqual("Subject already exists.", parsed.error_client_response_message)
-        self.assertEqual("/ODM/ClinicalData[1]/SubjectData[1]", parsed.error_origin_location)
+        self.assertEqual(
+            "5b1fa9a3-0cf3-46b6-8304-37c2e3b7d04f5", parsed.referencenumber
+        )
+        self.assertEqual(
+            "Subject already exists.", parsed.error_client_response_message
+        )
+        self.assertEqual(
+            "/ODM/ClinicalData[1]/SubjectData[1]", parsed.error_origin_location
+        )
 
 
 class TestRWSStudies(unittest.TestCase):
@@ -354,10 +382,10 @@ class TestRWSStudies(unittest.TestCase):
          </Study>
     </ODM>"""
         parsed = rwsobjects.RWSStudies(text)
-        self.assertEqual("1.3",parsed.ODMVersion)
-        self.assertEqual(2,len(parsed))
-        self.assertEqual(False,parsed[0].isProd())
-        self.assertEqual(True,parsed[1].isProd())
+        self.assertEqual("1.3", parsed.ODMVersion)
+        self.assertEqual(2, len(parsed))
+        self.assertEqual(False, parsed[0].isProd())
+        self.assertEqual(True, parsed[1].isProd())
 
 
 class TestUtils(unittest.TestCase):
@@ -384,12 +412,11 @@ class TestUtils(unittest.TestCase):
          </Study>
     </ODM>"""
         parsed = rwsobjects.RWSStudies(text)
-        self.assertEqual("1.3",parsed.ODMVersion)
-        self.assertEqual(2,len(parsed))
-        self.assertEqual(False,parsed[0].isProd())
-        self.assertEqual(True,parsed[1].isProd())
+        self.assertEqual("1.3", parsed.ODMVersion)
+        self.assertEqual(2, len(parsed))
+        self.assertEqual(False, parsed[0].isProd())
+        self.assertEqual(True, parsed[1].isProd())
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
