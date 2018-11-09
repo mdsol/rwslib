@@ -21,6 +21,3 @@ htmlcov
 
 # VirtualEnvs!
 venv
-
-# TOX
-.tox
