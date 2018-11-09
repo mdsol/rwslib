@@ -18,8 +18,8 @@ class TestParse(unittest.TestCase):
         self.assertEqual("ODM", rwsobjects.parseXMLString(text).tag)
 
     def test_parse_empty_string(self):
-        text = b""""""
-        self.assertEqual("", rwsobjects.parseXMLString(text))
+        text = b""
+        self.assertEqual(b"", rwsobjects.parseXMLString(text))
 
 
 class TestParseEnvironment(unittest.TestCase):
@@ -58,7 +58,7 @@ class TestRWSErrorResponse(unittest.TestCase):
     """Test that RWSErrorResponse correctly reads an error response"""
 
     def test_parse(self):
-        text = """<Response ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
+        text = b"""<Response ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
     InboundODMFileOID="Not Supplied"
     IsTransactionSuccessful="0"
     ReasonCode="RWS00092"
@@ -128,7 +128,7 @@ class TestRWSSubjects(unittest.TestCase):
         """
         Parse a simple response
         """
-        text = """<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
+        text = b"""<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
   <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
     <SubjectData SubjectKey="1" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="No" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
       <SiteRef LocationOID="TESTSITE"/>
@@ -156,13 +156,13 @@ class TestRWSSubjects(unittest.TestCase):
             None, subjects[1].overdue
         )  # Example where status was not asked for.
         self.assertEqual(True, subjects[2].incomplete)
-        self.assertEqual(text, str(subjects))
+        self.assertEqual(text.decode("utf-8"), str(subjects))
 
     def test_parse_no_uuid(self):
         """
         subject_name works when there is no SubjectKeyType
         """
-        text = """<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
+        text = b"""<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
   <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
     <SubjectData SubjectKey="1" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="No" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
       <SiteRef LocationOID="TESTSITE"/>
@@ -193,7 +193,7 @@ class TestRWSSubjects(unittest.TestCase):
             0, len(subjects[1].links)
         )  # Example where link was not asked for
         self.assertEqual(True, subjects[2].incomplete)
-        self.assertEqual(text, str(subjects))
+        self.assertEqual(text.decode("utf-8"), str(subjects))
         self.assertEqual("1", subjects[0].subject_name)
         self.assertEqual("2", subjects[1].subject_name)
         self.assertEqual("3", subjects[2].subject_name)
@@ -202,7 +202,7 @@ class TestRWSSubjects(unittest.TestCase):
         """
         when there is a SubjectKeyType='SubjectUUID' then we return Subject ID consistently
         """
-        text = """<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
+        text = b"""<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
   <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
     <SubjectData SubjectKey="0A663F39" mdsol:SubjectName="1" mdsol:SubjectKeyType="SubjectUUID" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="No" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
       <SiteRef LocationOID="TESTSITE"/>
@@ -230,7 +230,7 @@ class TestRWSSubjects(unittest.TestCase):
             None, subjects[1].overdue
         )  # Example where status was not asked for.
         self.assertEqual(True, subjects[2].incomplete)
-        self.assertEqual(text, str(subjects))
+        self.assertEqual(text.decode("utf-8"), str(subjects))
         self.assertEqual("1", subjects[0].subject_name)
         self.assertEqual("2", subjects[1].subject_name)
         self.assertEqual("3", subjects[2].subject_name)
@@ -242,7 +242,7 @@ class TestRWSSubjects(unittest.TestCase):
         """
         Populate subject.link with URL when provided
         """
-        text = """<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
+        text = b"""<ODM xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3" FileType="Snapshot" FileOID="0d2dcb32-16ca-4ab9-9917-c4b3eef2fb4a" CreationDateTime="2013-09-10T09:33:07.808-00:00" ODMVersion="1.3">
   <ClinicalData StudyOID="SIMPLESTUDY(TEST)" MetaDataVersionOID="1128">
     <SubjectData SubjectKey="0A663F39" mdsol:SubjectName="1" mdsol:SubjectKeyType="SubjectUUID" mdsol:Overdue="No" mdsol:Touched="Yes" mdsol:Empty="No" mdsol:Incomplete="No" mdsol:NonConformant="No" mdsol:RequiresSecondPass="No" mdsol:RequiresReconciliation="No" mdsol:RequiresVerification="No" mdsol:Verified="No" mdsol:Frozen="No" mdsol:Locked="No" mdsol:RequiresReview="No" mdsol:PendingReview="No" mdsol:Reviewed="No" mdsol:RequiresAnswerQuery="No" mdsol:RequiresPendingCloseQuery="No" mdsol:RequiresCloseQuery="No" mdsol:StickyPlaced="No" mdsol:Signed="No" mdsol:SignatureCurrent="No" mdsol:RequiresTranslation="No" mdsol:RequiresCoding="No" mdsol:RequiresPendingAnswerQuery="No" mdsol:RequiresSignature="No" mdsol:ReadyForFreeze="No" mdsol:ReadyForLock="Yes">
       <SiteRef LocationOID="TESTSITE"/>
@@ -283,7 +283,7 @@ class TestMetaDataVersions(unittest.TestCase):
     """Test MetaDataVersions"""
 
     def test_parse(self):
-        text = u"""<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
+        text = b"""<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
         <Study OID="IANTEST">
             <GlobalVariables>
                 <StudyName>IANTEST</StudyName>
@@ -307,7 +307,7 @@ class TestMetaDataVersions(unittest.TestCase):
 
 class TestRWSPostResponse(unittest.TestCase):
     def test_parse(self):
-        text = """<Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+        text = b"""<Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
               InboundODMFileOID=""
               IsTransactionSuccessful="1"
               SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords=""
@@ -322,7 +322,7 @@ class TestRWSPostResponse(unittest.TestCase):
 
     def test_bad_success_stats(self):
         """Test error when statistics contain info we don't recognize"""
-        text = """<Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+        text = b"""<Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
               InboundODMFileOID=""
               IsTransactionSuccessful="1"
               SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Unknown=10; Fields=0; LogLines=0"
@@ -335,7 +335,7 @@ class TestRWSPostResponse(unittest.TestCase):
 
 class TestRWSPostErrorResponse(unittest.TestCase):
     def test_parse(self):
-        text = """<Response
+        text = b"""<Response
         ReferenceNumber="5b1fa9a3-0cf3-46b6-8304-37c2e3b7d04f5"
         InboundODMFileOID="1"
         IsTransactionSuccessful = "0"
@@ -360,7 +360,7 @@ class TestRWSPostErrorResponse(unittest.TestCase):
 
 class TestRWSStudies(unittest.TestCase):
     def test_parse(self):
-        text = """<ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
+        text = b"""<ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
          CreationDateTime="2013-04-08T10:02:17.781-00:00"
          ODMVersion="1.3"
          xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
@@ -390,7 +390,7 @@ class TestRWSStudies(unittest.TestCase):
 
 class TestUtils(unittest.TestCase):
     def test_parse(self):
-        text = """<ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
+        text = b"""<ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
          CreationDateTime="2013-04-08T10:02:17.781-00:00"
          ODMVersion="1.3"
          xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
