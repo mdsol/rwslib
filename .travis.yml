@@ -18,4 +18,5 @@ deploy:
   on:
     tags: true
     python: '3.6'
-  distributions: sdist
+  distributions: "sdist bdist_wheel"
+  skip_existing: true
