@@ -83,7 +83,6 @@ class RWSRequest(object):
         :return:
         """
         # By default return text
-        response.encoding = "utf-8-sig"
         return response.text
 
     def url_path(self):
@@ -190,7 +189,6 @@ class CacheFlushRequest(RWSAuthorizedGetRequest):
         Return RWSResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return RWSResponse(response.text)
 
 
@@ -207,7 +205,6 @@ class ClinicalStudiesRequest(RWSAuthorizedGetRequest):
         Return RWSResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return RWSStudies(response.text)
 
 
@@ -245,7 +242,6 @@ class VersionRequestBase(RWSAuthorizedGetRequest):
         Return RWSResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return response.text
 
 
@@ -268,7 +264,6 @@ class MetadataStudiesRequest(RWSAuthorizedGetRequest):
         Return RWSResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return RWSStudies(response.text)
 
 
@@ -289,7 +284,6 @@ class StudyDraftsRequest(RWSAuthorizedGetRequest):
         Return RWSResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return RWSStudyMetadataVersions(response.text)
 
 
@@ -310,7 +304,6 @@ class StudyVersionsRequest(RWSAuthorizedGetRequest):
         Return RWSResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return RWSStudyMetadataVersions(response.text)
 
 
@@ -345,7 +338,6 @@ class GlobalLibrariesRequest(RWSAuthorizedGetRequest):
         Return RWSResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return RWSStudies(response.text)
 
 
@@ -366,7 +358,6 @@ class GlobalLibraryDraftsRequest(RWSAuthorizedGetRequest):
         Return RWSResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return RWSStudyMetadataVersions(response.text)
 
 
@@ -387,7 +378,6 @@ class GlobalLibraryVersionsRequest(RWSAuthorizedGetRequest):
         Return RWSResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return RWSStudyMetadataVersions(response.text)
 
 
@@ -426,7 +416,6 @@ class PostMetadataRequest(RWSAuthorizedPostRequest):
         Return RWSPostResponse object for success
         :param requests.models.Response response: request respnse
         """
-        response.encoding = "utf-8-sig"
         return RWSPostResponse(response.text)
 
 
@@ -514,7 +503,6 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
         Return RWSSubjects object for success
         :param requests.models.Response response: request response
         """
-        response.encoding = "utf-8-sig"
         return RWSSubjects(response.text)
 
 
@@ -547,7 +535,6 @@ class PostDataRequest(RWSAuthorizedPostRequest):
         Return RWSPostResponse object for success
         :param requests.models.Response response: request response
         """
-        response.encoding = "utf-8-sig"
         return RWSPostResponse(response.text)
 
 
