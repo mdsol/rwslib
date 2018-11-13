@@ -244,13 +244,14 @@ class TestErrorResponse(unittest.TestCase):
     def test_401_error_error_response_no_header(self):
         """Parse the IIS Response Error structure"""
 
-        text = u"Authorization Header not provided"
+        text = "Authorization Header not provided"
 
         httpretty.register_uri(
             httpretty.POST,
             "https://innovate.mdsol.com/RaveWebServices/webservice.aspx?PostODMClinicalData",
             status=401,
             body=text,
+            content_type="text/html; charset=utf-8"
         )
 
         # Now my test
@@ -263,13 +264,14 @@ class TestErrorResponse(unittest.TestCase):
     def test_401_error_error_response_unauthorized(self):
         """Parse the IIS Response Error structure"""
 
-        text = u"<h2>HTTP Error 401.0 - Unauthorized</h2>"
+        text = b"<h2>HTTP Error 401.0 - Unauthorized</h2>"
 
         httpretty.register_uri(
             httpretty.POST,
             "https://innovate.mdsol.com/RaveWebServices/webservice.aspx?PostODMClinicalData",
             status=401,
             body=text,
+            content_type="text/html; charset=utf-8"
         )
 
         # Now my test
@@ -282,7 +284,7 @@ class TestErrorResponse(unittest.TestCase):
     def test_401_error_error_response_unauthorized_but_wonky(self):
         """Parse the IIS Response Error structure"""
 
-        text = u"""<Response
+        text = b"""<Response
             ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
             InboundODMFileOID="Not Supplied"
             IsTransactionSuccessful="0"
@@ -309,7 +311,7 @@ class TestErrorResponse(unittest.TestCase):
     def test_401_error_error_response_unauthorized_without_content_type(self):
         """Parse the IIS Response Error structure"""
 
-        text = u"""<Response
+        text = b"""<Response
             ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
             InboundODMFileOID="Not Supplied"
             IsTransactionSuccessful="0"
@@ -335,7 +337,7 @@ class TestErrorResponse(unittest.TestCase):
     def test_405_error_error_response_response_object(self):
         """Parse the IIS Response Error structure"""
 
-        text = u"""<Response
+        text = b"""<Response
             ReferenceNumber="0b47fe86-542f-4070-9e7d-16396a5ef08a"
             InboundODMFileOID="Not Supplied"
             IsTransactionSuccessful="0"
@@ -375,15 +377,16 @@ class TestErrorResponse(unittest.TestCase):
 
         httpretty.register_uri(
             httpretty.GET,
-            "https://innovate.mdsol.com/RaveWebServices/version",
+            "https://innovate.mdsol.com/RaveWebServices/studies",
             status=405,
             body=text,
+            content_type="text/xml"
         )
 
         # Now my test
         rave = rwslib.RWSConnection("https://innovate.mdsol.com")
         with self.assertRaises(rwslib.RWSException) as exc:
-            v = rave.send_request(rwslib.rws_requests.VersionRequest())
+            v = rave.send_request(rwslib.rws_requests.ClinicalStudiesRequest())
         self.assertEqual(
             "Incorrect login and password combination. [RWS00008]", str(exc.exception)
         )
@@ -420,7 +423,10 @@ class TestErrorResponse(unittest.TestCase):
 
     @httpretty.activate
     def test_multibyte_character_encoding(self):
-        """Test the output is properly encoded"""
+        """
+        Test the output is properly encoded, Rave sends text/xml, but the underlying library doesn't seem to detect the
+            encoding correctly
+        """
         with open(
             os.path.join(
                 os.path.dirname(__file__), "fixtures", "test_double_byte_chars.xml"
@@ -433,12 +439,28 @@ class TestErrorResponse(unittest.TestCase):
                 "https://training1.mdsol.com/RaveWebServices/studies/RWS_Training_Japan(PROD)/datasets/regular/SURGERY",
                 status=200,
                 body=content,
+                content_type="text/xml"
             )
         # Now my test
         r = rwslib.RWSConnection("https://training1.mdsol.com")
         result = r.send_request(
             StudyDatasetRequest("RWS_Training_Japan", "PROD", formoid="SURGERY")
         )
+        # these don't match as the encoding of the characters fails
+        self.assertNotEqual(content.decode('utf-8'), result)
+
+        class UTF8StudyDatasetRequest(StudyDatasetRequest):
+            """
+            Force the encoding of the response
+            """
+            def result(self, response):
+                response.encoding = 'utf-8'
+                return response.text
+
+        result = r.send_request(
+            UTF8StudyDatasetRequest("RWS_Training_Japan", "PROD", formoid="SURGERY")
+        )
+        # these match as the encoding enforcement makes it so
         self.assertEqual(content.decode('utf-8'), result)
 
 

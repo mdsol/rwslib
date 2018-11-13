@@ -30,23 +30,23 @@ def getEnvironmentFromNameAndProtocol(studyname, protocolname):
 def parseXMLString(xml):
     """
     Parse XML string, return root
-    :param bytes xml: Passed in XML
+    :param str: Passed in XML
     """
+
+    # Remove BOM if it exists (different requests seem to have different BOMs)
+    unichr_captured = ""
+
     if not xml.strip():
-        return xml
-    # Create a parser
-    parser = etree.XMLParser(
-        ns_clean=True, collect_ids=False, huge_tree=True, encoding="utf-8"
-    )
+        return u""
+
+    while xml[0] != u"<":
+        unichr_captured += xml[0]
+        xml = xml[1:]
+    parser = etree.XMLParser(ns_clean=True, collect_ids=False, huge_tree=True)
     try:
-        # if it is already bytes
-        parsed = etree.fromstring(xml, parser=parser)
-    except ValueError:
-        # if it's a string, make it into bytes
-        parsed = etree.fromstring(xml.encode("utf-8-sig"), parser=parser)
+        return etree.fromstring(xml.encode("utf-8"), parser=parser)
     except etree.XMLSyntaxError:
         raise Exception(xml)
-    return parsed
 
 
 class RWSException(Exception):
