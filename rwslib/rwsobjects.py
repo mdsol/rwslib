@@ -43,7 +43,7 @@ def parseXMLString(xml):
         parsed = etree.fromstring(xml, parser=parser)
     except ValueError:
         # if it's a string, make it into bytes
-        parsed = etree.fromstring(xml.encode("utf-8"), parser=parser)
+        parsed = etree.fromstring(xml.encode("utf-8-sig"), parser=parser)
     except etree.XMLSyntaxError:
         raise Exception(xml)
     return parsed
