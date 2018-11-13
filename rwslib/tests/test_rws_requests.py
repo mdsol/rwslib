@@ -112,7 +112,7 @@ class TestStudySubjectsRequest(unittest.TestCase):
 
     def test_maps_response(self):
         """We map the response to a RWSSubjects instance"""
-        response_content = """    <ODM FileType="Snapshot"
+        response_content = u"""    <ODM FileType="Snapshot"
          FileOID="770f1758-db33-4ab2-af72-38db863734aa"
          CreationDateTime="2013-04-08T14:08:06.875-00:00"
          ODMVersion="1.3">
@@ -387,7 +387,7 @@ class TestStudyDatasetRequest(unittest.TestCase):
 class TestPostDataRequest(unittest.TestCase):
     def test_post_data_request_response(self):
         """We can POST data and reformat the response"""
-        response_content = """    <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+        response_content = u"""    <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
               InboundODMFileOID=""
               IsTransactionSuccessful="1"
               SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords=""
@@ -404,7 +404,7 @@ class TestPostDataRequest(unittest.TestCase):
 class TestPostMetadataRequest(unittest.TestCase):
     def test_post_data_request_response(self):
         """We can POST data and reformat the response"""
-        response_content = """    <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+        response_content = u"""    <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
               InboundODMFileOID=""
               IsTransactionSuccessful="1"
               SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords=""
@@ -450,7 +450,7 @@ class TestGlobalLibraryVersionsRequest(unittest.TestCase):
 
     def test_post_data_request_response(self):
         """We can POST data and reformat the response"""
-        response_content = """<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
+        response_content = u"""<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
         <Study OID="IANTEST">
             <GlobalVariables>
                 <StudyName>IANTEST</StudyName>
@@ -485,7 +485,7 @@ class TestGlobalLibraryDraftsRequest(unittest.TestCase):
 
     def test_post_data_request_response(self):
         """We can POST data and reformat the response"""
-        response_content = """<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
+        response_content = u"""<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
         <Study OID="IANTEST">
             <GlobalVariables>
                 <StudyName>IANTEST</StudyName>
@@ -520,7 +520,7 @@ class TestGlobalLibrariesRequest(unittest.TestCase):
 
     def test_post_data_request_response(self):
         """We can POST data and reformat the response"""
-        response_content = """    <ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
+        response_content = u"""    <ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
          CreationDateTime="2013-04-08T10:02:17.781-00:00"
          ODMVersion="1.3"
          xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
@@ -567,7 +567,7 @@ class TestStudyVersionRequest(unittest.TestCase):
 
     def test_post_data_request_response(self):
         """We can POST data and reformat the response"""
-        response_content = """    <ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
+        response_content = u"""    <ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
          CreationDateTime="2013-04-08T10:02:17.781-00:00"
          ODMVersion="1.3"
          xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
@@ -606,7 +606,7 @@ class TestStudyVersionsRequest(unittest.TestCase):
 
     def test_post_data_request_response(self):
         """We can POST data and reformat the response"""
-        response_content = """<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
+        response_content = u"""<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
         <Study OID="IANTEST">
             <GlobalVariables>
                 <StudyName>IANTEST</StudyName>
@@ -641,7 +641,7 @@ class TestStudyDraftsRequest(unittest.TestCase):
 
     def test_post_data_request_response(self):
         """We can POST data and reformat the response"""
-        response_content = """<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
+        response_content = u"""<ODM ODMVersion="1.3" Granularity="Metadata" FileType="Snapshot" FileOID="d26b4d33-376d-4037-9747-684411190179" CreationDateTime=" 2013-04-08T01:29:13 " xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata">
         <Study OID="IANTEST">
             <GlobalVariables>
                 <StudyName>IANTEST</StudyName>
@@ -676,7 +676,7 @@ class TestMetadataStudiesRequest(unittest.TestCase):
 
     def test_post_data_request_response(self):
         """We can POST data and reformat the response"""
-        response_content = """    <ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
+        response_content = u"""    <ODM FileType="Snapshot" FileOID="767a1f8b-7b72-4d12-adbe-37d4d62ba75e"
          CreationDateTime="2013-04-08T10:02:17.781-00:00"
          ODMVersion="1.3"
          xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
@@ -724,7 +724,7 @@ class TestClinicalStudiesRequest(unittest.TestCase):
     def test_process_response(self):
         """We process the response"""
         t = self.create_request_object()
-        response_content = """<ODM FileType="Snapshot" FileOID="" CreationDateTime="" ODMVersion="1.3"
+        response_content = u"""<ODM FileType="Snapshot" FileOID="" CreationDateTime="" ODMVersion="1.3"
 xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns="http://www.cdisc.org/ns/odm/v1.3">
  <Study OID="Lab Test">
    <GlobalVariables>
@@ -761,7 +761,7 @@ class TestCacheFlushRequest(unittest.TestCase):
     def test_process_response(self):
         """We process the response"""
         t = self.create_request_object()
-        response_content = """    <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
+        response_content = u"""    <Response ReferenceNumber="82e942b0-48e8-4cf4-b299-51e2b6a89a1b"
         InboundODMFileOID=""
         IsTransactionSuccessful="1"
         SuccessStatistics="Rave objects touched: Subjects=0; Folders=0; Forms=0; Fields=0; LogLines=0" NewRecords="">

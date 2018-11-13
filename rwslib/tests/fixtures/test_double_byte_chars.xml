@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ODM FileType="Snapshot" FileOID="68db3463-c335-4a66-b82c-d954d5f0c54b" CreationDateTime="2018-11-08T08:55:08.668-00:00" ODMVersion="1.3" xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.cdisc.org/ns/odm/v1.3">
+    <ClinicalData StudyOID="RWS_Training_Japan_20180821(Prod)" MetaDataVersionOID="1865">
+        <SubjectData SubjectKey="0001-MH-01 JAN 2000">
+            <SiteRef LocationOID="0001" />
+            <StudyEventData StudyEventOID="SUBJECT">
+                <FormData FormOID="SURGERY" FormRepeatKey="1">
+                    <ItemGroupData ItemGroupOID="SURGERY_LOG_LINE">
+                        <ItemData ItemOID="SURGERY.SURGERYDATE" IsNull="Yes" />
+                        <ItemData ItemOID="SURGERY.DEVICETYPE" IsNull="Yes" />
+                        <ItemData ItemOID="SURGERY.DEVICE" Value="日本語のテスト" />
+                    </ItemGroupData>
+                </FormData>
+            </StudyEventData>
+        </SubjectData>
+    </ClinicalData>
+</ODM>
