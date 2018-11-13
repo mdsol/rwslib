@@ -247,4 +247,27 @@ Where RWS returns an XML error response, rwslib will parse the error and return 
 copied into. The purpose of this scheme is to make rwslib raise a standard exception type that surfaces the error
 message from the source RWS response but which also provides full access to the content of the original RWS error message.
 
+Multi-byte encodings
+--------------------
 
+In some cases the underlying `requests` library does not detect the correct encoding for the response; this is partly
+down to how Rave reports the *Content-Type* for different requests.  To be able to safely encode the response for character sets
+beyond 'UTF-8', it is recommended the user subclasses the underlying `rwslib` Request object and force the encoding on the response
+object
+
+As an example:
+
+.. code-block:: python
+
+    from rwslib.rws_requests import StudyDatasetRequest
+
+    class UTF8StudyDatasetRequest(StudyDatasetRequest):
+        def result(self, response):
+            """
+            Process a result to create a custom output
+            :param requests.models.Response response: returned response
+            :return:
+            """
+            # By default return text
+            response.encoding = "utf-8-sig"
+            return response.text

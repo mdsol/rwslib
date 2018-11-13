@@ -1117,9 +1117,10 @@ class MdsolProtocolDeviation(TransactionalElement):
     """
     Extension for Protocol Deviations in Rave
 
-    .. note:: This is a Medidata Rave Specific Extension
-    .. note:: This primarily exists as a mechanism for use by the Clinical Audit Record Service, but it is useful 
-        to define for the builders
+    .. note::
+        * This is a Medidata Rave Specific Extension
+        * This primarily exists as a mechanism for use by the Clinical Audit Record Service, but it is useful to define for the builders
+
     """
     ALLOWED_TRANSACTION_TYPES = ["Insert"]
 
