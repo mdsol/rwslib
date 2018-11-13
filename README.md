@@ -17,5 +17,5 @@ Documented with Sphinx. See http://rwslib.readthedocs.org/en/latest/
 
 Build Status
 ------------
-* develop - [![Build Status](https://travis-ci.com/mdsol/rwslib.svg?branch=develop)](https://travis-ci.com/mdsol/rwslib.svg?branch=develop)
-* master - [![Build Status](https://travis-ci.com/mdsol/rwslib.svg?branch=master)](https://travis-ci.com/mdsol/rwslib.svg?branch=master)
+* develop - [![Build Status](https://travis-ci.org/mdsol/rwslib.svg?branch=develop)](https://travis-ci.org/mdsol/rwslib.svg?branch=develop)
+* master - [![Build Status](https://travis-ci.org/mdsol/rwslib.svg?branch=master)](https://travis-ci.org/mdsol/rwslib.svg?branch=master)
