@@ -107,21 +107,13 @@ class TestSubjectData(unittest.TestCase):
         """Test transaction type will not allow you to set to invalid choice"""
 
         def do():
-            self.tested.transaction_type = "UpDateSert"
+            self.tested.transaction_type = "invalid"
 
         self.assertRaises(AttributeError, do)
 
     def test_children(self):
         """Test there is 1 child"""
         self.assertEqual(1, len(self.tested.study_events))
-
-    def test_invalid_transaction_type(self):
-        """According to docs does not permit upserts"""
-
-        def do():
-            SubjectData("SITEA", "SUB1", transaction_type="upsert")
-
-        self.assertRaises(AttributeError, do)
 
     def test_builder(self):
         """XML produced"""
@@ -313,15 +305,7 @@ class TestStudyEventData(unittest.TestCase):
         """Test transaction type will not allow you to set to invalid choice"""
 
         def do():
-            self.tested.transaction_type = "upsert"
-
-        self.assertRaises(AttributeError, do)
-
-    def test_invalid_transaction_type(self):
-        """According to docs does not permit upserts"""
-
-        def do():
-            StudyEventData("V2", transaction_type="upsert")
+            self.tested.transaction_type = "invalid"
 
         self.assertRaises(AttributeError, do)
 
@@ -350,10 +334,10 @@ class TestFormData(unittest.TestCase):
         self.assertEqual(3, len(self.tested.itemgroups))
 
     def test_invalid_transaction_type(self):
-        """Can only be insert, update, upsert not context"""
+        """Test transaction type will not allow you to set to invalid choice"""
 
         def do():
-            FormData("MYFORM", transaction_type="context")
+            FormData("MYFORM", transaction_type="invalid")
 
         self.assertRaises(AttributeError, do)
 
