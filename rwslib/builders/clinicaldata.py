@@ -82,7 +82,7 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         :param str site_location_oid: :class:`SiteLocation` OID
         :param str subject_key: Value for SubjectKey
         :param str subject_key_type: Specifier as to the type of SubjectKey (either **SubjectName** or **SubjectUUID**)
-        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **, Context**, **Remove**)
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         """
         super(self.__class__, self).__init__(transaction_type)
         self.sitelocationoid = site_location_oid
@@ -163,7 +163,7 @@ class StudyEventData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     ):
         """
         :param str study_event_oid: :class:`StudyEvent` OID
-        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **, Context**, **Remove**)
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param int study_event_repeat_key: :attr:`StudyEventRepeatKey` for StudyEventData
         """
         super(self.__class__, self).__init__(transaction_type)
@@ -228,7 +228,7 @@ class FormData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     def __init__(self, formoid, transaction_type=None, form_repeat_key=None):
         """
         :param str formoid: :class:`FormDef` OID
-        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **, Context**, **Remove**)
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param str form_repeat_key: Repeat Key for FormData
         """
         super(FormData, self).__init__(transaction_type)
@@ -304,7 +304,7 @@ class ItemGroupData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         annotations=None,
     ):
         """
-        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **, Context**, **Remove**)
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param int item_group_repeat_key: RepeatKey for the ItemGroupData
         :param bool whole_item_group: Is this the entire ItemGroupData, or just parts? - *Rave specific attribute*
         :param annotations: Annotation for the ItemGroup - *Not supported by Rave*
@@ -399,7 +399,7 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         :param str itemoid: OID for the matching :class:`ItemDef`
         :param str value: Value for the the ItemData
         :param str specify_value: 'If other, specify' value - *Rave specific attribute*
-        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **, Context**, **Remove**)
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param bool lock: Lock the DataPoint? - *Rave specific attribute*
         :param bool freeze: Freeze the DataPoint? - *Rave specific attribute*
         :param bool verify: Verify the DataPoint? - *Rave specific attribute*
