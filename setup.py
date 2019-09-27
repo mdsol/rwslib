@@ -26,11 +26,15 @@ rwsinit = open("rwslib/__init__.py").read()
 author = re.search(r"__author__ = \"([^\"]+)\"", rwsinit).group(1)
 version = re.search(r"__version__ = \"([^\"]+)\"", rwsinit).group(1)
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name="rwslib",
     version=version,
     description="Rave web services for Python",
-    long_description=open("README.md").read(),
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author=author,
     author_email="isparks@mdsol.com",
     packages=packages,
