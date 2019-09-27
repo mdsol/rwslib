@@ -48,7 +48,7 @@ setup(
                       "enum34; python_version < '3.4'",
                       ],
     tests_require=['mock', 'httpretty'],
-    license=open('LICENSE.txt').read(),
+    license="MIT License",
     url='https://github.com/mdsol/rwslib/',
     zip_safe=False,
     test_suite='rwslib.tests.all_tests',
