@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from rwslib.builders.common import ODMElement, TransactionalElement, bool_to_yes_no, dt_to_iso8601, VALID_ID_CHARS
+from rwslib.builders.common import (
+    ODMElement,
+    TransactionalElement,
+    bool_to_yes_no,
+    dt_to_iso8601,
+    VALID_ID_CHARS,
+)
 from rwslib.builders.modm import LastUpdateMixin, MilestoneMixin
 from rwslib.builders.metadata import MeasurementUnitRef
 from rwslib.builders.constants import ProtocolDeviationStatus, QueryStatusType
@@ -13,8 +19,9 @@ import re
 class ClinicalData(ODMElement, LastUpdateMixin):
     """Models the ODM ClinicalData object"""
 
-    def __init__(self, projectname, environment, metadata_version_oid="1",
-                 annotations=None):
+    def __init__(
+        self, projectname, environment, metadata_version_oid="1", annotations=None
+    ):
         """
         :param projectname: Name of Project in Medidata Rave
         :param environment: Rave Study Enviroment
@@ -30,9 +37,10 @@ class ClinicalData(ODMElement, LastUpdateMixin):
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(MetaDataVersionOID=str(self.metadata_version_oid),
-                      StudyOID="%s (%s)" % (self.projectname, self.environment,),
-                      )
+        params = dict(
+            MetaDataVersionOID=str(self.metadata_version_oid),
+            StudyOID="%s (%s)" % (self.projectname, self.environment),
+        )
 
         # mixins
         self.mixin_params(params)
@@ -50,22 +58,31 @@ class ClinicalData(ODMElement, LastUpdateMixin):
     def __lshift__(self, other):
         """Override << operator"""
         if not isinstance(other, (SubjectData, Annotations)):
-            raise ValueError("ClinicalData object can only receive SubjectData or Annotations object")
-        self.set_list_attribute(other, SubjectData, 'subject_data')
-        self.set_single_attribute(other, Annotations, 'annotations')
+            raise ValueError(
+                "ClinicalData object can only receive SubjectData or Annotations object"
+            )
+        self.set_list_attribute(other, SubjectData, "subject_data")
+        self.set_single_attribute(other, Annotations, "annotations")
         return other
 
 
 class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     """Models the ODM SubjectData and ODM SiteRef objects"""
-    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert']
 
-    def __init__(self, site_location_oid, subject_key, subject_key_type="SubjectName", transaction_type="Update"):
+    ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Upsert", "Context", "Remove"]
+
+    def __init__(
+        self,
+        site_location_oid,
+        subject_key,
+        subject_key_type="SubjectName",
+        transaction_type="Update",
+    ):
         """
         :param str site_location_oid: :class:`SiteLocation` OID
         :param str subject_key: Value for SubjectKey
         :param str subject_key_type: Specifier as to the type of SubjectKey (either **SubjectName** or **SubjectUUID**)
-        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**)
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         """
         super(self.__class__, self).__init__(transaction_type)
         self.sitelocationoid = site_location_oid
@@ -85,7 +102,7 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     def build(self, builder):
         """Build XML by appending to builder"""
         params = dict(SubjectKey=self.subject_key)
-        params['mdsol:SubjectKeyType'] = self.subject_key_type
+        params["mdsol:SubjectKeyType"] = self.subject_key_type
 
         if self.transaction_type is not None:
             params["TransactionType"] = self.transaction_type
@@ -103,7 +120,7 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         if self.siteref:
             self.siteref.build(builder)
         else:
-            builder.start("SiteRef", {'LocationOID': self.sitelocationoid})
+            builder.start("SiteRef", {"LocationOID": self.sitelocationoid})
             builder.end("SiteRef")
 
         for event in self.study_events:
@@ -119,27 +136,34 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
 
     def __lshift__(self, other):
         """Override << operator"""
-        if not isinstance(other, (StudyEventData, AuditRecord, Annotation, Signature, SiteRef)):
-            raise ValueError("SubjectData object can only receive StudyEventData, AuditRecord, "
-                             "Annotation or Signature object")
+        if not isinstance(
+            other, (StudyEventData, AuditRecord, Annotation, Signature, SiteRef)
+        ):
+            raise ValueError(
+                "SubjectData object can only receive StudyEventData, AuditRecord, "
+                "Annotation or Signature object"
+            )
 
-        self.set_list_attribute(other, Annotation, 'annotations')
-        self.set_list_attribute(other, StudyEventData, 'study_events')
-        self.set_single_attribute(other, AuditRecord, 'audit_record')
-        self.set_single_attribute(other, Signature, 'signature')
-        self.set_single_attribute(other, SiteRef, 'siteref')
+        self.set_list_attribute(other, Annotation, "annotations")
+        self.set_list_attribute(other, StudyEventData, "study_events")
+        self.set_single_attribute(other, AuditRecord, "audit_record")
+        self.set_single_attribute(other, Signature, "signature")
+        self.set_single_attribute(other, SiteRef, "siteref")
 
         return other
 
 
 class StudyEventData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     """Models the ODM StudyEventData object"""
-    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Remove', 'Context']
 
-    def __init__(self, study_event_oid, transaction_type="Update", study_event_repeat_key=None):
+    ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Upsert", "Context", "Remove"]
+
+    def __init__(
+        self, study_event_oid, transaction_type="Update", study_event_repeat_key=None
+    ):
         """
         :param str study_event_oid: :class:`StudyEvent` OID
-        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, *Remove*, **Context**)
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param int study_event_repeat_key: :attr:`StudyEventRepeatKey` for StudyEventData
         """
         super(self.__class__, self).__init__(transaction_type)
@@ -187,21 +211,24 @@ class StudyEventData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     def __lshift__(self, other):
         """Override << operator"""
         if not isinstance(other, (FormData, Annotation, Signature)):
-            raise ValueError("StudyEventData object can only receive FormData, Signature or Annotation objects")
-        self.set_list_attribute(other, FormData, 'forms')
-        self.set_single_attribute(other, Signature, 'signature')
-        self.set_list_attribute(other, Annotation, 'annotations')
+            raise ValueError(
+                "StudyEventData object can only receive FormData, Signature or Annotation objects"
+            )
+        self.set_list_attribute(other, FormData, "forms")
+        self.set_single_attribute(other, Signature, "signature")
+        self.set_list_attribute(other, Annotation, "annotations")
         return other
 
 
 class FormData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     """Models the ODM FormData object"""
-    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update']
+
+    ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Upsert", "Context", "Remove"]
 
     def __init__(self, formoid, transaction_type=None, form_repeat_key=None):
         """
         :param str formoid: :class:`FormDef` OID
-        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**)
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param str form_repeat_key: Repeat Key for FormData
         """
         super(FormData, self).__init__(transaction_type)
@@ -250,10 +277,12 @@ class FormData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         if not isinstance(other, (Signature, ItemGroupData, Annotation)):
             raise ValueError(
                 "FormData object can only receive ItemGroupData, Signature or Annotation objects (not '{}')".format(
-                    other))
-        self.set_list_attribute(other, ItemGroupData, 'itemgroups')
-        self.set_list_attribute(other, Annotation, 'annotations')
-        self.set_single_attribute(other, Signature, 'signature')
+                    other
+                )
+            )
+        self.set_list_attribute(other, ItemGroupData, "itemgroups")
+        self.set_list_attribute(other, Annotation, "annotations")
+        self.set_single_attribute(other, Signature, "signature")
         return other
 
 
@@ -263,12 +292,19 @@ class ItemGroupData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
 
     .. note:: No name for the ItemGroupData element is required. This is built automatically by the form.
     """
-    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert', 'Context']
 
-    def __init__(self, itemgroupoid=None, transaction_type=None, item_group_repeat_key=None,
-                 whole_item_group=False, annotations=None):
+    ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Upsert", "Context", "Remove"]
+
+    def __init__(
+        self,
+        itemgroupoid=None,
+        transaction_type=None,
+        item_group_repeat_key=None,
+        whole_item_group=False,
+        annotations=None,
+    ):
         """
-        :param str transaction_type: TransactionType for the ItemGroupData
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param int item_group_repeat_key: RepeatKey for the ItemGroupData
         :param bool whole_item_group: Is this the entire ItemGroupData, or just parts? - *Rave specific attribute*
         :param annotations: Annotation for the ItemGroup - *Not supported by Rave*
@@ -300,9 +336,12 @@ class ItemGroupData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
 
         if self.item_group_repeat_key is not None:
             params["ItemGroupRepeatKey"] = str(
-                self.item_group_repeat_key)  # may be @context for transaction type upsert or context
+                self.item_group_repeat_key
+            )  # may be @context for transaction type upsert or context
 
-        params["mdsol:Submission"] = "WholeItemGroup" if self.whole_item_group else "SpecifiedItemsOnly"
+        params["mdsol:Submission"] = (
+            "WholeItemGroup" if self.whole_item_group else "SpecifiedItemsOnly"
+        )
 
         # mixins
         self.mixin()
@@ -326,27 +365,41 @@ class ItemGroupData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     def __lshift__(self, other):
         """Override << operator"""
         if not isinstance(other, (ItemData, Annotation, Signature)):
-            raise ValueError("ItemGroupData object can only receive ItemData, Signature or Annotation objects")
+            raise ValueError(
+                "ItemGroupData object can only receive ItemData, Signature or Annotation objects"
+            )
 
-        self.set_list_attribute(other, Annotation, 'annotations')
-        self.set_single_attribute(other, Signature, 'signature')
+        self.set_list_attribute(other, Annotation, "annotations")
+        self.set_single_attribute(other, Signature, "signature")
         if isinstance(other, ItemData):
             if other.itemoid in self.items:
-                raise ValueError("ItemGroupData object with that itemoid is already in the ItemGroupData object")
+                raise ValueError(
+                    "ItemGroupData object with that itemoid is already in the ItemGroupData object"
+                )
             self.items[other.itemoid] = other
         return other
 
 
 class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     """Models the ODM ItemData object"""
-    ALLOWED_TRANSACTION_TYPES = ['Insert', 'Update', 'Upsert', 'Context', 'Remove']
 
-    def __init__(self, itemoid, value, specify_value=None, transaction_type=None, lock=None, freeze=None, verify=None):
+    ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Upsert", "Context", "Remove"]
+
+    def __init__(
+        self,
+        itemoid,
+        value,
+        specify_value=None,
+        transaction_type=None,
+        lock=None,
+        freeze=None,
+        verify=None,
+    ):
         """
         :param str itemoid: OID for the matching :class:`ItemDef`
         :param str value: Value for the the ItemData
         :param str specify_value: 'If other, specify' value - *Rave specific attribute*
-        :param str transaction_type: Transaction type for the data
+        :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param bool lock: Lock the DataPoint? - *Rave specific attribute*
         :param bool freeze: Freeze the DataPoint? - *Rave specific attribute*
         :param bool verify: Verify the DataPoint? - *Rave specific attribute*
@@ -379,22 +432,22 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         if self.transaction_type is not None:
             params["TransactionType"] = self.transaction_type
 
-        if self.value in [None, '']:
-            params['IsNull'] = 'Yes'
+        if self.value in [None, ""]:
+            params["IsNull"] = "Yes"
         else:
-            params['Value'] = str(self.value)
+            params["Value"] = str(self.value)
 
         if self.specify_value is not None:
-            params['mdsol:SpecifyValue'] = self.specify_value
+            params["mdsol:SpecifyValue"] = self.specify_value
 
         if self.lock is not None:
-            params['mdsol:Lock'] = bool_to_yes_no(self.lock)
+            params["mdsol:Lock"] = bool_to_yes_no(self.lock)
 
         if self.freeze is not None:
-            params['mdsol:Freeze'] = bool_to_yes_no(self.freeze)
+            params["mdsol:Freeze"] = bool_to_yes_no(self.freeze)
 
         if self.verify is not None:
-            params['mdsol:Verify'] = bool_to_yes_no(self.verify)
+            params["mdsol:Verify"] = bool_to_yes_no(self.verify)
 
         # mixins
         self.mixin()
@@ -421,15 +474,25 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         builder.end("ItemData")
 
     def __lshift__(self, other):
-        if not isinstance(other, (MeasurementUnitRef, AuditRecord, MdsolQuery, Annotation,
-                                  MdsolProtocolDeviation)):
-            raise ValueError("ItemData object can only receive MeasurementUnitRef, AuditRecord, Annotation,"
-                             "MdsolProtocolDeviation or MdsolQuery objects")
-        self.set_single_attribute(other, MeasurementUnitRef, 'measurement_unit_ref')
-        self.set_single_attribute(other, AuditRecord, 'audit_record')
-        self.set_list_attribute(other, MdsolQuery, 'queries')
-        self.set_list_attribute(other, MdsolProtocolDeviation, 'deviations')
-        self.set_list_attribute(other, Annotation, 'annotations')
+        if not isinstance(
+            other,
+            (
+                MeasurementUnitRef,
+                AuditRecord,
+                MdsolQuery,
+                Annotation,
+                MdsolProtocolDeviation,
+            ),
+        ):
+            raise ValueError(
+                "ItemData object can only receive MeasurementUnitRef, AuditRecord, Annotation,"
+                "MdsolProtocolDeviation or MdsolQuery objects"
+            )
+        self.set_single_attribute(other, MeasurementUnitRef, "measurement_unit_ref")
+        self.set_single_attribute(other, AuditRecord, "audit_record")
+        self.set_list_attribute(other, MdsolQuery, "queries")
+        self.set_list_attribute(other, MdsolProtocolDeviation, "deviations")
+        self.set_list_attribute(other, Annotation, "annotations")
         return other
 
 
@@ -444,7 +507,14 @@ class Signature(ODMElement):
     and (in the case of a digital signature) an encrypted hash of the included data.
     """
 
-    def __init__(self, signature_id=None, user_ref=None, location_ref=None, signature_ref=None, date_time_stamp=None):
+    def __init__(
+        self,
+        signature_id=None,
+        user_ref=None,
+        location_ref=None,
+        signature_ref=None,
+        date_time_stamp=None,
+    ):
         #: Unique ID for Signature
         """
         :param UserRef user_ref: :class:`UserRef` for :class:`User` signing Data
@@ -482,7 +552,7 @@ class Signature(ODMElement):
         params = {}
         if self.signature_id is not None:
             # If a Signature element is contained within a Signatures element, the ID attribute is required.
-            params['ID'] = self.signature_id
+            params["ID"] = self.signature_id
 
         builder.start("Signature", params)
 
@@ -505,14 +575,17 @@ class Signature(ODMElement):
         builder.end("Signature")
 
     def __lshift__(self, other):
-        if not isinstance(other, (UserRef, LocationRef, SignatureRef, DateTimeStamp,)):
-            raise ValueError("Signature cannot accept a child element of type %s" % other.__class__.__name__)
+        if not isinstance(other, (UserRef, LocationRef, SignatureRef, DateTimeStamp)):
+            raise ValueError(
+                "Signature cannot accept a child element of type %s"
+                % other.__class__.__name__
+            )
 
         # Order is important, apparently
-        self.set_single_attribute(other, UserRef, 'user_ref')
-        self.set_single_attribute(other, LocationRef, 'location_ref')
-        self.set_single_attribute(other, SignatureRef, 'signature_ref')
-        self.set_single_attribute(other, DateTimeStamp, 'date_time_stamp')
+        self.set_single_attribute(other, UserRef, "user_ref")
+        self.set_single_attribute(other, LocationRef, "location_ref")
+        self.set_single_attribute(other, SignatureRef, "signature_ref")
+        self.set_single_attribute(other, DateTimeStamp, "date_time_stamp")
         return other
 
 
@@ -523,11 +596,17 @@ class Annotation(TransactionalElement):
 
     .. note:: Annotation is not supported by Medidata Rave
     """
+
     ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Remove", "Upsert", "Context"]
 
-    def __init__(self, annotation_id=None, seqnum=1,
-                 flags=None, comment=None,
-                 transaction_type=None):
+    def __init__(
+        self,
+        annotation_id=None,
+        seqnum=1,
+        flags=None,
+        comment=None,
+        transaction_type=None,
+    ):
         """
         :param id: ID for this Annotation (required if contained within an Annotations element)
         :type id: str or None
@@ -570,7 +649,7 @@ class Annotation(TransactionalElement):
     @annotation_id.setter
     def annotation_id(self, value):
         """Set ID for Annotation"""
-        if value in [None, ''] or str(value).strip() == '':
+        if value in [None, ""] or str(value).strip() == "":
             raise AttributeError("Invalid ID value supplied")
         self._id = value
 
@@ -588,7 +667,7 @@ class Annotation(TransactionalElement):
         :param value: SeqNum value
         :type value: int
         """
-        if not re.match(r'\d+', str(value)) or value < 0:
+        if not re.match(r"\d+", str(value)) or value < 0:
             raise AttributeError("Invalid SeqNum value supplied")
         self._seqnum = value
 
@@ -615,7 +694,7 @@ class Annotation(TransactionalElement):
         builder.start("Annotation", params)
 
         if self.flags in (None, []):
-            raise ValueError('Flag is not set.')
+            raise ValueError("Flag is not set.")
 
         # populate the flags
         for flag in self.flags:
@@ -628,11 +707,14 @@ class Annotation(TransactionalElement):
         builder.end("Annotation")
 
     def __lshift__(self, other):
-        if not isinstance(other, (Flag, Comment,)):
-            raise ValueError("Annotation cannot accept a child element of type %s" % other.__class__.__name__)
+        if not isinstance(other, (Flag, Comment)):
+            raise ValueError(
+                "Annotation cannot accept a child element of type %s"
+                % other.__class__.__name__
+            )
 
-        self.set_single_attribute(other, Comment, 'comment')
-        self.set_list_attribute(other, Flag, 'flags')
+        self.set_single_attribute(other, Comment, "comment")
+        self.set_list_attribute(other, Flag, "flags")
         return other
 
 
@@ -640,6 +722,7 @@ class Annotations(ODMElement):
     """
     Groups Annotation elements referenced by ItemData[TYPE] elements.
     """
+
     def __init__(self, annotations=[]):
         self.annotations = []
         for annotation in annotations:
@@ -659,9 +742,12 @@ class Annotations(ODMElement):
 
     def __lshift__(self, other):
         if not isinstance(other, (Annotation,)):
-            raise ValueError("Annotations cannot accept a child element of type %s" % other.__class__.__name__)
+            raise ValueError(
+                "Annotations cannot accept a child element of type %s"
+                % other.__class__.__name__
+            )
 
-        self.set_list_attribute(other, Annotation, 'annotations')
+        self.set_list_attribute(other, Annotation, "annotations")
         return other
 
 
@@ -691,7 +777,7 @@ class Comment(ODMElement):
     @text.setter
     def text(self, value):
         """Set Text content for Comment (validation of input)"""
-        if value in (None, '') or value.strip() == "":
+        if value in (None, "") or value.strip() == "":
             raise AttributeError("Empty text value is invalid.")
         self._text = value
 
@@ -704,8 +790,10 @@ class Comment(ODMElement):
     def sponsor_or_site(self, value):
         """Set Originator with validation of input"""
         if value not in Comment.VALID_SPONSOR_OR_SITE_RESPONSES:
-            raise AttributeError("%s sponsor_or_site value of %s is not valid" % (self.__class__.__name__,
-                                                                                  value))
+            raise AttributeError(
+                "%s sponsor_or_site value of %s is not valid"
+                % (self.__class__.__name__, value)
+            )
         self._sponsor_or_site = value
 
     def build(self, builder):
@@ -716,7 +804,7 @@ class Comment(ODMElement):
             raise ValueError("Text is not set.")
         params = {}
         if self.sponsor_or_site is not None:
-            params['SponsorOrSite'] = self.sponsor_or_site
+            params["SponsorOrSite"] = self.sponsor_or_site
 
         builder.start("Comment", params)
         builder.data(self.text)
@@ -752,18 +840,21 @@ class Flag(ODMElement):
             self.flag_type.build(builder)
 
         if self.flag_value is None:
-            raise ValueError('FlagValue is not set.')
+            raise ValueError("FlagValue is not set.")
         self.flag_value.build(builder)
 
         builder.end("Flag")
 
     def __lshift__(self, other):
-        if not isinstance(other, (FlagType, FlagValue,)):
-            raise ValueError("Flag cannot accept a child element of type %s" % other.__class__.__name__)
+        if not isinstance(other, (FlagType, FlagValue)):
+            raise ValueError(
+                "Flag cannot accept a child element of type %s"
+                % other.__class__.__name__
+            )
 
         # Order is important, apparently
-        self.set_single_attribute(other, FlagType, 'flag_type')
-        self.set_single_attribute(other, FlagValue, 'flag_value')
+        self.set_single_attribute(other, FlagType, "flag_type")
+        self.set_single_attribute(other, FlagValue, "flag_value")
         return other
 
 
@@ -792,7 +883,7 @@ class FlagType(ODMElement):
 
     @codelist_oid.setter
     def codelist_oid(self, value):
-        if value in (None, '') or value.strip() == "":
+        if value in (None, "") or value.strip() == "":
             raise AttributeError("Empty CodeListOID value is invalid.")
         self._codelist_oid = value
 
@@ -831,7 +922,7 @@ class FlagValue(ODMElement):
 
     @codelist_oid.setter
     def codelist_oid(self, value):
-        if value in (None, '') or value.strip() == "":
+        if value in (None, "") or value.strip() == "":
             raise AttributeError("Empty CodeListOID value is invalid.")
         self._codelist_oid = value
 
@@ -997,12 +1088,19 @@ class AuditRecord(ODMElement):
 
     .. note:: AuditRecord is supported only by :class:`ItemData` in Rave
     """
-    EDIT_MONITORING = 'Monitoring'
-    EDIT_DATA_MANAGEMENT = 'DataManagement'
-    EDIT_DB_AUDIT = 'DBAudit'
+
+    EDIT_MONITORING = "Monitoring"
+    EDIT_DATA_MANAGEMENT = "DataManagement"
+    EDIT_DB_AUDIT = "DBAudit"
     EDIT_POINTS = [EDIT_MONITORING, EDIT_DATA_MANAGEMENT, EDIT_DB_AUDIT]
 
-    def __init__(self, edit_point=None, used_imputation_method=None, identifier=None, include_file_oid=None):
+    def __init__(
+        self,
+        edit_point=None,
+        used_imputation_method=None,
+        identifier=None,
+        include_file_oid=None,
+    ):
         """
         :param str identifier: Audit identifier
         :param str edit_point: EditPoint attribute identifies the phase of data processing in which action occurred
@@ -1039,10 +1137,13 @@ class AuditRecord(ODMElement):
 
     @audit_id.setter
     def audit_id(self, value):
-        if value not in [None, ''] and str(value).strip() != '':
+        if value not in [None, ""] and str(value).strip() != "":
             val = str(value).strip()[0]
             if val not in VALID_ID_CHARS:
-                raise AttributeError('%s id cannot start with "%s" character' % (self.__class__.__name__, val,))
+                raise AttributeError(
+                    '%s id cannot start with "%s" character'
+                    % (self.__class__.__name__, val)
+                )
         self._id = value
 
     @property
@@ -1057,8 +1158,10 @@ class AuditRecord(ODMElement):
     def edit_point(self, value):
         if value is not None:
             if value not in self.EDIT_POINTS:
-                raise AttributeError('%s edit_point must be one of %s not %s' % (
-                    self.__class__.__name__, ','.join(self.EDIT_POINTS), value,))
+                raise AttributeError(
+                    "%s edit_point must be one of %s not %s"
+                    % (self.__class__.__name__, ",".join(self.EDIT_POINTS), value)
+                )
         self._edit_point = value
 
     def build(self, builder):
@@ -1069,13 +1172,13 @@ class AuditRecord(ODMElement):
             params["EditPoint"] = self.edit_point
 
         if self.used_imputation_method is not None:
-            params['UsedImputationMethod'] = bool_to_yes_no(self.used_imputation_method)
+            params["UsedImputationMethod"] = bool_to_yes_no(self.used_imputation_method)
 
         if self.audit_id is not None:
-            params['ID'] = str(self.audit_id)
+            params["ID"] = str(self.audit_id)
 
         if self.include_file_oid is not None:
-            params['mdsol:IncludeFileOID'] = bool_to_yes_no(self.include_file_oid)
+            params["mdsol:IncludeFileOID"] = bool_to_yes_no(self.include_file_oid)
 
         builder.start("AuditRecord", params)
         if self.user_ref is None:
@@ -1101,15 +1204,20 @@ class AuditRecord(ODMElement):
         builder.end("AuditRecord")
 
     def __lshift__(self, other):
-        if not isinstance(other, (UserRef, LocationRef, DateTimeStamp, ReasonForChange, SourceID)):
-            raise ValueError("AuditRecord cannot accept a child element of type %s" % other.__class__.__name__)
+        if not isinstance(
+            other, (UserRef, LocationRef, DateTimeStamp, ReasonForChange, SourceID)
+        ):
+            raise ValueError(
+                "AuditRecord cannot accept a child element of type %s"
+                % other.__class__.__name__
+            )
 
         # Order is important, apparently
-        self.set_single_attribute(other, UserRef, 'user_ref')
-        self.set_single_attribute(other, LocationRef, 'location_ref')
-        self.set_single_attribute(other, DateTimeStamp, 'date_time_stamp')
-        self.set_single_attribute(other, ReasonForChange, 'reason_for_change')
-        self.set_single_attribute(other, SourceID, 'source_id')
+        self.set_single_attribute(other, UserRef, "user_ref")
+        self.set_single_attribute(other, LocationRef, "location_ref")
+        self.set_single_attribute(other, DateTimeStamp, "date_time_stamp")
+        self.set_single_attribute(other, ReasonForChange, "reason_for_change")
+        self.set_single_attribute(other, SourceID, "source_id")
         return other
 
 
@@ -1122,9 +1230,12 @@ class MdsolProtocolDeviation(TransactionalElement):
         * This primarily exists as a mechanism for use by the Clinical Audit Record Service, but it is useful to define for the builders
 
     """
+
     ALLOWED_TRANSACTION_TYPES = ["Insert"]
 
-    def __init__(self, value, status, repeat_key=1, code=None, klass=None, transaction_type=None):
+    def __init__(
+        self, value, status, repeat_key=1, code=None, klass=None, transaction_type=None
+    ):
         """
         :param str value: Value for the Protocol Deviation 
         :param rwslib.builder_constants.ProtocolDeviationStatus status: 
@@ -1162,23 +1273,26 @@ class MdsolProtocolDeviation(TransactionalElement):
         if isinstance(value, ProtocolDeviationStatus):
             self._status = value
         else:
-            raise ValueError("Status {} is not a valid ProtocolDeviationStatus".format(value))
+            raise ValueError(
+                "Status {} is not a valid ProtocolDeviationStatus".format(value)
+            )
 
     def build(self, builder):
         """Build XML by appending to builder"""
-        params = dict(Value=self.value,
-                      Status=self.status.value,
-                      ProtocolDeviationRepeatKey=self.repeat_key
-                      )
+        params = dict(
+            Value=self.value,
+            Status=self.status.value,
+            ProtocolDeviationRepeatKey=self.repeat_key,
+        )
 
         if self.code:
-            params['Code'] = self.code
+            params["Code"] = self.code
         if self.pdclass:
-            params['Class'] = self.pdclass
+            params["Class"] = self.pdclass
         if self.transaction_type:
-            params['TransactionType'] = self.transaction_type
-        builder.start('mdsol:ProtocolDeviation', params)
-        builder.end('mdsol:ProtocolDeviation')
+            params["TransactionType"] = self.transaction_type
+        builder.start("mdsol:ProtocolDeviation", params)
+        builder.end("mdsol:ProtocolDeviation")
 
 
 class MdsolQuery(ODMElement):
@@ -1188,8 +1302,15 @@ class MdsolQuery(ODMElement):
     .. note:: This is a Medidata Rave specific extension
     """
 
-    def __init__(self, value=None, query_repeat_key=None, recipient=None, status=None, requires_response=None,
-                 response=None):
+    def __init__(
+        self,
+        value=None,
+        query_repeat_key=None,
+        recipient=None,
+        status=None,
+        requires_response=None,
+        response=None,
+    ):
         """
         :param str value: Query Value
         :param int query_repeat_key: Repeat key for Query
@@ -1217,7 +1338,9 @@ class MdsolQuery(ODMElement):
         """Set Query Status"""
         if value is not None:
             if not isinstance(value, QueryStatusType):
-                raise AttributeError("%s action type is invalid in mdsol:Query." % (value,))
+                raise AttributeError(
+                    "%s action type is invalid in mdsol:Query." % (value,)
+                )
         self._status = value
 
     def build(self, builder):
@@ -1227,26 +1350,23 @@ class MdsolQuery(ODMElement):
         params = {}
 
         if self.value is not None:
-            params['Value'] = str(self.value)
+            params["Value"] = str(self.value)
 
         if self.query_repeat_key is not None:
-            params['QueryRepeatKey'] = str(self.query_repeat_key)
+            params["QueryRepeatKey"] = str(self.query_repeat_key)
 
         if self.recipient is not None:
-            params['Recipient'] = str(self.recipient)
+            params["Recipient"] = str(self.recipient)
 
         if self.status is not None:
-            params['Status'] = self.status.value
+            params["Status"] = self.status.value
 
         if self.requires_response is not None:
-            params['RequiresResponse'] = bool_to_yes_no(self.requires_response)
+            params["RequiresResponse"] = bool_to_yes_no(self.requires_response)
 
         # When closing a query
         if self.response is not None:
-            params['Response'] = str(self.response)
+            params["Response"] = str(self.response)
 
         builder.start("mdsol:Query", params)
         builder.end("mdsol:Query")
-
-
-
