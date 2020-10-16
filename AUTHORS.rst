@@ -3,7 +3,7 @@ rwslib is an open source product of Medidata Solutions Inc with contributions fr
 Authors
 ```````
 
-- Ian Sparks <isparks@mdsol.com>
+- Ian Sparks <isparks@mdsol.com> / <isparks@trialgrid.com>
 - Geoff Low <glow@mdsol.com>
 - Andrew Newbigging <anewbigging@mdsol.com>
 - Oli Quinet <https://github.com/Oli76>
