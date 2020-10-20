@@ -1310,15 +1310,17 @@ class MdsolQuery(ODMElement):
         status=None,
         requires_response=None,
         response=None,
-    ):
+        preceding_query_repeat_key=None,
+        ):
         """
         :param str value: Query Value
         :param int query_repeat_key: Repeat key for Query
-        :param str recipient: Recipient for Query
+        :param str recipient: Recipient for Query (Marking Group)
         :param QueryStatusType status: Query status
         :param bool requires_response: Does this Query need a response?
         :param response: Query response (if any)
         :type response: str or None
+        :param int preceding_query_repeat_key: Query Key returned by OpenQuery call
         """
         self.value = value
         self.query_repeat_key = query_repeat_key
@@ -1327,6 +1329,7 @@ class MdsolQuery(ODMElement):
         self.status = status
         self.requires_response = requires_response
         self.response = response
+        self.preceding_query_repeat_key = preceding_query_repeat_key
 
     @property
     def status(self):
@@ -1367,6 +1370,10 @@ class MdsolQuery(ODMElement):
         # When closing a query
         if self.response is not None:
             params["Response"] = str(self.response)
+
+        # When re-opening a query
+        if self.preceding_query_repeat_key is not None:
+            params["PrecedingQueryRepeatKey"] = str(self.preceding_query_repeat_key)
 
         builder.start("mdsol:Query", params)
         builder.end("mdsol:Query")

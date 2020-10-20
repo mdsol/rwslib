@@ -9,9 +9,11 @@ from rwslib.tests.common import obj_to_doc
 class TestMdsolQuery(unittest.TestCase):
     """Test extension MdsolQuery"""
 
-    def get_tested(self):
-        return MdsolQuery(status=QueryStatusType.Open, value="Data missing", query_repeat_key=123,
+    def get_tested(self, **kwargs):
+        defaults = dict(status=QueryStatusType.Open, value="Data missing", query_repeat_key=123,
                           recipient="Site from System", requires_response=True)
+        defaults.update(kwargs)
+        return MdsolQuery(**defaults)
 
     def test_basic(self):
         tested = self.get_tested()
@@ -36,6 +38,20 @@ class TestMdsolQuery(unittest.TestCase):
         """Status must come from QueryStatusType"""
         with self.assertRaises(AttributeError):
             MdsolQuery(status='A test')
+
+    def test_preceding_query_repeat_key(self):
+        """Test that preceding query repeat key is passed through"""
+        tested = self.get_tested(status=QueryStatusType.Open,
+                                 preceding_query_repeat_key=11891,
+                                 query_repeat_key=None,
+                                 response=None)
+        doc = obj_to_doc(tested)
+        self.assertEqual("mdsol:Query", doc.tag)
+        self.assertEqual("Yes", doc.attrib['RequiresResponse'])
+        self.assertEqual("Site from System", doc.attrib['Recipient'])
+        self.assertIsNone(doc.attrib.get('QueryRepeatKey'))
+        self.assertEqual("Data missing", doc.attrib['Value'])
+        self.assertEqual("11891", doc.attrib['PrecedingQueryRepeatKey'])
 
 
 class TestProtocolDeviation(unittest.TestCase):

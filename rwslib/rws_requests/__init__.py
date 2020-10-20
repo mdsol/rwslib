@@ -503,6 +503,7 @@ class StudySubjectsRequest(RWSAuthorizedGetRequest):
         Return RWSSubjects object for success
         :param requests.models.Response response: request response
         """
+        response.encoding = "utf-8-sig"
         return RWSSubjects(response.text)
 
 
