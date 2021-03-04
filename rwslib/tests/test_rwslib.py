@@ -7,6 +7,7 @@ from mock import mock
 
 import rwslib
 from rwslib.rws_requests import StudyDatasetRequest
+from rwslib.rwsobjects import RWSPostErrorResponse
 
 
 # TODO: per the Repository, httpretty is not supporting Python3 - do we need to replace?
@@ -180,6 +181,11 @@ class TestErrorResponse(unittest.TestCase):
         with self.assertRaises(rwslib.RWSException) as exc:
             v = rave.send_request(rwslib.rws_requests.PostDataRequest("<ODM/>"))
         self.assertEqual("Subject already exists.", str(exc.exception))
+        rws_error = exc.exception.rws_error
+        self.assertEqual("/ODM/ClinicalData[1]/SubjectData[1]", str(rws_error.error_origin_location))
+        self.assertEqual("RWS00024", str(rws_error.reasoncode))
+        self.assertTrue(isinstance(rws_error, (RWSPostErrorResponse, )))
+        self.assertFalse(rws_error.istransactionsuccessful)
 
     @httpretty.activate
     def test_400_error_iis_error(self):

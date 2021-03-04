@@ -356,6 +356,8 @@ class TestRWSPostErrorResponse(unittest.TestCase):
         self.assertEqual(
             "/ODM/ClinicalData[1]/SubjectData[1]", parsed.error_origin_location
         )
+        self.assertEqual("RWS00024", parsed.reason_code)
+        self.assertEqual("RWS00024", parsed.reasoncode)
 
 
 class TestRWSStudies(unittest.TestCase):
