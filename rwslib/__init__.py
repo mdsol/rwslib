@@ -2,15 +2,16 @@
 
 __title__ = "rwslib"
 __author__ = "Ian Sparks (isparks@trialgrid.com)"
-__version__ = "1.2.6"
+__maintainer__ = "Geoff Low (glow@mdsol.com)"
+__version__ = "1.2.7"
 __license__ = "MIT"
-__copyright__ = "Copyright 2017 Medidata Solutions Inc"
+__copyright__ = "Copyright 2021 Medidata Solutions Inc"
 
 
 import requests
 
 from .rws_requests import RWSRequest, make_url
-from .rwsobjects import RWSException, RWSError, RWSErrorResponse
+from .rwsobjects import RWSException, RWSError, RWSErrorResponse, RWSPostErrorResponse
 
 import time
 
@@ -127,7 +128,7 @@ class RWSConnection(object):
         if r.status_code in [400, 404]:
             # Is it a RWS response?
             if r.text.startswith("<Response"):
-                error = RWSErrorResponse(r.text)
+                error = RWSErrorResponse(r.text) if request_object.method == "GET" else RWSPostErrorResponse(r.text)
                 raise RWSException(error.errordescription, error)
             elif "<html" in r.text:
                 raise RWSException("IIS Error", r.text)
@@ -155,7 +156,7 @@ class RWSConnection(object):
             if r.headers.get("content-type").startswith("text/xml"):
                 # XML response
                 if r.text.startswith("<Response"):
-                    error = RWSErrorResponse(r.text)
+                    error = RWSErrorResponse(r.text) if request_object.method == "GET" else RWSPostErrorResponse(r.text)
                 elif "ODM" in r.text:
                     error = RWSError(r.text)
             else:
@@ -168,7 +169,7 @@ class RWSConnection(object):
             if "<" in r.text:
                 # XML like
                 if r.text.strip().startswith("<Response"):
-                    error = RWSErrorResponse(r.text)
+                    error = RWSErrorResponse(r.text) if request_object.method == "GET" else RWSPostErrorResponse(r.text)
                 elif "ODM" in r.text:
                     error = RWSError(r.text)
                 else:

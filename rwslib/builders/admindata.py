@@ -286,7 +286,7 @@ class SimpleChildElement(ODMElement):
         :param builder: 
         :return: 
         """
-        builder.start(self.__class__.__name__)
+        builder.start(self.__class__.__name__, {})
         builder.data(self.text)
         builder.end(self.__class__.__name__)
 
@@ -372,7 +372,7 @@ class Country(ODMElement):
         :param builder: 
         :return: 
         """
-        builder.start(self.__class__.__name__)
+        builder.start(self.__class__.__name__, {})
         builder.data(self.country_code)
         builder.end(self.__class__.__name__)
 

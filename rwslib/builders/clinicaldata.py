@@ -732,7 +732,7 @@ class Annotations(ODMElement):
         """
         Build XML by appending to builder
         """
-        builder.start("Annotations")
+        builder.start("Annotations", {})
 
         # populate the flags
         for annotation in self.annotations:

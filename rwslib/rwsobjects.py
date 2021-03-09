@@ -240,7 +240,7 @@ class RWSPostResponse(RWSResponse):
         self.draft_imported = r_get("DraftImported")
 
 
-class RWSPostErrorResponse(RWSResponse):
+class RWSPostErrorResponse(RWSErrorResponse):
     """
     Responses to Clinical data post messages have additional Attributes to normal RWS Response messages:
 
@@ -262,7 +262,7 @@ class RWSPostErrorResponse(RWSResponse):
         """
         :param str xml: Error response
         """
-        RWSResponse.__init__(self, xml)
+        RWSErrorResponse.__init__(self, xml)
 
         # Get additional properties
         r_get = self.root.get

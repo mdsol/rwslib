@@ -21,3 +21,6 @@ htmlcov
 
 # VirtualEnvs!
 venv
+
+# Pyenv
+.python-version

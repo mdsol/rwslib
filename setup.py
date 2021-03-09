@@ -24,6 +24,9 @@ packages = [
 
 rwsinit = open("rwslib/__init__.py").read()
 author = re.search(r"__author__ = \"([^\"]+)\"", rwsinit).group(1)
+author_email = re.search('\(([^\)]+)', author).group(1)
+maintainer = re.search(r"__maintainer__ = \"([^\"]+)\"", rwsinit).group(1)
+maintainer_email = re.search('\(([^\)]+)', maintainer).group(1)
 version = re.search(r"__version__ = \"([^\"]+)\"", rwsinit).group(1)
 
 with open("README.md", "r") as fh:
@@ -36,7 +39,9 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author=author,
-    author_email="isparks@trialgrid.com",
+    author_email=author_email,
+    maintainer=maintainer,
+    maintainer_email=maintainer_email,
     packages=packages,
     package_dir={"rwslib": "rwslib"},
     include_package_data=True,
@@ -45,7 +50,6 @@ setup(
                       'six',
                       'click',
                       'faker',
-                      "enum34; python_version < '3.4'",
                       ],
     tests_require=['mock', 'httpretty'],
     license="MIT License",
@@ -58,10 +62,10 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     entry_points="""
     [console_scripts]
