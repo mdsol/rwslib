@@ -147,7 +147,7 @@ class RWSConnection(object):
             if r.text == "Authorization Header not provided":
                 raise AuthorizationException(r.text)
 
-            if "<h2>HTTP Error 401.0 - Unauthorized</h2>" in r.text:
+            if "HTTP Error 401.0 - Unauthorized" in r.text:
                 raise RWSException("Unauthorized.", r.text)
 
             # Check if the content_type is text/xml.  Use startswith

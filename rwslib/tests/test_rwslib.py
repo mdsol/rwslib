@@ -270,7 +270,7 @@ class TestErrorResponse(unittest.TestCase):
     def test_401_error_error_response_unauthorized(self):
         """Parse the IIS Response Error structure"""
 
-        text = b"<h2>HTTP Error 401.0 - Unauthorized</h2>"
+        text = b"<h3>HTTP Error 401.0 - Unauthorized</h3>"
 
         httpretty.register_uri(
             httpretty.POST,
