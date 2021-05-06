@@ -3,7 +3,7 @@
 __title__ = "rwslib"
 __author__ = "Ian Sparks (isparks@trialgrid.com)"
 __maintainer__ = "Geoff Low (glow@mdsol.com)"
-__version__ = "1.2.7"
+__version__ = "1.2.8"
 __license__ = "MIT"
 __copyright__ = "Copyright 2021 Medidata Solutions Inc"
 
@@ -147,7 +147,7 @@ class RWSConnection(object):
             if r.text == "Authorization Header not provided":
                 raise AuthorizationException(r.text)
 
-            if "<h2>HTTP Error 401.0 - Unauthorized</h2>" in r.text:
+            if "HTTP Error 401.0 - Unauthorized" in r.text:
                 raise RWSException("Unauthorized.", r.text)
 
             # Check if the content_type is text/xml.  Use startswith
