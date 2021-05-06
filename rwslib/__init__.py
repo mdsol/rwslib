@@ -3,7 +3,7 @@
 __title__ = "rwslib"
 __author__ = "Ian Sparks (isparks@trialgrid.com)"
 __maintainer__ = "Geoff Low (glow@mdsol.com)"
-__version__ = "1.2.7"
+__version__ = "1.2.8"
 __license__ = "MIT"
 __copyright__ = "Copyright 2021 Medidata Solutions Inc"
 

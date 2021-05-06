@@ -9,3 +9,4 @@ Authors
 - Oli Quinet <https://github.com/Oli76>
 - Daniel Smoczyk <https://github.com/dPeS>
 - Bastien Gerard <https://github.com/bagerard>
+- Filip Janowski <https://github.com/filip75>
