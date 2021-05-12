@@ -374,10 +374,10 @@ class TestMdsolReviewGroup(unittest.TestCase):
             MdsolReviewGroup("DM") << object()
 
 
-def test_build(self):
-    doc = obj_to_doc(MdsolReviewGroup("CRA"))
-    self.assertEqual(doc.tag, "mdsol:ReviewGroup")
-    self.assertEqual("CRA", doc.text)
+    def test_build(self):
+        doc = obj_to_doc(MdsolReviewGroup("CRA"))
+        self.assertEqual(doc.tag, "mdsol:ReviewGroup")
+        self.assertEqual("CRA", doc.text)
 
 
 class TestMdsolLabelDef(unittest.TestCase):
