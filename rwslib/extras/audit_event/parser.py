@@ -215,7 +215,7 @@ class ODMTargetParser(object):
                 attrib.get(A_ITEM_OID),
                 attrib.get(A_VALUE),
                 attrib.get(A_SPECIFY_VALUE),
-                attrib.get(A_SIGNATURE_BROKEN),
+                yes_no_none(attrib.get(A_SIGNATURE_BROKEN)),
                 yes_no_none(attrib.get(A_FREEZE)),
                 yes_no_none(attrib.get(A_VERIFY)),
                 yes_no_none(attrib.get(A_LOCK)),
