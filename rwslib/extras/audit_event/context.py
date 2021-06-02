@@ -88,9 +88,11 @@ class ItemGroup(ContextContainer):
 
 
 class Item(ContextBase):
-    def __init__(self, oid, value, freeze, verify, lock, transaction_type):
+    def __init__(self, oid, value, specify_value, signature_broken, freeze, verify, lock, transaction_type):
         self.oid = oid
         self.value = value
+        self.specify_value = specify_value
+        self.signature_broken = signature_broken
         self.freeze = freeze
         self.verify = verify
         self.lock = lock

@@ -85,6 +85,9 @@ A_INSTANCE_OVERDUE = mdsol('InstanceOverdue')
 A_DATAPAGE_NAME = mdsol('DataPageName')
 A_DATAPAGE_ID = mdsol('DataPageId')
 A_SIGNATURE_OID = 'SignatureOID'
+A_SPECIFY_VALUE = mdsol('SpecifyValue')
+A_SIGNATURE_BROKEN = mdsol('SignatureBroken')
+
 
 
 # Elements
@@ -211,6 +214,8 @@ class ODMTargetParser(object):
             self.context.item = Item(
                 attrib.get(A_ITEM_OID),
                 attrib.get(A_VALUE),
+                attrib.get(A_SPECIFY_VALUE),
+                attrib.get(A_SIGNATURE_BROKEN),
                 yes_no_none(attrib.get(A_FREEZE)),
                 yes_no_none(attrib.get(A_VERIFY)),
                 yes_no_none(attrib.get(A_LOCK)),
