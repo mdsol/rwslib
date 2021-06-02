@@ -2,11 +2,15 @@ from rwslib.extras.audit_event import parser
 import unittest
 import os
 
+
 class MockEventer:
+    """
+    Mock Event Sink instance for the purposes of testing (capturing all ASC)
+    """
 
     def __init__(self):
         self.__events = {}
-    
+
     def default(self, event):
         self.__events.setdefault(event.subcategory, []).append(event)
 
@@ -16,12 +20,15 @@ class MockEventer:
     @property
     def eventlist(self):
         return self.__events.keys()
-    
+
+
 class MockEventerEntered:
+    """
+    Mock Event Sink instance for the purposes of testing (capturing only 'Entered' ASC)
+    """
 
     def __init__(self):
         self.__events = {}
-    
 
     def get_audit_subcategory_events(self, audit_subcategory):
         return self.__events.get(audit_subcategory, [])
@@ -33,42 +40,55 @@ class MockEventerEntered:
     def eventlist(self):
         return self.__events.keys()
 
-class TestAuditEvent(unittest.TestCase):
 
+class TestAuditEvent(unittest.TestCase):
+    """
+    Test Case for Audit Event Processor
+    """
     def test_parses_audit_message(self):
         """parses an audit message from a CAR message"""
-        with open(os.path.join(os.path.dirname(__file__), "fixtures", "car_message.xml")) as fh:
+        with open(
+            os.path.join(os.path.dirname(__file__), "fixtures", "car_message.xml")
+        ) as fh:
             content = fh.read()
         eventer = MockEventer()
         message = parser.parse(content, eventer)
         # get the events
         self.assertTrue(len(eventer.eventlist) > 1)
-        self.assertTrue('EnteredEmpty' in eventer.eventlist)
+        self.assertTrue("EnteredEmpty" in eventer.eventlist)
         self.assertEquals(60, len(eventer.get_audit_subcategory_events("EnteredEmpty")))
         self.assertEquals(501, len(eventer.get_audit_subcategory_events("Entered")))
 
     def test_parses_audit_message_entered(self):
         """parses an audit message, but only subscribe to Entered Events from a CAR message"""
-        with open(os.path.join(os.path.dirname(__file__), "fixtures", "car_message.xml")) as fh:
+        with open(
+            os.path.join(os.path.dirname(__file__), "fixtures", "car_message.xml")
+        ) as fh:
             content = fh.read()
         eventer = MockEventerEntered()
         message = parser.parse(content, eventer)
         # get the events
         self.assertTrue(len(eventer.eventlist) == 1)
-        self.assertTrue('EnteredEmpty' not in eventer.eventlist)
+        self.assertTrue("EnteredEmpty" not in eventer.eventlist)
         self.assertEquals(0, len(eventer.get_audit_subcategory_events("EnteredEmpty")))
         self.assertEquals(501, len(eventer.get_audit_subcategory_events("Entered")))
 
     def test_parses_audit_message_subject_created(self):
         """parses an audit message, but only subscribe to Entered Events from a CAR message"""
-        with open(os.path.join(os.path.dirname(__file__), "fixtures", "car_message.xml")) as fh:
+        with open(
+            os.path.join(os.path.dirname(__file__), "fixtures", "car_message.xml")
+        ) as fh:
             content = fh.read()
         eventer = MockEventer()
         message = parser.parse(content, eventer)
         # get the events
-        self.assertEquals(92, len(eventer.get_audit_subcategory_events("SubjectCreated")))
+        self.assertEquals(
+            92, len(eventer.get_audit_subcategory_events("SubjectCreated"))
+        )
         subject_123_ABC = eventer.get_audit_subcategory_events("SubjectCreated")[0]
-        self.assertEqual("e983f330-c108-45ab-8f16-b4a566c7089c", subject_123_ABC.subject.key)
+        self.assertEqual(
+            "e983f330-c108-45ab-8f16-b4a566c7089c", subject_123_ABC.subject.key
+        )
         self.assertEqual("123 ABC", subject_123_ABC.subject.name)
 
     def test_parses_specify_value(self):
@@ -98,7 +118,7 @@ class TestAuditEvent(unittest.TestCase):
         """
         eventer = MockEventer()
         message = parser.parse(content, eventer)
-        event = eventer.get_audit_subcategory_events('Entered')[0]
+        event = eventer.get_audit_subcategory_events("Entered")[0]
         self.assertEqual("UNDEF", event.item.specify_value)
         self.assertEqual("Specify", event.item.value)
         self.assertEqual("DM.SEX", event.item.oid)
@@ -130,7 +150,7 @@ class TestAuditEvent(unittest.TestCase):
         """
         eventer = MockEventer()
         message = parser.parse(content, eventer)
-        event = eventer.get_audit_subcategory_events('Entered')[0]
+        event = eventer.get_audit_subcategory_events("Entered")[0]
         self.assertEqual("UNDEF", event.item.specify_value)
         self.assertEqual("Specify", event.item.value)
         self.assertEqual("DM.SEX", event.item.oid)
@@ -163,7 +183,7 @@ class TestAuditEvent(unittest.TestCase):
         """
         eventer = MockEventer()
         message = parser.parse(content, eventer)
-        event = eventer.get_audit_subcategory_events('Entered')[0]
+        event = eventer.get_audit_subcategory_events("Entered")[0]
         self.assertEqual("UNDEF", event.item.specify_value)
         self.assertEqual("Specify", event.item.value)
         self.assertEqual("DM.SEX", event.item.oid)
