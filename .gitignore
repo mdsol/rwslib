@@ -24,3 +24,5 @@ venv
 
 # Pyenv
 .python-version
+
+.vscode
