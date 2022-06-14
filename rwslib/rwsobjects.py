@@ -543,6 +543,7 @@ class RWSSubjectListItem(object):
         self.subjectkey = None
         self.subjectkeytype = None
         self.locationoid = None
+        self.study_environment_site_number = None
 
         self.active = None  # SubjectActive
         self.deleted = None  # Deleted
@@ -581,6 +582,7 @@ class RWSSubjectListItem(object):
         self.subjectkey = e_subjectdata.get("SubjectKey")
         e_siteref = e_subjectdata.findall(ODM_NS + "SiteRef")[0]
         self.locationoid = e_siteref.get("LocationOID")
+        self.study_environment_site_number = e_siteref.get(MEDI_NS + "StudyEnvSiteNumber")
 
         e_links = e_subjectdata.findall(MEDI_NS + "Link")
         for e_link in e_links:
