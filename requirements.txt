@@ -1,5 +1,0 @@
-lxml
-requests
-six
-click
-faker
