@@ -2,6 +2,7 @@
 omit =
     # omit the .tox directory
     */.tox/*
+    */.pytest_cache/*
 
 [report]
 ignore_errors = True
