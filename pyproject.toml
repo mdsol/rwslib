@@ -31,6 +31,8 @@ six = "*"
 click = "*"
 faker = "*"
 urllib3 = "^1.26.9"
+Sphinx = { version = "^5.1.1", optional = true }
+
 
 [tool.poetry.dev-dependencies]
 httpretty = "*"
@@ -42,9 +44,8 @@ tox-poetry = "*"
 
 [tool.poetry.extras]
 docs = [
-    "sphinx",
+    "Sphinx",
 ]
-
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
