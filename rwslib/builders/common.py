@@ -147,3 +147,9 @@ class TransactionalElement(ODMElement):
         self._transaction_type = value
 
 
+class Unset:
+    """
+    A class to represent an unset value.
+    """
+    def __bool__(self) -> bool:
+        return False
