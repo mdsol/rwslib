@@ -1,13 +1,6 @@
 Class Reference
 ***************
 
-rwslib
-======
-
-.. automodule:: rwslib
-    :members:
-    :exclude-members: builders
-
 Rave Web Services Request Objects
 =================================
 
@@ -17,6 +10,7 @@ Rave Web Services Request Objects
 
 Rave Web Services Objects
 =========================
+Rave Web Services Objects are core objects used to interact with the RWS Service.
 
 .. automodule:: rwslib.rwsobjects
     :members:
@@ -24,6 +18,7 @@ Rave Web Services Objects
 
 Biostats Gateway
 ================
+Biostats Gateway is a web service that provides a RESTful interface to the Rave Clinical Views.
 
 .. automodule:: rwslib.rws_requests.biostats_gateway
     :members:
@@ -31,11 +26,8 @@ Biostats Gateway
 
 ODM Adapter
 ===========
+ODM Adapter is an extension to the RWS API to support the extraction of Clinical Audit Records.
 
 .. automodule:: rwslib.rws_requests.odm_adapter
     :members:
     :exclude-members: url_path, studyoid
-
-
-
-

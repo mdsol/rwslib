@@ -1,10 +1,12 @@
 Class Reference for Builders
 ****************************
+Builders provide a way to construct an ODM XML document from  Python object.
+
+.. note:: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
 
 Metadata Builders
 =================
-
-.. note:: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
+Metadata Builders provide an API for creating ODM metadata elements
 
 .. automodule:: rwslib.builders.metadata
     :members:
@@ -12,8 +14,7 @@ Metadata Builders
 
 Clinical Data Builders
 ======================
-
-.. note:: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
+Clinical Data Builders provide an API for creating ODM data elements
 
 .. automodule:: rwslib.builders.clinicaldata
     :members:
@@ -22,8 +23,7 @@ Clinical Data Builders
 
 Medidata Extensions to ODM (MODM) Builders
 ==========================================
-
-.. note:: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
+MODM Builders provide an API for creating ODM data elements meeting the Medidata Rave specific extensions to the MODM specification
 
 .. automodule:: rwslib.builders.clinicaldata
     :members:
@@ -32,8 +32,7 @@ Medidata Extensions to ODM (MODM) Builders
 
 Administrative Data Builders
 ============================
-
-.. note:: Any Class with the Prefix **Mdsol** represents a Medidata Rave specific extension
+Admin Data Builders provide an API for creating ODM AdminData elements
 
 .. automodule:: rwslib.builders.admindata
     :members:
