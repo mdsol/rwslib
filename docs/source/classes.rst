@@ -6,6 +6,7 @@ rwslib
 
 .. automodule:: rwslib
     :members:
+    :exclude-members: builders
 
 Rave Web Services Request Objects
 =================================
