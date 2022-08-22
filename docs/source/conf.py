@@ -11,7 +11,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -20,7 +21,10 @@ import sys, os
 parentdir = os.path.split(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))[0]
 sys.path.insert(0,str(parentdir))
 
-from rwslib import __version__, __copyright__
+import pkg_resources
+__version__ = pkg_resources.get_distribution('rwslib').version
+
+from rwslib import  __copyright__
 
 # -- General configuration -----------------------------------------------------
 
@@ -119,7 +123,7 @@ html_theme = 'sphinxdoc'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '_static/mdsol.jpg'
+html_logo = '_static/3DS_MEDIDATA_Logotype_Navy.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
