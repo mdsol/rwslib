@@ -72,11 +72,3 @@ jobs:
       # And finally run tests. I'm using pytest and all my pytest config is in my `pyproject.toml`
       # so this line is super-simple. But it could be as complex as you need.
       - run: poetry run pytest
-
-  build-n-publish:
-    needs: tests
-    name: Build and publish Python 🐍 distributions 📦 to PyPI
-    if: startsWith(github.ref, 'refs/tags')
-    uses: "JRubics/poetry-publish@v1.11"
-    with:
-      pypi_token: ${{ secrets.PYPI_API_TOKEN }}
