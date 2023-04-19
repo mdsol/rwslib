@@ -13,11 +13,11 @@ jobs:
     name: "Python ${{ matrix.python-version }}"
     runs-on: "ubuntu-latest"
     env:
-      USING_COVERAGE: '3.6,3.8,3.10'
+      USING_COVERAGE: '3.7,3.8,3.10'
 
     strategy:
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "pypy3"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
     steps:
       - uses: "actions/checkout@v2"
@@ -33,7 +33,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.local
-          key: poetry-1.1.12-0
+          key: poetry-1.4.2-0
       # Install Poetry. You could do this manually, or there are several actions that do this.
       # `snok/install-poetry` seems to be minimal yet complete, and really just calls out to
       # Poetry's default install script, which feels correct. I pin the Poetry version here
@@ -45,7 +45,7 @@ jobs:
       # cache it.
       - uses: snok/install-poetry@v1
         with:
-          version: 1.1.12
+          version: 1.4.2
           virtualenvs-create: true
           virtualenvs-in-project: true
       # Cache your dependencies (i.e. all the stuff in your `pyproject.toml`). Note the cache
