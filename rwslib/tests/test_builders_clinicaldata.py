@@ -561,6 +561,13 @@ class TestItemData(unittest.TestCase):
     def setUp(self):
         self.tested = ItemData("FIELDA", "TEST")
 
+    def test_unset(self):
+        """Test unset value"""
+        itmdata = ItemData("FIELD")
+        doc = obj_to_doc(itmdata)
+        self.assertRaises(KeyError, doc.attrib.__getitem__, "Value")
+        self.assertRaises(KeyError, doc.attrib.__getitem__, "IsNull")
+
     def test_basic(self):
         tested = self.tested
         self.assertEqual(tested.itemoid, "FIELDA")

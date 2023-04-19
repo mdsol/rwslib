@@ -4,7 +4,7 @@ from rwslib.extras.audit_event.main import ODMAdapter
 from rwslib import RWSConnection
 
 
-class TestEventer(object):
+class MockEventer(object):
 
     def __init__(self):
         self.count = 0
@@ -22,6 +22,6 @@ class ODMAdapterTaseCase(unittest.TestCase):
         pass
 
     def test_classes(self):
-        test_eventer = TestEventer()
+        test_eventer = MockEventer()
         conn = RWSConnection('innovate', "FAKE_USER", "FAKE_PASS")
         ODMAdapter(conn, "Mediflex", "Dev", test_eventer)

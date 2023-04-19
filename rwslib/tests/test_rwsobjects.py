@@ -278,6 +278,36 @@ class TestRWSSubjects(unittest.TestCase):
             subjects[2].links[0],
         )
 
+    def test_site_number(self):
+        """
+        Gets the Siten
+        """
+        text = """<?xml version="1.0" encoding="utf-8"?>
+<ODM FileType="Snapshot" FileOID="b5cdc2fb-36fd-4cf0-abc7-c84628a7380f" CreationDateTime="2022-06-01T14:16:52.336-00:00" ODMVersion="1.3"
+	xmlns:mdsol="http://www.mdsol.com/ns/odm/metadata"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	xmlns="http://www.cdisc.org/ns/odm/v1.3">
+	<ClinicalData StudyOID="TDE-OSTEO-800(Prod)" MetaDataVersionOID="104">
+		<SubjectData SubjectKey="6c3eed1c-a256-4c0b-8dff-49ea21e20cc5" mdsol:SubjectKeyType="SubjectUUID" mdsol:SubjectName="0010">
+			<SiteRef LocationOID="mdsol03" mdsol:StudyEnvSiteNumber="Site002" />
+		</SubjectData>
+	</ClinicalData>
+	<ClinicalData StudyOID="TDE-OSTEO-800(Prod)" MetaDataVersionOID="109">
+		<SubjectData SubjectKey="02e74501-0d1b-4000-a6fb-ffe2e6613875" mdsol:SubjectKeyType="SubjectUUID" mdsol:SubjectName="0011">
+			<SiteRef LocationOID="810" mdsol:StudyEnvSiteNumber="site 003" />
+		</SubjectData>
+	</ClinicalData>
+	</ODM>
+"""
+        subjects = rwsobjects.RWSSubjects(text)
+        self.assertEqual(2, len(subjects))
+        mapped = {"02e74501-0d1b-4000-a6fb-ffe2e6613875": ["810", "site 003"],
+                  "6c3eed1c-a256-4c0b-8dff-49ea21e20cc5": ["mdsol03", "Site002"]}
+        for subject in subjects:
+            meta = mapped[subject.subjectkey]
+            self.assertEqual(meta[1], subject.study_environment_site_number)
+            self.assertEqual(meta[0], subject.locationoid)
+
 
 class TestMetaDataVersions(unittest.TestCase):
     """Test MetaDataVersions"""

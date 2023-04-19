@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from rwslib.builders.common import (
     ODMElement,
     TransactionalElement,
@@ -10,6 +9,7 @@ from rwslib.builders.common import (
 from rwslib.builders.modm import LastUpdateMixin, MilestoneMixin
 from rwslib.builders.metadata import MeasurementUnitRef
 from rwslib.builders.constants import ProtocolDeviationStatus, QueryStatusType
+from rwslib.builders.common import Unset
 
 from collections import OrderedDict
 from datetime import datetime
@@ -388,7 +388,7 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     def __init__(
         self,
         itemoid,
-        value,
+        value=Unset,
         specify_value=None,
         transaction_type=None,
         lock=None,
@@ -397,7 +397,7 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
     ):
         """
         :param str itemoid: OID for the matching :class:`ItemDef`
-        :param str value: Value for the the ItemData
+        :param str value: Value for the ItemData
         :param str specify_value: 'If other, specify' value - *Rave specific attribute*
         :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param bool lock: Lock the DataPoint? - *Rave specific attribute*
@@ -432,10 +432,11 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         if self.transaction_type is not None:
             params["TransactionType"] = self.transaction_type
 
-        if self.value in [None, ""]:
-            params["IsNull"] = "Yes"
-        else:
-            params["Value"] = str(self.value)
+        if self.value is not Unset:
+            if self.value in [None, ""]:
+                params["IsNull"] = "Yes"
+            else:
+                params["Value"] = str(self.value)
 
         if self.specify_value is not None:
             params["mdsol:SpecifyValue"] = self.specify_value

@@ -1,6 +1,52 @@
-[build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
+[tool.poetry]
+name = "rwslib"
+version = "1.2.10"
+description = "Rave Web Services for Python"
+authors = ["Ian Sparks <isparks@trialgrid.com>"]
+maintainers = ["Geoff Low <geoff.low@3ds.com>"]
+readme = "README.md"
+repository = "https://github.com/mdsol/rwslib"
+documentation = "https://rwslib.readthedocs.io"
+license = "MIT"
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Developers',
+    'Natural Language :: English',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
 ]
-build-backend = "setuptools.build_meta"
+packages = [
+    { include = "rwslib" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7.0,<4"
+lxml = "*"
+requests = "*"
+six = "*"
+click = "*"
+faker = "*"
+urllib3 = "^1.26.9"
+Sphinx = { version = "^5.1.1", optional = true }
+
+
+[tool.poetry.dev-dependencies]
+httpretty = "*"
+mock = "*"
+coverage = "*"
+pytest = "*"
+tox = "*"
+tox-poetry = "*"
+
+[tool.poetry.extras]
+docs = [
+    "Sphinx",
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

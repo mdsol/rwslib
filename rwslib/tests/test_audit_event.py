@@ -56,8 +56,8 @@ class TestAuditEvent(unittest.TestCase):
         # get the events
         self.assertTrue(len(eventer.eventlist) > 1)
         self.assertTrue("EnteredEmpty" in eventer.eventlist)
-        self.assertEquals(60, len(eventer.get_audit_subcategory_events("EnteredEmpty")))
-        self.assertEquals(501, len(eventer.get_audit_subcategory_events("Entered")))
+        self.assertEqual(60, len(eventer.get_audit_subcategory_events("EnteredEmpty")))
+        self.assertEqual(501, len(eventer.get_audit_subcategory_events("Entered")))
 
     def test_parses_audit_message_entered(self):
         """parses an audit message, but only subscribe to Entered Events from a CAR message"""
@@ -70,8 +70,8 @@ class TestAuditEvent(unittest.TestCase):
         # get the events
         self.assertTrue(len(eventer.eventlist) == 1)
         self.assertTrue("EnteredEmpty" not in eventer.eventlist)
-        self.assertEquals(0, len(eventer.get_audit_subcategory_events("EnteredEmpty")))
-        self.assertEquals(501, len(eventer.get_audit_subcategory_events("Entered")))
+        self.assertEqual(0, len(eventer.get_audit_subcategory_events("EnteredEmpty")))
+        self.assertEqual(501, len(eventer.get_audit_subcategory_events("Entered")))
 
     def test_parses_audit_message_subject_created(self):
         """parses an audit message, but only subscribe to Entered Events from a CAR message"""
@@ -82,7 +82,7 @@ class TestAuditEvent(unittest.TestCase):
         eventer = MockEventer()
         message = parser.parse(content, eventer)
         # get the events
-        self.assertEquals(
+        self.assertEqual(
             92, len(eventer.get_audit_subcategory_events("SubjectCreated"))
         )
         subject_123_ABC = eventer.get_audit_subcategory_events("SubjectCreated")[0]
