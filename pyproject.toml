@@ -30,7 +30,7 @@ requests = "*"
 six = "*"
 click = "*"
 faker = "*"
-urllib3 = "^1.26.9"
+urllib3 = "*"
 Sphinx = { version = "^5.1.1", optional = true }
 
 
