@@ -225,15 +225,19 @@ class FormData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
 
     ALLOWED_TRANSACTION_TYPES = ["Insert", "Update", "Upsert", "Context", "Remove"]
 
-    def __init__(self, formoid, transaction_type=None, form_repeat_key=None):
+    def __init__(self, formoid, transaction_type=None, form_repeat_key=None, lab_reference=None, lab_type=None):
         """
         :param str formoid: :class:`FormDef` OID
         :param str transaction_type: Transaction Type for Data (one of **Insert**, **Update**, **Upsert**, **Context**, **Remove**)
         :param str form_repeat_key: Repeat Key for FormData
+        :param str lab_reference: Name for the Lab with the ranges
+        :param LabType lab_type: Type of the Lab (Central, Local)
         """
         super(FormData, self).__init__(transaction_type)
         self.formoid = formoid
         self.form_repeat_key = form_repeat_key
+        self.lab_reference = lab_reference
+        self.lab_type = lab_type
         self.itemgroups = []
         #: :class:`Signature` for FormData
         self.signature = None  # type: Signature
@@ -253,6 +257,12 @@ class FormData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
 
         if self.form_repeat_key is not None:
             params["FormRepeatKey"] = str(self.form_repeat_key)
+
+        if self.lab_reference is not None:
+            params["mdsol:LaboratoryRef"] = str(self.lab_reference)
+
+        if self.lab_type is not None:
+            params["mdsol:LaboratoryType"] = self.lab_type.value
 
         # mixins
         self.mixin()

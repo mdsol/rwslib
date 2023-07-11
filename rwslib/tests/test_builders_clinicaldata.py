@@ -422,6 +422,11 @@ class TestFormData(unittest.TestCase):
         self.assertEqual(self.__class__.__name__[4:], t.tag)
         self.assertTrue(len(list(t)) == 4)  # three igdata + 1 signature
 
+    def test_lab_settings(self):
+        tested = FormData("TESTFORM_A", lab_reference="A Lab", lab_type=LabType.Local)
+        doc = obj_to_doc(tested)
+        self.assertEqual(doc.attrib["mdsol:LaboratoryRef"], "A Lab")
+        self.assertEqual(doc.attrib["mdsol:LaboratoryType"], "Local")
 
 class TestItemGroupData(unittest.TestCase):
     """Test ItemGroupData classes"""
