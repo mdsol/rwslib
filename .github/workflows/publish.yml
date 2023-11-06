@@ -7,6 +7,8 @@ on:
 jobs:
   test-publish:
     name: Test Publish
+    runs-on:
+      ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -32,6 +34,8 @@ jobs:
   publish:
     needs: test-publish
     name: Publish to PyPI
+    runs-on:
+      ubuntu-latest
     strategy:
       fail-fast: false
       matrix:

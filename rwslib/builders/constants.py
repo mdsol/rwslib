@@ -297,6 +297,15 @@ class LocationType(enum.Enum):
     Other = 'Other'
 
 
+class LabType(enum.Enum):
+    """
+    Type of LaboratoryType
+    Applies to a :class:`FormData`
+    """
+    Local = 'Local'
+    Central = 'Central'
+
+
 class UserType(enum.Enum):
     """
     User Type Enumeration
