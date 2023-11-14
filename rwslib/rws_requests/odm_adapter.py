@@ -3,25 +3,44 @@ Requests related to the ODM Adapter
 
 http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/clinical_data_audits/index.html#odm-adapter
 """
+from typing import Optional
+
 from . import RWSAuthorizedGetRequest, QueryOptionGetRequest
 
 
 class AuditRecordsRequest(QueryOptionGetRequest):
     """Clinical Audit Records Dataset"""
 
-    KNOWN_QUERY_OPTIONS = ["studyoid", "startid", "per_page"]
+    KNOWN_QUERY_OPTIONS = ["studyoid", "startid", "per_page", "mode", "unicode"]
+    # Permissible values for mode
+    ALLOWABLE_MODES = ("default", "all", "enhanced")
 
-    def __init__(self, project_name, environment_name, startid=1, per_page=100):
+    def __init__(self, project_name: str,
+                 environment_name: str,
+                 startid: Optional[int] = 1,
+                 per_page: Optional[int] = 100,
+                 mode: Optional[str] = None,
+                 unicode: Optional[bool] = False):
         """
         :param str project_name: Project Name
         :param str environment_name: Environment Name
         :param int startid: Starting Audit
         :param int per_page: Page Size
+        :param str mode: extract more Audit Subcategories (allowed values: default, all, enhanced)
+        :param bool unicode: specify Unicode characters are required in the response.
         """
         self.project_name = project_name
         self.environment_name = environment_name
         self.startid = startid
         self.per_page = per_page
+        if mode and mode not in self.ALLOWABLE_MODES:
+            raise ValueError("mode must be one of %s" % ", ".join(self.ALLOWABLE_MODES))
+        self.mode = mode
+        self._unicode = unicode
+
+    @property
+    def unicode(self) -> str:
+        return 'true' if self._unicode else None
 
     @property
     def studyoid(self):
