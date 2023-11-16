@@ -11,21 +11,13 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
-import os
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-import importlib.metadata
+from sphinx_pyproject import SphinxConfig
 
-_DISTRIBUTION_METADATA = importlib.metadata.metadata('rwslib')
-
-author = _DISTRIBUTION_METADATA['Author']
-project = _DISTRIBUTION_METADATA['Name']
-version = _DISTRIBUTION_METADATA['Version']
-copyright = _DISTRIBUTION_METADATA['Copyright']
+config = SphinxConfig("../../pyproject.toml", globalns=globals(), style="poetry")
 
 
 # -- General configuration -----------------------------------------------------
