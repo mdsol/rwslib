@@ -12,10 +12,12 @@ build:
       - asdf install poetry latest
       - asdf global poetry latest
       - poetry config virtualenvs.create false
-    pre_build:
+    post_install:
       - poetry install --with docs
+    pre_build:
+      - poetry shell
 
-# Build documentation in the docs/ directory with Sphinx
+# Build documentation using Sphinx
 sphinx:
   configuration: docs/source/conf.py
   fail_on_warning: true
