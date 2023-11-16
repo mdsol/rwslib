@@ -12,7 +12,7 @@ The ODM Adapter module provides Request implementations for the Rave Web Service
 * Signature Definitions Dataset
 
 Read more about ODM Adapter in the
-`Rave Web Services documentation <http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/clinical_data_audits/index.html#odm-adapter>`_
+`Rave Web Services documentation <https://learn.medidata.com/en-US/bundle/rave-web-services/page/odm_operational_data_model_adapter.html>`_
 
 
 .. _oa_auditrecords_request:
@@ -40,6 +40,10 @@ Options:
 +--------------------------------+-----------------------------------------------------------------------------------+
 | per_page=100                   | How many audits to return per request. Default is 100.                            |
 +--------------------------------+-----------------------------------------------------------------------------------+
+| mode=[default,enhanced,all]    | Define what AuditSubcategories to return                                          |
++--------------------------------+-----------------------------------------------------------------------------------+
+
+* See `this link <https://learn.medidata.com/en-US/bundle/rave-web-services/page/retrieve_clinical_data_with_the_clinical_audit_records_dataset.html>`_ for more information on the `mode` parameter.
 
 Example::
 
