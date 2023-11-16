@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-
-__title__ = "rwslib"
-__author__ = "Ian Sparks (isparks@trialgrid.com)"
-__maintainer__ = "Geoff Low (glow@mdsol.com)"
-__version__ = "1.2.9"
-__license__ = "MIT"
-__copyright__ = "Copyright 2021 Medidata Solutions Inc"
-
-
 import requests
 
 from .rws_requests import RWSRequest, make_url
