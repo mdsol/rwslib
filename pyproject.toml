@@ -31,10 +31,9 @@ six = "*"
 click = "*"
 faker = "*"
 urllib3 = "*"
-Sphinx = { version = "^5.1.1", optional = true }
 
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 httpretty = "*"
 mock = "*"
 coverage = "*"
@@ -42,11 +41,9 @@ pytest = "*"
 tox = "*"
 tox-poetry = "*"
 
-[tool.poetry.extras]
-docs = [
-    "Sphinx",
-]
+[tool.poetry.group.docs.dependencies]
+Sphinx = "^5.1.1"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
