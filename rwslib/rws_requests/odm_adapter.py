@@ -1,7 +1,9 @@
 """
 Requests related to the ODM Adapter
 
-http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/clinical_data_audits/index.html#odm-adapter
+See the following for more information (from the Knowledge Hub - requires login):
+https://learn.medidata.com/en-US/bundle/rave-web-services/page/odm_operational_data_model_adapter.html
+
 """
 from typing import Optional
 
