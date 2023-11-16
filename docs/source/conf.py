@@ -18,13 +18,15 @@ import os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-parentdir = os.path.split(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))[0]
-sys.path.insert(0,str(parentdir))
+import importlib.metadata
 
-import pkg_resources
-__version__ = pkg_resources.get_distribution('rwslib').version
+_DISTRIBUTION_METADATA = importlib.metadata.metadata('rwslib')
 
-from rwslib import  __copyright__
+author = _DISTRIBUTION_METADATA['Author']
+project = _DISTRIBUTION_METADATA['Name']
+version = _DISTRIBUTION_METADATA['Version']
+copyright = _DISTRIBUTION_METADATA['Copyright']
+
 
 # -- General configuration -----------------------------------------------------
 
@@ -48,17 +50,11 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'rwslib'
-copyright = __copyright__
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-
-
-# The short X.Y version.
-version = __version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
