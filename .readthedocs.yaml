@@ -14,8 +14,6 @@ build:
       - poetry config virtualenvs.create false
     post_install:
       - poetry install --with docs
-    pre_build:
-      - poetry shell
 
 # Build documentation using Sphinx
 sphinx:
