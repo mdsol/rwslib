@@ -42,9 +42,10 @@ Options:
 +--------------------------------+-----------------------------------------------------------------------------------+
 | mode=[default,enhanced,all]    | Define what AuditSubcategories to return                                          |
 +--------------------------------+-----------------------------------------------------------------------------------+
+
 *NOTE*
-    * The `mode` parameter is only available in Rave EDC 2022.3.0 and later.
-    * See `this link <https://learn.medidata.com/en-US/bundle/rave-web-services/page/retrieve_clinical_data_with_the_clinical_audit_records_dataset.html>`_ for more information on the `mode` parameter.
+* The `mode` parameter is only available in Rave EDC 2022.3.0 and later.
+* See `this link <https://learn.medidata.com/en-US/bundle/rave-web-services/page/retrieve_clinical_data_with_the_clinical_audit_records_dataset.html>`_ for more information on the `mode` parameter.
 
 Example::
 
