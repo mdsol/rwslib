@@ -1,7 +1,7 @@
 # audit_event
 
 audit_event is a simple way to consume the ODMAdapter 
-[Clinical Audit Records service](http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/clinical_data_audits/clinical_audit_records.html#odm-adapter-clinical-audit-records)
+[Clinical Audit Records service](https://learn.medidata.com/en-US/bundle/rave-web-services/page/odm_operational_data_model_adapter.html)
 
 audit_event takes the approach of converting the ODM dataset provided by the clinical audit record service into a set of 
 events. This is the same approach that SAX parsers take to parsing XML files.
@@ -26,7 +26,12 @@ if you want to count the number of subjects created you might write:
             pass
     
 Events raised are named after the audit subcategory for each reported audit in the ODM stream. See a 
-[full list of event names](http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/clinical_data_audits/clinical_audit_records_in_subcategories.html#odm-adapter-clinical-audit-records-in-subcategories)
+[full list of event names](https://learn.medidata.com/en-US/bundle/rave-web-services/page/included_audit_subcategories_in_rws.html)
+
+*NOTE*
+* From Rave EDC 2022.3.0 onwards: 
+  * the ODM Adapter Version 2 provides Clinical Audit Record (CAR) extracts for all the Audit Subcategories (ASCs) available for Rave EDC clinical data. 
+  * the ODM Adapter V2 Clinical Audit Records (CAR) service has introduced an optional query string parameter, `mode`, to allow you to extract additional ASCs. 
 
 The _context_ object passed contains all the data pulled from the audit record. 
 
@@ -108,11 +113,11 @@ clinical audits dataset.
 ODMAdapter is a class that takes a RWSConnection, the name of the study and environment you want to process for 
 events and an instance of your eventer class.
 
-the run() method starts ODMAadpter using the RWSConnection credentials to pull audits from the study, passing them to
+the run() method starts ODMAdapter using the RWSConnection credentials to pull audits from the study, passing them to
 your event capturing class for reporting.
 
 
-    #Define a counting class
+    # Define a counting class
     class SubjectCounter(object):
     
         def __init__(self):
@@ -121,19 +126,19 @@ your event capturing class for reporting.
         def SubjectCreated(self, context):
             self.count += 1
             
-    #Create one
+    # Create one
     counter = SubjectCounter()
     
-    #Make a connection
+    # Make a connection
     c = RWSConnection("ravedemo7","myusername","**mypassword**")
     
-    #Pass connection and counter to the ODMAdapter along with the study name/environment we want to process
+    # Pass connection and counter to the ODMAdapter along with the study name/environment we want to process
     o = ODMAdapter(c, "MEDICILLIN-RD7","DEMO", counter )
     
-    #Run the adapter
+    # Run the adapter
     o.run()
     
-    #get the count
+    # get the count
     print counter.count
     
 The ODMAdapter run() method takes a number of optional arguments. By default it will start with audit id 0 and keep
@@ -142,14 +147,15 @@ says that there is no more data.
 
 The options to run() are:
 
-    start_id=0     #Which audit id to start ar (great for daily/hourly incremental pulls from the service)
-    max_pages=-1   #How many pages of data to pull (-1 means all pages)
-    per_page=1000  #The size (in audit records) of each request - 1,000 is min, higher takes more memory/time
+    start_id=0      # Which audit id to start ar (great for daily/hourly incremental pulls from the service)
+    max_pages=-1    # How many pages of data to pull (-1 means all pages)
+    per_page=1000   # The size (in audit records) of each request - 1,000 is min, higher takes more memory/time
+    mode            # Allow extraction of additional ASCs
     
 ## Working out which id to start on
     
 If we planned to run our Subject Counter on a regular basis, we wouldn't want to start from the beginning of the 
-"audit tape" each time, that would be inefficient. Instead we could change our SubjectCounter class to track the
+"audit tape" each time, that would be inefficient. Instead, we could change our SubjectCounter class to track the
 last id it saw and ask for this value +1 the next time.
 
     class SubjectCounter(object):
