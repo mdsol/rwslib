@@ -7,15 +7,14 @@ build:
   tools:
     python: "3.10"
   jobs:
-    pre_create_environment:
+    post_create_environment:
       - pip install poetry
       - poetry config virtualenvs.create false
     post_install:
       - poetry install --with docs
-  commands:
-    - python -m sphinx -T -E -W --keep-going -b html -d _build/doctrees -D language=en docs/source $READTHEDOCS_OUTPUT/html
 
-    # Build documentation using Sphinx
+
+# Build documentation using Sphinx
 sphinx:
   configuration: docs/source/conf.py
   fail_on_warning: true
