@@ -10,7 +10,7 @@ Many of the Biostats gateway requests pull data from the Rave Clinical Views. Th
 Clinical Views are active in Rave.
 
 Read more about Biostats Gateway in the
-`Rave Web Services documentation <http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/01_biostat_adapter.html>`_
+`Rave Web Services documentation <https://learn.medidata.com/en-US/bundle/rave-web-services/page/biostat_adapter.html>`_
 
 
 .. _cv_metadata_request:

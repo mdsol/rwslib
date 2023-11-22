@@ -21,15 +21,6 @@ Clinical Data Builders provide an API for creating ODM data elements
     :exclude-members: build
 
 
-Medidata Extensions to ODM (MODM) Builders
-==========================================
-MODM Builders provide an API for creating ODM data elements meeting the Medidata Rave specific extensions to the MODM specification
-
-.. automodule:: rwslib.builders.clinicaldata
-    :members:
-    :exclude-members: build
-
-
 Administrative Data Builders
 ============================
 Admin Data Builders provide an API for creating ODM AdminData elements

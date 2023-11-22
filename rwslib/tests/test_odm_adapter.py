@@ -3,6 +3,8 @@
 __author__ = 'glow'
 
 import unittest
+
+import pytest
 from six.moves.urllib_parse import quote
 from rwslib.rws_requests.odm_adapter import SignatureDefinitionsRequest, UsersRequest, \
     SitesMetadataRequest, VersionFoldersRequest, AuditRecordsRequest
@@ -116,6 +118,50 @@ class TestAuditRecordsRequest(unittest.TestCase):
         t = self.create_request_object(startid=2569, per_page=50)
         self.assertTrue('startid=2569' in t.url_path())
         self.assertTrue('per_page=50' in t.url_path())
+
+
+def test_clinical_audit_request_mode_allowed():
+    """We can create an AuditRecordsRequest"""
+    for allowed_mode in ("default", "all", "enhanced"):
+        t = AuditRecordsRequest(project_name="Mediflex",
+                                environment_name="Dev",
+                                startid=1,
+                                per_page=100,
+                                mode=allowed_mode)
+        assert 'datasets/ClinicalAuditRecords.odm' in t.url_path()
+        assert f'mode={allowed_mode}' in t.url_path()
+
+
+def test_clinical_audit_request_mode_not_allowed():
+    """We can create an AuditRecordsRequest"""
+    for not_allowed_mode in ("potato", "pear", "guava"):
+        with pytest.raises(ValueError):
+            t = AuditRecordsRequest(project_name="Mediflex",
+                                    environment_name="Dev",
+                                    startid=1,
+                                    per_page=100,
+                                    mode=not_allowed_mode)
+
+
+def test_clinical_audit_request_unicode():
+    """We can create an AuditRecordsRequest"""
+    t = AuditRecordsRequest(project_name="Mediflex",
+                            environment_name="Dev",
+                            startid=1,
+                            per_page=100,
+                            unicode=True)
+    assert 'datasets/ClinicalAuditRecords.odm' in t.url_path()
+    assert f'unicode=true' in t.url_path()
+
+def test_clinical_audit_request_unicode_default():
+    """We can create an AuditRecordsRequest"""
+    t = AuditRecordsRequest(project_name="Mediflex",
+                            environment_name="Dev",
+                            startid=1,
+                            per_page=100)
+    assert 'datasets/ClinicalAuditRecords.odm' in t.url_path()
+    assert f'unicode' not in t.url_path()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,19 +1,23 @@
 # -*- coding: utf-8 -*-
 __author__ = 'isparks'
 
-from rwslib.rws_requests.odm_adapter import AuditRecordsRequest
-from six.moves.urllib.parse import urlparse, parse_qs
-from rwslib.extras.audit_event.parser import parse
 import logging
+from typing import Optional
+
+from six.moves.urllib.parse import urlparse, parse_qs
+
+from rwslib.extras.audit_event.parser import parse
+from rwslib.rws_requests.odm_adapter import AuditRecordsRequest
 
 
 class ODMAdapter(object):
     """A self-contained data fetcher and parser using a RWSConnection and an event class provided by the user"""
-    def __init__(self, rws_connection, study, environment, eventer):
+    def __init__(self, rws_connection, study, environment, eventer, mode: Optional[str] = None):
         self.rws_connection = rws_connection
         self.eventer = eventer
         self.study = study
         self.environment = environment
+        self.mode = mode
         self.start_id = 0
 
     def get_next_start_id(self):
@@ -32,7 +36,8 @@ class ODMAdapter(object):
         self.start_id = start_id
         while max_pages == -1 or (page < max_pages):
 
-            req = AuditRecordsRequest(self.study, self.environment, startid=self.start_id, per_page=per_page)
+            req = AuditRecordsRequest(self.study, self.environment, startid=self.start_id, per_page=per_page,
+                                      mode=self.mode)
             try:
                 # Get the ODM data
                 odm = self.rws_connection.send_request(req, **kwargs)

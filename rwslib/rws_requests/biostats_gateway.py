@@ -1,7 +1,8 @@
 """
 Views related to clinical views and their metadata, Biostats Gateway/Adapter
 
-http://rws-webhelp.s3.amazonaws.com/WebHelp_ENG/solutions/01_biostat_adapter.html#biostat-adapter
+See the following for more information (from the Knowledge Hub - requires login):
+https://learn.medidata.com/en-US/bundle/rave-web-services/page/biostat_adapter.html
 
 """
 

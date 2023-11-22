@@ -11,20 +11,14 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
-import os
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-parentdir = os.path.split(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))[0]
-sys.path.insert(0,str(parentdir))
+from sphinx_pyproject import SphinxConfig
 
-import pkg_resources
-__version__ = pkg_resources.get_distribution('rwslib').version
+config = SphinxConfig("../../pyproject.toml", globalns=globals(), style="poetry")
 
-from rwslib import  __copyright__
 
 # -- General configuration -----------------------------------------------------
 
@@ -48,17 +42,11 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'rwslib'
-copyright = __copyright__
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-
-
-# The short X.Y version.
-version = __version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
