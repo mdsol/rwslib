@@ -134,7 +134,10 @@ class TestMetaDataVersionRef(unittest.TestCase):
         self.assertEqual("MetaDataVersionRef", tested.tag)
         self.assertEqual("Mediflex(Prod)", tested.get('StudyOID'))
         self.assertEqual("1024", tested.get('MetaDataVersionOID'))
-        self.assertTrue(tested.get('EffectiveDate').startswith(datetime.date.today().isoformat()))
+        _effective_date = tested.get('EffectiveDate')
+        self.assertIsNotNone(_effective_date)
+        _ref_date = datetime.datetime.utcnow().isoformat().split('T')[0]
+        self.assertTrue(_effective_date.startswith(_ref_date))
 
     def test_create_a_version_ref_and_attach_to_location(self):
         """We create a MetaDataVersionRef"""
@@ -142,16 +145,17 @@ class TestMetaDataVersionRef(unittest.TestCase):
         that = MetaDataVersionRef("Mediflex(Prod)", "1025", datetime.datetime.utcnow())
         obj = Location('Site01', 'Site 1')
         obj << this
-        obj <<  that
+        obj << that
         tested = obj_to_doc(obj)
         self.assertEqual("Location", tested.tag)
         self.assertTrue(len(list(tested)) == 2)
         _this = list(tested)[0]
         self.assertEqual("Mediflex(Prod)", _this.get('StudyOID'))
         self.assertEqual("1024", _this.get('MetaDataVersionOID'))
-        self.assertTrue(_this.get('EffectiveDate').startswith((datetime.date.today() -
-                                                               datetime.timedelta(days=7)).isoformat()))
+        _ref_date = (datetime.datetime.utcnow() - datetime.timedelta(days=7))
+        self.assertTrue(_this.get('EffectiveDate').startswith(_ref_date.isoformat().split('T')[0]))
         _that = list(tested)[1]
         self.assertEqual("Mediflex(Prod)", _that.get('StudyOID'))
         self.assertEqual("1025", _that.get('MetaDataVersionOID'))
-        self.assertTrue(_that.get('EffectiveDate').startswith(datetime.date.today().isoformat()))
+        _ref_date = datetime.datetime.utcnow()
+        self.assertTrue(_that.get('EffectiveDate').startswith(_ref_date.isoformat().split('T')[0]))
