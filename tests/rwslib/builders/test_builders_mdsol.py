@@ -3,7 +3,7 @@ import unittest
 
 from rwslib.builders.constants import ProtocolDeviationStatus, QueryStatusType
 from rwslib.builders.clinicaldata import ItemData, MdsolProtocolDeviation, MdsolQuery
-from rwslib.tests.common import obj_to_doc
+from ..common import obj_to_doc
 
 
 class TestMdsolQuery(unittest.TestCase):

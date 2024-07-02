@@ -2,6 +2,7 @@ import os
 import unittest
 
 import httpretty
+import pytest
 import requests
 from mock import mock
 
@@ -117,7 +118,7 @@ class TestRequestTime(unittest.TestCase):
         request_time = rave.request_time
         self.assertIs(type(request_time), float)
 
-
+@pytest.mark.usefixtures("double_byte_chars")
 class TestErrorResponse(unittest.TestCase):
     @httpretty.activate
     def test_503_error(self):
@@ -433,18 +434,11 @@ class TestErrorResponse(unittest.TestCase):
         Test the output is properly encoded, Rave sends text/xml, but the underlying library doesn't seem to detect the
             encoding correctly
         """
-        with open(
-            os.path.join(
-                os.path.dirname(__file__), "fixtures", "test_double_byte_chars.xml"
-            ),
-            "r+b",
-        ) as fh:
-            content = fh.read()
-            httpretty.register_uri(
+        httpretty.register_uri(
                 httpretty.GET,
                 "https://training1.mdsol.com/RaveWebServices/studies/RWS_Training_Japan(PROD)/datasets/regular/SURGERY",
                 status=200,
-                body=content,
+                body=self.double_byte_chars,
                 content_type="text/xml"
             )
         # Now my test
@@ -453,7 +447,7 @@ class TestErrorResponse(unittest.TestCase):
             StudyDatasetRequest("RWS_Training_Japan", "PROD", formoid="SURGERY")
         )
         # these don't match as the encoding of the characters fails
-        self.assertNotEqual(content.decode('utf-8'), result)
+        self.assertNotEqual(self.double_byte_chars.decode('utf-8'), result)
 
         class UTF8StudyDatasetRequest(StudyDatasetRequest):
             """
@@ -467,7 +461,7 @@ class TestErrorResponse(unittest.TestCase):
             UTF8StudyDatasetRequest("RWS_Training_Japan", "PROD", formoid="SURGERY")
         )
         # these match as the encoding enforcement makes it so
-        self.assertEqual(content.decode('utf-8'), result)
+        self.assertEqual(self.double_byte_chars.decode('utf-8'), result)
 
 
 if __name__ == "__main__":

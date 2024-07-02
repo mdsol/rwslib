@@ -10,7 +10,7 @@ from rwslib.builders.admindata import Location
 from rwslib.builders.constants import QueryStatusType
 from rwslib.builders.clinicaldata import ClinicalData, FormData, ItemData, ItemGroupData, MdsolQuery, StudyEventData, \
     SubjectData
-from rwslib.tests.common import obj_to_doc
+from ..common import obj_to_doc
 
 import datetime
 import unittest

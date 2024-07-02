@@ -6,7 +6,7 @@ from rwslib.builders.constants import LocationType, UserType
 __author__ = 'glow'
 
 import unittest
-from rwslib.tests.common import obj_to_doc
+from ..common import obj_to_doc
 from rwslib.builders.admindata import AdminData, User, FirstName, LastName, Location, DisplayName, MetaDataVersionRef
 
 

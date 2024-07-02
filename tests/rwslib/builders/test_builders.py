@@ -4,7 +4,7 @@ import sys
 
 from mock import patch
 
-from rwslib.tests.common import obj_to_doc
+from ..common import obj_to_doc
 
 __author__ = 'isparks'
 

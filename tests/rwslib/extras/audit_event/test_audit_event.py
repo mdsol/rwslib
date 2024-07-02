@@ -1,6 +1,8 @@
 from rwslib.extras.audit_event import parser
 import unittest
 import os
+import pytest
+
 
 
 class MockEventer:
@@ -41,18 +43,16 @@ class MockEventerEntered:
         return self.__events.keys()
 
 
+@pytest.mark.usefixtures("car_message")
 class TestAuditEvent(unittest.TestCase):
     """
     Test Case for Audit Event Processor
     """
+
     def test_parses_audit_message(self):
         """parses an audit message from a CAR message"""
-        with open(
-            os.path.join(os.path.dirname(__file__), "fixtures", "car_message.xml")
-        ) as fh:
-            content = fh.read()
         eventer = MockEventer()
-        message = parser.parse(content, eventer)
+        message = parser.parse(self.car_message, eventer)
         # get the events
         self.assertTrue(len(eventer.eventlist) > 1)
         self.assertTrue("EnteredEmpty" in eventer.eventlist)
@@ -61,26 +61,20 @@ class TestAuditEvent(unittest.TestCase):
 
     def test_parses_audit_message_entered(self):
         """parses an audit message, but only subscribe to Entered Events from a CAR message"""
-        with open(
-            os.path.join(os.path.dirname(__file__), "fixtures", "car_message.xml")
-        ) as fh:
-            content = fh.read()
         eventer = MockEventerEntered()
-        message = parser.parse(content, eventer)
+        message = parser.parse(self.car_message, eventer)
         # get the events
         self.assertTrue(len(eventer.eventlist) == 1)
         self.assertTrue("EnteredEmpty" not in eventer.eventlist)
         self.assertEqual(0, len(eventer.get_audit_subcategory_events("EnteredEmpty")))
         self.assertEqual(501, len(eventer.get_audit_subcategory_events("Entered")))
 
+
     def test_parses_audit_message_subject_created(self):
         """parses an audit message, but only subscribe to Entered Events from a CAR message"""
-        with open(
-            os.path.join(os.path.dirname(__file__), "fixtures", "car_message.xml")
-        ) as fh:
-            content = fh.read()
+
         eventer = MockEventer()
-        message = parser.parse(content, eventer)
+        message = parser.parse(self.car_message, eventer)
         # get the events
         self.assertEqual(
             92, len(eventer.get_audit_subcategory_events("SubjectCreated"))
