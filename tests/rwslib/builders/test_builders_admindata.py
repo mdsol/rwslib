@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+from rwslib.builders.common import get_utc_date
 from rwslib.builders.constants import LocationType, UserType
 
 __author__ = 'glow'
@@ -125,24 +126,27 @@ class TestUser(unittest.TestCase):
         self.assertEqual("DisplayName", list(tested)[0].tag)
         self.assertEqual("Henrik", list(tested)[0].text)
 
+
 class TestMetaDataVersionRef(unittest.TestCase):
 
     def test_create_a_version_ref(self):
         """We create a MetaDataVersionRef"""
-        obj = MetaDataVersionRef("Mediflex(Prod)", "1024", datetime.datetime.utcnow())
+        _utc_date = get_utc_date()
+        obj = MetaDataVersionRef("Mediflex(Prod)", "1024", _utc_date)
         tested = obj_to_doc(obj)
         self.assertEqual("MetaDataVersionRef", tested.tag)
         self.assertEqual("Mediflex(Prod)", tested.get('StudyOID'))
         self.assertEqual("1024", tested.get('MetaDataVersionOID'))
         _effective_date = tested.get('EffectiveDate')
         self.assertIsNotNone(_effective_date)
-        _ref_date = datetime.datetime.utcnow().isoformat().split('T')[0]
+        _ref_date = get_utc_date().isoformat().split('T')[0]
         self.assertTrue(_effective_date.startswith(_ref_date))
 
     def test_create_a_version_ref_and_attach_to_location(self):
         """We create a MetaDataVersionRef"""
-        this = MetaDataVersionRef("Mediflex(Prod)", "1024", datetime.datetime.utcnow() - datetime.timedelta(days=7))
-        that = MetaDataVersionRef("Mediflex(Prod)", "1025", datetime.datetime.utcnow())
+        this = MetaDataVersionRef("Mediflex(Prod)",
+                                  "1024", get_utc_date() - datetime.timedelta(days=7))
+        that = MetaDataVersionRef("Mediflex(Prod)", "1025", get_utc_date())
         obj = Location('Site01', 'Site 1')
         obj << this
         obj << that
@@ -152,10 +156,10 @@ class TestMetaDataVersionRef(unittest.TestCase):
         _this = list(tested)[0]
         self.assertEqual("Mediflex(Prod)", _this.get('StudyOID'))
         self.assertEqual("1024", _this.get('MetaDataVersionOID'))
-        _ref_date = (datetime.datetime.utcnow() - datetime.timedelta(days=7))
+        _ref_date = (get_utc_date() - datetime.timedelta(days=7))
         self.assertTrue(_this.get('EffectiveDate').startswith(_ref_date.isoformat().split('T')[0]))
         _that = list(tested)[1]
         self.assertEqual("Mediflex(Prod)", _that.get('StudyOID'))
         self.assertEqual("1025", _that.get('MetaDataVersionOID'))
-        _ref_date = datetime.datetime.utcnow()
+        _ref_date = get_utc_date()
         self.assertTrue(_that.get('EffectiveDate').startswith(_ref_date.isoformat().split('T')[0]))

@@ -10,7 +10,7 @@ __author__ = 'isparks'
 
 import unittest
 
-from rwslib.builders.common import bool_to_yes_no, bool_to_true_false, ODMElement
+from rwslib.builders.common import bool_to_yes_no, bool_to_true_false, ODMElement, get_utc_date
 from rwslib.builders.clinicaldata import UserRef, LocationRef, ClinicalData, SubjectData
 from rwslib.builders.metadata import Study
 from rwslib.builders.admindata import AdminData
@@ -123,7 +123,7 @@ class TestODM(unittest.TestCase):
         tested_1 = obj_to_doc(obj=obj_1)
         with patch('rwslib.builders.common.datetime') as mock_dt:
             # offset the time to ensure we don't overlap
-            mock_dt.utcnow.return_value = datetime.datetime.utcnow() + datetime.timedelta(seconds=61)
+            mock_dt.utcnow.return_value = get_utc_date() + datetime.timedelta(seconds=61)
             obj_2 = ODM("Test User", fileoid="1235", source_system="Battlestar", source_system_version="1.04")
             tested_2 = obj_to_doc(obj=obj_2)
         self.assertEqual(tested_1.get('Originator'), tested_2.get('Originator'))

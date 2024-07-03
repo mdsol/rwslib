@@ -1319,7 +1319,7 @@ class TestSourceID(unittest.TestCase):
         record = AuditRecord()
         record << UserRef("glow1")
         record << LocationRef("hillview")
-        record << DateTimeStamp(datetime.utcnow())
+        record << DateTimeStamp(get_utc_date().isoformat())
         record << SourceID("12345")
         tested = obj_to_doc(record)
         self.assertEqual("AuditRecord", tested.tag)
