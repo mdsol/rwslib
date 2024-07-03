@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rwslib"
-version = "1.2.11"
+version = "1.2.12"
 description = "Rave Web Services for Python"
 authors = ["Ian Sparks <isparks@trialgrid.com>"]
 maintainers = ["Geoff Low <geoff.low@3ds.com>"]
@@ -33,6 +33,8 @@ click = "*"
 faker = "*"
 urllib3 = "*"
 
+[tool.poetry.group.dev]
+optional = true
 
 [tool.poetry.group.dev.dependencies]
 httpretty = "*"
@@ -40,12 +42,12 @@ mock = "*"
 coverage = "*"
 pytest = "*"
 tox = "*"
-tox-poetry = "*"
 
 [tool.poetry.group.docs.dependencies]
 Sphinx = "^5.1.1"
 sphinx-pyproject = "^0.3.0"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
