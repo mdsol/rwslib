@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from typing import Optional
+
 from rwslib.builders.common import (
     ODMElement,
     TransactionalElement,
@@ -8,7 +10,7 @@ from rwslib.builders.common import (
 )
 from rwslib.builders.modm import LastUpdateMixin, MilestoneMixin
 from rwslib.builders.metadata import MeasurementUnitRef
-from rwslib.builders.constants import ProtocolDeviationStatus, QueryStatusType
+from rwslib.builders.constants import ProtocolDeviationStatus, QueryStatusType, LocationOIDType
 from rwslib.builders.common import Unset
 
 from collections import OrderedDict
@@ -77,6 +79,7 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         subject_key,
         subject_key_type="SubjectName",
         transaction_type="Update",
+        location_oid_type: Optional[LocationOIDType] = None,
     ):
         """
         :param str site_location_oid: :class:`SiteLocation` OID
@@ -98,6 +101,8 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         self.signature = None
         #: :class:`SiteRef`
         self.siteref = None
+        #: :class:`LocationOIDType`
+        self.location_oid_type = location_oid_type
 
     def build(self, builder):
         """Build XML by appending to builder"""
@@ -120,8 +125,8 @@ class SubjectData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         if self.siteref:
             self.siteref.build(builder)
         else:
-            builder.start("SiteRef", {"LocationOID": self.sitelocationoid})
-            builder.end("SiteRef")
+            _siteref = SiteRef(self.sitelocationoid, self.location_oid_type)
+            _siteref.build(builder)
 
         for event in self.study_events:
             event.build(builder)
@@ -993,17 +998,66 @@ class SiteRef(ODMElement, LastUpdateMixin):
     .. note:: The `mdsol:LocationOIDType` attribute should be used to indicate the type of `LocationOID`
     """
 
-    def __init__(self, oid):
+    def __init__(self,
+                 oid,
+                 location_oid_type: Optional[LocationOIDType] = None,
+                 site_number: Optional[str] = None,
+                 study_site_name: Optional[str] = None,
+                 site_uuid: Optional[str] = None,
+                 location_name: Optional[str] = None,
+                 study_env_site_number: Optional[str] = None,
+                 previous_location_oid: Optional[str] = None,
+                 shared_location_oid: Optional[str] = None,
+                 previous_shared_location_oid: Optional[str] = None,
+                 subject_created_at_site: Optional[str] = None,):
         """
         :param str oid: OID for referenced :class:`Location`
+        :param LocationOIDType location_oid_type: Type for the oid
+        :param site_number: Site number
+        :param study_site_name: Study site name
+        :param site_uuid: Site UUID
+        :param location_name: Location name
+        :param study_env_site_number: Study environment site number
+        :param previous_location_oid: Previous location OID
+        :param shared_location_oid: Shared location OID
+        :param previous_shared_location_oid: Previous shared location OID
+        :param subject_created_at_site: Subject created at site
         """
         self.oid = oid
+        self.location_oid_type = location_oid_type
+        self.site_number = site_number
+        self.study_site_name = study_site_name
+        self.site_uuid = site_uuid
+        self.location_name = location_name
+        self.study_env_site_number = study_env_site_number
+        self.previous_location_oid = previous_location_oid
+        self.shared_location_oid = shared_location_oid
+        self.previous_shared_location_oid = previous_shared_location_oid
+        self.subject_created_at_site = subject_created_at_site
 
     def build(self, builder):
         """
         Build XML by appending to builder
         """
         params = dict(LocationOID=self.oid)
+        if self.location_oid_type:
+            params["mdsol:LocationOIDType"] = self.location_oid_type.value
+        elif self.site_uuid:
+            params["mdsol:SiteUUID"] = self.site_uuid
+        elif self.site_number:
+            params["mdsol:SiteNumber"] = self.site_number
+        elif self.study_site_name:
+            params["mdsol:StudySiteName"] = self.study_site_name
+        elif self.study_env_site_number:
+            params["mdsol:StudyEnvSiteNumber"] = self.study_env_site_number
+        if self.location_name:
+            params["mdsol:LocationName"] = self.location_name
+        if self.previous_location_oid:
+            params["mdsol:PreviousLocationOID"] = self.previous_location_oid
+        if self.shared_location_oid:
+            params["mdsol:SharedLocationOID"] = self.shared_location_oid
+        if self.subject_created_at_site:
+            params["mdsol:SubjectCreatedAtSite"] = self.subject_created_at_site
         # mixins
         self.mixin()
         self.mixin_params(params)
