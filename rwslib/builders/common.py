@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-
+import platform
 from string import ascii_letters
-from datetime import datetime
+import datetime
 from xml.etree import cElementTree as ET
 
 
@@ -13,11 +13,21 @@ VALID_ID_CHARS = ascii_letters + '_'
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Utilities
+def get_utc_date() -> datetime.datetime:
+    """
+    Returns the UTC date as datetime.datetime object.
+    """
+    match platform.python_version_tuple():
+        case ("3", "10", _):
+            utc_date = datetime.datetime.utcnow()
+        case _:
+            utc_date = datetime.datetime.now(datetime.UTC)
+    return utc_date
 
 
 def now_to_iso8601():
     """Returns NOW date/time as a UTC date/time formated as iso8601 string"""
-    utc_date = datetime.utcnow()
+    utc_date = get_utc_date()
     return dt_to_iso8601(utc_date)
 
 
