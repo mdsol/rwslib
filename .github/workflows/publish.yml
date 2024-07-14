@@ -8,6 +8,7 @@ jobs:
   test-publish:
     name: Test Publish
     runs-on:
+      self-hosted
       ubuntu-latest
     strategy:
       fail-fast: false
