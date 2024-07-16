@@ -17,11 +17,11 @@ def get_utc_date() -> datetime.datetime:
     """
     Returns the UTC date as datetime.datetime object.
     """
-    match platform.python_version_tuple():
-        case ("3", "10", _):
-            utc_date = datetime.datetime.utcnow()
-        case _:
-            utc_date = datetime.datetime.now(datetime.UTC)
+    version = platform.python_version_tuple()
+    if int(version[1]) < 11:
+        utc_date = datetime.datetime.utcnow()
+    else:
+        utc_date = datetime.datetime.now(datetime.UTC)
     return utc_date
 
 
