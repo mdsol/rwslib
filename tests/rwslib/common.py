@@ -12,5 +12,3 @@ def obj_to_doc(obj, *args, **kwargs):
     builder = ET.TreeBuilder()
     obj.build(builder, *args, **kwargs)
     return builder.close()
-
-

@@ -5,6 +5,8 @@ __author__ = 'glow'
 import datetime
 import enum
 
+from rwslib.builders.common import get_utc_date
+
 
 class MODMExtensionRegistry(enum.Enum):
     """
@@ -167,7 +169,7 @@ class LastUpdateMixin(MODMMixin):
         if update_time and isinstance(update_time, (datetime.datetime,)):
             self.last_update_time = update_time
         else:
-            self.last_update_time = datetime.datetime.utcnow()
+            self.last_update_time = get_utc_date()
 
     def mixin_params(self, params):
         """

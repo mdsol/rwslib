@@ -329,3 +329,14 @@ class GranularityType(enum.Enum):
     AllClinicalData = 'AllClinicalData'
     SingleSite = 'SingleSite'
     SingleSubject = 'SingleSubject'
+
+
+class LocationOIDType(enum.Enum):
+    """
+    Location OID Type Enumeration
+    Applies to a :class:`SiteRef`
+    """
+    SiteUUID = 'SiteUUID'
+    SiteNumber = 'SiteNumber'
+    StudyEnvSiteNumber = 'StudyEnvSiteNumber'
+

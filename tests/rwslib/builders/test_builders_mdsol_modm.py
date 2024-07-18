@@ -6,11 +6,12 @@ from unittest import TestCase
 from faker import Faker
 
 from rwslib.builders.admindata import Location
+from rwslib.builders.common import get_utc_date
 
 from rwslib.builders.constants import QueryStatusType
 from rwslib.builders.clinicaldata import ClinicalData, FormData, ItemData, ItemGroupData, MdsolQuery, StudyEventData, \
     SubjectData
-from rwslib.tests.common import obj_to_doc
+from ..common import obj_to_doc
 
 import datetime
 import unittest
@@ -57,7 +58,7 @@ class TestMODMClinicalData(TestCase):
     def test_add_last_update_time(self):
         """We add a LastUpdateTime"""
         clindata = ClinicalData("Mediflex", "Prod", metadata_version_oid="1012")
-        now = datetime.datetime.utcnow()
+        now = get_utc_date()
         clindata.last_update_time = now
         tested = obj_to_doc(clindata)
         self.assertEqual(now.isoformat(), tested.get('mdsol:LastUpdateTime'))
@@ -100,7 +101,7 @@ class TestMODMSubjectData(TestCase):
     def test_add_last_update_time(self):
         """We add a LastUpdateTime"""
         obj = SubjectData("Subject 1", "Site 1")
-        now = datetime.datetime.utcnow()
+        now = get_utc_date()
         obj.last_update_time = now
         tested = obj_to_doc(obj)
         self.assertEqual(now.isoformat(), tested.get('mdsol:LastUpdateTime'))
@@ -158,7 +159,7 @@ class TestMODMStudyEventData(TestCase):
     def test_add_last_update_time(self):
         """We add a LastUpdateTime"""
         obj = StudyEventData("VISIT1")
-        now = datetime.datetime.utcnow()
+        now = get_utc_date()
         obj.last_update_time = now
         tested = obj_to_doc(obj)
         self.assertEqual("StudyEventData", tested.tag)
@@ -233,7 +234,7 @@ class TestMODMFormData(TestCase):
     def test_add_last_update_time(self):
         """We add a LastUpdateTime"""
         obj = FormData(formoid="DM")
-        now = datetime.datetime.utcnow()
+        now = get_utc_date()
         obj.last_update_time = now
         tested = obj_to_doc(obj)
         self.assertEqual("FormData", tested.tag)
@@ -305,7 +306,7 @@ class TestMODMItemGroupData(TestCase):
     def test_add_last_update_time(self):
         """We add a LastUpdateTime"""
         obj = ItemGroupData(itemgroupoid="DM")
-        now = datetime.datetime.utcnow()
+        now = get_utc_date()
         obj.last_update_time = now
         tested = obj_to_doc(obj)
         self.assertEqual("ItemGroupData", tested.tag)
@@ -377,7 +378,7 @@ class TestMODMItemData(TestCase):
     def test_add_last_update_time(self):
         """We add a LastUpdateTime"""
         obj = ItemData(itemoid="BRTHDAT", value="12 DEC 1975")
-        now = datetime.datetime.utcnow()
+        now = get_utc_date()
         obj.last_update_time = now
         tested = obj_to_doc(obj)
         self.assertEqual("ItemData", tested.tag)
@@ -428,7 +429,7 @@ class TestMODMItemData(TestCase):
     def test_add_item_uuid(self):
         """We add a mdsol:ItemUUID"""
         obj = ItemData(itemoid="BRTHDAT", value="12 DEC 1975")
-        now = datetime.datetime.utcnow()
+        now = get_utc_date()
         obj.last_update_time = now
         obj.add_attribute("ItemUUID", "85D4F9F0-9F49-42F3-A8E7-413DE85CC55E")
         tested = obj_to_doc(obj)
@@ -439,7 +440,7 @@ class TestMODMItemData(TestCase):
     def test_gate_modm_attributes(self):
         """We add a mdsol:Nonsense"""
         obj = ItemData(itemoid="BRTHDAT", value="12 DEC 1975")
-        now = datetime.datetime.utcnow()
+        now = get_utc_date()
         obj.last_update_time = now
         with self.assertRaises(ValueError) as exc:
             obj.add_attribute("Nonsense", "85D4F9F0-9F49-42F3-A8E7-413DE85CC55E")

@@ -8,7 +8,7 @@ from rwslib.builders.metadata import *
 from rwslib.builders.constants import DataType, LogicalRecordPositionType, StepType
 from rwslib.builders.clinicaldata import ItemData
 
-from rwslib.tests.test_builders import obj_to_doc
+from ..common import obj_to_doc
 
 # Metadata object tests
 

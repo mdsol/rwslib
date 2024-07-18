@@ -5,7 +5,7 @@ __author__ = "isparks"
 import unittest
 
 from rwslib.builders import *
-from rwslib.tests.common import obj_to_doc
+from ..common import obj_to_doc
 from datetime import datetime
 
 
@@ -201,6 +201,15 @@ class TestSubjectData(unittest.TestCase):
         cd << SubjectData("Site1", "Subject2")
         doc = obj_to_doc(cd)
         self.assertEqual(2, len(doc))
+
+    def test_multiple_subject_data_location_oid(self):
+        """Specify the LocationOID Type"""
+        cd = ClinicalData("Mediflex", "Prod")
+        cd << SubjectData("Site1", "Subject1",
+                          location_oid_type=LocationOIDType.StudyEnvSiteNumber)
+        doc = obj_to_doc(cd)
+        site_ref = doc.find(".//SiteRef", namespaces={"odm": "http://www.cdisc.org/ns/odm/v1.3"})
+        self.assertEqual('StudyEnvSiteNumber', site_ref.attrib["mdsol:LocationOIDType"])
 
 
 class TestStudyEventData(unittest.TestCase):
@@ -1310,7 +1319,7 @@ class TestSourceID(unittest.TestCase):
         record = AuditRecord()
         record << UserRef("glow1")
         record << LocationRef("hillview")
-        record << DateTimeStamp(datetime.utcnow())
+        record << DateTimeStamp(get_utc_date().isoformat())
         record << SourceID("12345")
         tested = obj_to_doc(record)
         self.assertEqual("AuditRecord", tested.tag)
@@ -1340,3 +1349,39 @@ class TestSiteRef(unittest.TestCase):
             "E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B", tested.get("LocationOID")
         )
         self.assertEqual("SiteUUID", tested.get("mdsol:LocationOIDType"))
+
+    def test_oid_type_init_site_uuid(self):
+        siteref = SiteRef(oid="E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B", location_oid_type=LocationOIDType.SiteUUID)
+        tested = obj_to_doc(siteref)
+        self.assertEqual("SiteRef", tested.tag)
+        self.assertEqual(
+            "E20DEF2D-0CD4-4B3A-B963-AC7D592CB85B", tested.get("LocationOID")
+        )
+        self.assertEqual("SiteUUID", tested.get("mdsol:LocationOIDType"))
+
+    def test_oid_type_init_site_number(self):
+        siteref = SiteRef(oid="001", location_oid_type=LocationOIDType.SiteNumber)
+        tested = obj_to_doc(siteref)
+        self.assertEqual("SiteRef", tested.tag)
+        self.assertEqual(
+            "001", tested.get("LocationOID")
+        )
+        self.assertEqual("SiteNumber", tested.get("mdsol:LocationOIDType"))
+
+    def test_oid_type_init_study_env_site_number(self):
+        siteref = SiteRef(oid="01", location_oid_type=LocationOIDType.StudyEnvSiteNumber)
+        tested = obj_to_doc(siteref)
+        self.assertEqual("SiteRef", tested.tag)
+        self.assertEqual(
+            "01", tested.get("LocationOID")
+        )
+        self.assertEqual("StudyEnvSiteNumber", tested.get("mdsol:LocationOIDType"))
+
+    def test_oid_type_study_env_site_number(self):
+        siteref = SiteRef(oid="01", study_env_site_number="001")
+        tested = obj_to_doc(siteref)
+        self.assertEqual("SiteRef", tested.tag)
+        self.assertEqual(
+            "01", tested.get("LocationOID")
+        )
+        self.assertEqual("001", tested.get("mdsol:StudyEnvSiteNumber"))

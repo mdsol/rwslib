@@ -9,14 +9,14 @@ Developer Setup
    ```
    git clone https://github.com/mdsol/rwslib
    ```
-2. Create a Virtual Env for the Local instance
+2. Install poetry and start a shell
     ```bash
-    $ python -m venv venv
-    $ source venv/bin/activate
+    $ pip install poetry
+    $ poetry shell
     ```
 3. Install the development dependencies
     ```bash
-    $ pip install -r requirements-dev.txt
+    $ poetry install --with dev
     ```
 4. Enjoy !!!
 
