@@ -64,12 +64,13 @@ class RWSConnection(object):
         # Time taken to process last request
         self.request_time = None
 
-    def send_request(self, request_object, timeout=None, retries=1, **kwargs):
+    def send_request(self, request_object, timeout=None, retries=1, preserve_last_response=True, **kwargs):
         """Send request to RWS endpoint. The request object passed provides the URL endpoint and the HTTP method.
            Takes the text response from RWS and allows the request object to modify it for return. This allows the request
            object to return text, an XML document object, a CSV file or anything else that can be generated from the text
            response from RWS.
            A timeout, in seconds, can be optionally passed into send_request.
+           Preserving response in class can be disabled by setting `preserve_last_response=False`.
         """
         if not isinstance(request_object, RWSRequest):
             raise ValueError("Request object must be a subclass of RWSRequest")
@@ -113,7 +114,8 @@ class RWSConnection(object):
                 )
 
         self.request_time = time.time() - start_time
-        self.last_result = r  # see also r.elapsed for timedelta object.
+        if preserve_last_response:
+            self.last_result = r  # see also r.elapsed for timedelta object.
 
         if r.status_code in [400, 404]:
             # Is it a RWS response?
