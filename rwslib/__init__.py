@@ -99,19 +99,15 @@ class RWSConnection(object):
 
         try:
             r = action(full_url, **kwargs)  # type: requests.models.Response
-        except (
-            requests.exceptions.ConnectTimeout,
-            requests.exceptions.ReadTimeout,
-        ) as exc:
-            if isinstance(exc, (requests.exceptions.ConnectTimeout,)):
-                raise RWSException(
-                    "Server Connection Timeout",
-                    "Connection timeout for {}".format(full_url),
-                )
-            elif isinstance(exc, (requests.exceptions.ReadTimeout,)):
-                raise RWSException(
-                    "Server Read Timeout", "Read timeout for {}".format(full_url)
-                )
+        except requests.exceptions.ConnectTimeout:
+            raise RWSException(
+                "Server Connection Timeout",
+                "Connection timeout for {}".format(full_url),
+            )
+        except requests.exceptions.ReadTimeout:
+            raise RWSException(
+                "Server Read Timeout", "Read timeout for {}".format(full_url)
+            )
 
         self.request_time = time.time() - start_time
         if preserve_last_response:
