@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rwslib"
-version = "1.2.12"
+version = "1.2.13"
 description = "Rave Web Services for Python"
 authors = ["Ian Sparks <isparks@trialgrid.com>"]
 maintainers = ["Geoff Low <geoff.low@3ds.com>"]

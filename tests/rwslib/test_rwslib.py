@@ -83,6 +83,24 @@ class TestVersion(unittest.TestCase):
         self.assertEqual(v, "1.0.0")
         self.assertEqual(rave.last_result.status_code, 200)
 
+    @httpretty.activate
+    def test_disable_response_preserving(self):
+        """A simple test, patching the get request so that it does not hit a website"""
+
+        httpretty.register_uri(
+            httpretty.GET,
+            "https://innovate.mdsol.com/RaveWebServices/version",
+            status=200,
+            body="1.0.0",
+        )
+
+        # Now my test
+        rave = rwslib.RWSConnection("https://innovate.mdsol.com")
+        v = rave.send_request(rwslib.rws_requests.VersionRequest(), preserve_last_response=False)
+
+        self.assertEqual(v, "1.0.0")
+        self.assertEqual(rave.last_result, None)
+
 
 class TestMustBeRWSRequestSubclass(unittest.TestCase):
     """Test that request object passed must be RWSRequest subclass"""
