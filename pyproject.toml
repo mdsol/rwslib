@@ -23,7 +23,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7.0,<4"
+python = ">=3.8.0,<4"
 lxml = "*"
 requests = "*"
 six = "*"
@@ -40,6 +40,9 @@ mock = "*"
 coverage = "*"
 pytest = "*"
 tox = "*"
+
+[tool.poetry.group.docs]
+optional = true
 
 [tool.poetry.group.docs.dependencies]
 Sphinx = "^5.1.1"
