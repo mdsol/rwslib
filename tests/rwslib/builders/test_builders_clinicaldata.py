@@ -1385,3 +1385,27 @@ class TestSiteRef(unittest.TestCase):
             "01", tested.get("LocationOID")
         )
         self.assertEqual("001", tested.get("mdsol:StudyEnvSiteNumber"))
+
+    def test_clinical_significance(self):
+        obj = MdsolClinicalSignificance(value="NCS", comment="Not related")
+        tested = obj_to_doc(obj)
+        self.assertEqual("mdsol:ClinicalSignificance", tested.tag)
+        self.assertEqual("NCS", tested.attrib["Value"])
+        self.assertEqual("Not related", tested.attrib["Comment"])
+        idata = ItemData("ALB", "1.23")
+        idata << obj
+        tested = obj_to_doc(idata)
+        self.assertEqual("ItemData", tested.tag)
+        self.assertEqual(1, len(tested))
+
+    # def test_lab_alert(self):
+    #     obj = MdsolLabAlert(type="High", range="15")
+    #     tested = obj_to_doc(obj)
+    #     self.assertEqual("mdsol:LabAlert", tested.tag)
+    #     self.assertEqual("High", tested.attrib["Type"])
+    #     self.assertEqual("15", tested.attrib["Range"])
+    #     idata = ItemData("ALB", "1.23")
+    #     idata << obj
+    #     tested = obj_to_doc(idata)
+    #     self.assertEqual("ItemData", tested.tag)
+    #     self.assertEqual(1, len(tested))

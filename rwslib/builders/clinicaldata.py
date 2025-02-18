@@ -10,7 +10,7 @@ from rwslib.builders.common import (
 )
 from rwslib.builders.modm import LastUpdateMixin, MilestoneMixin
 from rwslib.builders.metadata import MeasurementUnitRef
-from rwslib.builders.constants import ProtocolDeviationStatus, QueryStatusType, LocationOIDType
+from rwslib.builders.constants import ProtocolDeviationStatus, QueryStatusType, LocationOIDType, TransactionType
 from rwslib.builders.common import Unset
 
 from collections import OrderedDict
@@ -437,6 +437,8 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         self.measurement_unit_ref = None
         #: the list of :class:`MdsolProtocolDeviation` references on the DataPoint - *Rave Specific Attribute*
         self.deviations = []
+        #: the clinical significance attestation for the value - *Rave Specific Attribute*
+        self.clinical_significance = None
 
     def build(self, builder):
         """
@@ -478,6 +480,9 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         if self.measurement_unit_ref is not None:
             self.measurement_unit_ref.build(builder)
 
+        if self.clinical_significance is not None:
+            self.clinical_significance.build(builder)
+
         for query in self.queries:  # type: MdsolQuery
             query.build(builder)
 
@@ -498,6 +503,7 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
                 MdsolQuery,
                 Annotation,
                 MdsolProtocolDeviation,
+                MdsolClinicalSignificance,
             ),
         ):
             raise ValueError(
@@ -509,6 +515,7 @@ class ItemData(TransactionalElement, LastUpdateMixin, MilestoneMixin):
         self.set_list_attribute(other, MdsolQuery, "queries")
         self.set_list_attribute(other, MdsolProtocolDeviation, "deviations")
         self.set_list_attribute(other, Annotation, "annotations")
+        self.set_single_attribute(other, MdsolClinicalSignificance, "clinical_significance")
         return other
 
 
@@ -1442,3 +1449,72 @@ class MdsolQuery(ODMElement):
 
         builder.start("mdsol:Query", params)
         builder.end("mdsol:Query")
+
+
+class MdsolClinicalSignificance(ODMElement):
+    """
+    Represents the mdsol:ClinicalSignificance element in ODM.
+    """
+    def __init__(self, value: Optional[str] = None, status: Optional[str] = None, comment: Optional[str] = None, transaction_type: Optional[TransactionType] = None):
+        """
+        Assign clinical significance data to a datapoint
+        :param value: Clinical significance value (should match the values set in LabAdmin)
+        :param status: Status of the clinical significance statement
+        :param comment: Comment on the Clinical Significance
+        :param transaction_type: TransactionType for the statement of clinical significance
+        """
+        self.value = value
+        self.status = status
+        self.comment = comment
+        self.transaction_type = transaction_type
+
+    def build(self, builder):
+        """
+        Build XML by appending to builder
+        """
+        params = {}
+        if self.value:
+            params["Value"] = self.value
+        if self.status:
+            params["Status"] = self.status
+        if self.comment:
+            params["Comment"] = self.comment
+        if self.transaction_type:
+            params["TransactionType"] = str(self.transaction_type)
+        builder.start("mdsol:ClinicalSignificance", params)
+        builder.end("mdsol:ClinicalSignificance")
+
+
+# class MdsolLabAlert(ODMElement):
+#     """
+#     Represents the mdsol:LabAlert element in ODM.
+#     """
+#     def __init__(self, type: Optional[str] = None, range: Optional[str] = None, alert: Optional[str] = None, transaction_type: Optional[TransactionType] = None):
+#         """
+#         Assign Lab Alert data to a datapoint
+#         :param type: Type of alert (eg High, Low)
+#         :param range: Range
+#         :param alert:
+#         :param transaction_type: TransactionType for the lab alert
+#         """
+#         self.type = type
+#         self.range = range
+#         self.alert = alert
+#         self.transaction_type = transaction_type
+#
+#     def build(self, builder):
+#         """
+#         Build XML by appending to builder
+#         """
+#         params = {}
+#         if self.type:
+#             params["Type"] = self.type
+#         if self.range:
+#             params["Range"] = self.range
+#         if self.alert:
+#             params["Alert"] = self.alert
+#         if self.transaction_type:
+#             params["TransactionType"] = str(self.transaction_type)
+#         builder.start("mdsol:LabAlert", params)
+#         builder.end("mdsol:LabAlert")
+
