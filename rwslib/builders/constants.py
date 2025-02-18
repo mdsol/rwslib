@@ -340,3 +340,13 @@ class LocationOIDType(enum.Enum):
     SiteNumber = 'SiteNumber'
     StudyEnvSiteNumber = 'StudyEnvSiteNumber'
 
+
+class TransactionType(enum.Enum):
+    """
+    Transaction Type
+    """
+    Insert = 'Insert'
+    Remove = 'Remove'
+    Update = 'Update'
+    Upsert = 'Upsert'
+    Context = 'Context'
