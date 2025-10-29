@@ -5,13 +5,12 @@ version: 2
 build:
   os: ubuntu-22.04
   tools:
-    python: "3.10"
+    python: "3.12"
   jobs:
     post_create_environment:
-      - pip install poetry
-      - poetry config virtualenvs.create false
+      - pipx install uv
     post_install:
-      - poetry install --with docs
+      - uv sync --with docs
 
 
 # Build documentation using Sphinx
