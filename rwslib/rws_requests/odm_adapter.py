@@ -170,3 +170,23 @@ class SignatureDefinitionsRequest(RWSAuthorizedGetRequest):
     def url_path(self):
         """Return url path list"""
         return self.make_url("datasets", "Signatures.odm", **self._querystring())
+
+
+class LabAnalyteRangesRequest(RWSAuthorizedGetRequest):
+    """Retrieves the local lab analyte ranges for a study across all sites."""
+
+    def __init__(self, project_name):
+        """
+        :param str project_name: Project Name (should include environment), eg Mediflex(Prod)
+        """
+        self.project_name = project_name
+
+    def _querystring(self):
+        """Additional keyword arguments"""
+
+        kw = {"studyoid": self.project_name}
+        return kw
+
+    def url_path(self):
+        """Return url path list"""
+        return self.make_url("datasets", "LabAnalyteRanges.csv", **self._querystring())
