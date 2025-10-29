@@ -78,6 +78,15 @@ class TestClinicalData(unittest.TestCase):
         self.assertEqual("ODM", tested.tag)
         self.assertTrue(2, len(list(tested)))
 
+    def test_nix_prod_designation(self):
+        """Prod gets removed"""
+        odm = ODM("Some test case")
+        odm << ClinicalData("Study1", "Prod")
+        tested = obj_to_doc(odm)
+        self.assertEqual("ODM", tested.tag)
+        self.assertTrue(1, len(list(tested)))
+        self.assertTrue("Study1" == tested[0].attrib["StudyOID"])
+
 
 class TestSubjectData(unittest.TestCase):
     """Test SubjectData classes"""
