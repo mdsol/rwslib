@@ -40,7 +40,7 @@ dev = [
     "tox",
 ]
 docs = [
-    "Sphinx>=5.1.1,<6",
+    "Sphinx>=6.0.0",
     "sphinx-pyproject>=0.3.0,<0.4",
 ]
 
@@ -59,4 +59,9 @@ include = ["rwslib"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.sphinx-pyproject]
+project = "rwslib"
+github_username = "mdsol"
+github_repository = "rwslib"
 
