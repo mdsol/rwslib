@@ -24,7 +24,8 @@ try:
 except ImportError:
     from io import StringIO
 
-VIEW_REX = re.compile('''V_(?P<study>[^\W_]+)_(?P<view>[^\W_]+)(_(?P<type>[^\W_]+))?''')
+VIEW_REX = re.compile(r"V_(?P<study>[A-Za-z0-9]+)_(?P<view>[A-Za-z0-9]+)(?:_(?P<type>[A-Za-z0-9]+))?")
+
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Classes
