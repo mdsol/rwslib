@@ -85,7 +85,7 @@ class TestClinicalData(unittest.TestCase):
         tested = obj_to_doc(odm)
         self.assertEqual("ODM", tested.tag)
         self.assertTrue(1, len(list(tested)))
-        self.assertTrue("Study1" == tested[0].attrib["StudyOID"])
+        self.assertEqual("Study1", tested[0].attrib["StudyOID"])
 
 
 class TestSubjectData(unittest.TestCase):
