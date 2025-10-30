@@ -1,54 +1,67 @@
-[tool.poetry]
+[project]
 name = "rwslib"
-version = "1.2.13"
+version = "1.2.15"
 description = "Rave Web Services for Python"
-authors = ["Ian Sparks <isparks@trialgrid.com>"]
-maintainers = ["Geoff Low <geoff.low@3ds.com>"]
+authors = [{ name = "Ian Sparks", email = "isparks@trialgrid.com" }]
+requires-python = ">=3.8.0,<4"
 readme = "README.md"
-repository = "https://github.com/mdsol/rwslib"
-documentation = "https://rwslib.readthedocs.io"
 license = "MIT"
+maintainers = [{ name = "Geoff Low", email = "geoff.low@3ds.com" }]
 classifiers = [
-    'Development Status :: 5 - Production/Stable',
-    'Intended Audience :: Developers',
-    'Natural Language :: English',
-    'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
-packages = [
-    { include = "rwslib" },
+dependencies = [
+    "lxml",
+    "requests",
+    "six",
+    "click",
+    "faker",
+    "urllib3",
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.8.0,<4"
-lxml = "*"
-requests = "*"
-six = "*"
-click = "*"
-faker = "*"
-urllib3 = "*"
+[project.urls]
+Repository = "https://github.com/mdsol/rwslib"
+Documentation = "https://rwslib.readthedocs.io"
 
-[tool.poetry.group.dev]
-optional = true
+[dependency-groups]
+dev = [
+    "httpretty",
+    "mock",
+    "coverage",
+    "pytest",
+    "tox",
+]
+docs = [
+    "Sphinx>=6.0.0",
+    "sphinx-pyproject>=0.3.0,<0.4",
+]
 
-[tool.poetry.group.dev.dependencies]
-httpretty = "*"
-mock = "*"
-coverage = "*"
-pytest = "*"
-tox = "*"
+[tool.uv]
+default-groups = [
+    "dev",
+    "docs",
+]
 
-[tool.poetry.group.docs]
-optional = true
+[tool.hatch.build.targets.sdist]
+include = ["rwslib"]
 
-[tool.poetry.group.docs.dependencies]
-Sphinx = "^5.1.1"
-sphinx-pyproject = "^0.3.0"
+[tool.hatch.build.targets.wheel]
+include = ["rwslib"]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.sphinx-pyproject]
+project = "rwslib"
+github_username = "mdsol"
+github_repository = "rwslib"
 

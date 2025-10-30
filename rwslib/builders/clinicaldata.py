@@ -39,9 +39,15 @@ class ClinicalData(ODMElement, LastUpdateMixin):
 
     def build(self, builder):
         """Build XML by appending to builder"""
+
+        # recently we have had issues with the Prod designation on Study OID
+        # it defaults to Prod so we can use that
+        _study_oid = self.projectname
+        if self.environment.lower() != "prod":
+            _study_oid += " (%s)" % self.environment
         params = dict(
             MetaDataVersionOID=str(self.metadata_version_oid),
-            StudyOID="%s (%s)" % (self.projectname, self.environment),
+            StudyOID=_study_oid,
         )
 
         # mixins

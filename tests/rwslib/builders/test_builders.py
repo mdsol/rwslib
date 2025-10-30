@@ -130,3 +130,12 @@ class TestODM(unittest.TestCase):
         self.assertEqual(tested_1.get('SourceSystem'), tested_2.get('SourceSystem'))
         self.assertNotEqual(tested_1.get('FileOID'), tested_2.get('FileOID'))
         self.assertNotEqual(tested_1.get('CreationDateTime'), tested_2.get('CreationDateTime'))
+
+    def test_respect_unique_file_oid(self):
+        """Test the RespectUniqueFileOID attribute"""
+        obj_1 = ODM("Test User", fileoid="1234", source_system="Battlestar", source_system_version="1.04", respect_unique_file_oid=True)
+        tested_1 = obj_to_doc(obj=obj_1)
+        self.assertEqual(tested_1.get('RespectUniqueFileOID'), "Yes")
+        obj_2 = ODM("Test User", fileoid="1234", source_system="Battlestar", source_system_version="1.04", respect_unique_file_oid=False)
+        tested_2 = obj_to_doc(obj=obj_2)
+        self.assertEqual(tested_2.get('RespectUniqueFileOID'), "No")

@@ -9,14 +9,14 @@ Developer Setup
    ```
    git clone https://github.com/mdsol/rwslib
    ```
-2. Install poetry and start a shell
+2. [Install uv](https://docs.astral.sh/uv/getting-started/installation/) and start a shell
     ```bash
-    $ pip install poetry
-    $ poetry shell
+    $ pipx install uv
+    $ uv shell
     ```
 3. Install the development dependencies
     ```bash
-    $ poetry install --with dev
+    $ uv sync --group dev
     ```
 4. Enjoy !!!
 

@@ -7,27 +7,24 @@ on:
 jobs:
   publish:
     name: Publish to PyPI
-    runs-on:
-      ubuntu-latest
-    environment: pypi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
     permissions:
       id-token: write
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [ "3.10" ]
-        poetry-version: [ "1.4.2" ]
-        os: [ ubuntu-latest ]
+      contents: read
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Run image
-        uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: ${{ matrix.poetry-version }}
-      - name: Build Project
-        run: poetry build
-      - name: Upload release to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Install Python 3.13
+        run: uv python install 3.13
+      - name: Build
+        run: uv build
+      # Check that basic features work and we didn't miss to include crucial files
+      - name: Smoke test (wheel)
+        run: uv run --isolated --no-project --with dist/*.whl tests/smoke_test.py
+      - name: Smoke test (source distribution)
+        run: uv run --isolated --no-project --with dist/*.tar.gz tests/smoke_test.py
+      - name: Publish
+        run: uv publish

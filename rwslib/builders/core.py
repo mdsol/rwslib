@@ -21,7 +21,9 @@ class ODM(ODMElement):
                  fileoid=None,
                  filetype=None,
                  granularity=GranularityType.AllClinicalData,
-                 source_system=None, source_system_version=None):
+                 source_system=None,
+                 source_system_version=None,
+                 respect_unique_file_oid=None):
         """
         :param str originator: The organization that generated the ODM file.
         :param str description: The sender should use the Description attribute to record any information that will 
@@ -33,6 +35,9 @@ class ODM(ODMElement):
             data point. For clinical data, TransactionType in a Snapshot file must either not be present or be Insert. 
             Transactional means that the document may contain more than one instruction per data point. 
             Use a Transactional document to send both what the current state of the data is, and how it came to be there.
+        :param str source_system: The name of the source system that is sending the data.
+        :param str source_system_version: The version of the source system that is sending the data.
+        :param bool respect_unique_file_oid: Whether to respect the unique file OID constraint.
         """
         self.originator = originator  # Required
         self.description = description
@@ -52,6 +57,7 @@ class ODM(ODMElement):
         self._granularity_type = None
         if granularity:
             self.granularity_type = granularity
+        self.respect_unique_file_oid = respect_unique_file_oid
 
     @property
     def granularity_type(self):
@@ -101,6 +107,9 @@ class ODM(ODMElement):
 
         if self.description:
             params['Description'] = self.description
+
+        if self.respect_unique_file_oid is not None:
+            params['RespectUniqueFileOID'] = "Yes" if self.respect_unique_file_oid else "No"
 
         builder.start("ODM", params)
 

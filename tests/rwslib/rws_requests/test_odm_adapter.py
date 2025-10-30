@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'glow'
-
 import unittest
 
 import pytest
-from six.moves.urllib_parse import quote
 from rwslib.rws_requests.odm_adapter import SignatureDefinitionsRequest, UsersRequest, \
-    SitesMetadataRequest, VersionFoldersRequest, AuditRecordsRequest
+    SitesMetadataRequest, VersionFoldersRequest, AuditRecordsRequest, LabAnalyteRangesRequest
+from urllib.parse import quote
 
 
 class TestSignatureDefinitionsRequest(unittest.TestCase):
@@ -48,7 +46,7 @@ class TestSitesMetadataRequest(unittest.TestCase):
                               project_name="Mediflex",
                               environment_name="Dev"):
         t = SitesMetadataRequest(project_name=project_name,
-                                environment_name=environment_name)
+                                 environment_name=environment_name)
         return t
 
     def test_create_a_sites_metadata_request(self):
@@ -86,7 +84,7 @@ class TestVersionFoldersRequest(unittest.TestCase):
                               project_name="Mediflex",
                               environment_name="Dev"):
         t = VersionFoldersRequest(project_name=project_name,
-                                environment_name=environment_name)
+                                  environment_name=environment_name)
         return t
 
     def test_happy_case(self):
@@ -153,6 +151,7 @@ def test_clinical_audit_request_unicode():
     assert 'datasets/ClinicalAuditRecords.odm' in t.url_path()
     assert f'unicode=true' in t.url_path()
 
+
 def test_clinical_audit_request_unicode_default():
     """We can create an AuditRecordsRequest"""
     t = AuditRecordsRequest(project_name="Mediflex",
@@ -161,6 +160,12 @@ def test_clinical_audit_request_unicode_default():
                             per_page=100)
     assert 'datasets/ClinicalAuditRecords.odm' in t.url_path()
     assert f'unicode' not in t.url_path()
+
+
+def test_lab_ranges():
+    """Test the creation of a LabRangesRequest"""
+    t = LabAnalyteRangesRequest("Mediflex")
+    assert t.url_path() == "datasets/LabAnalyteRanges.csv?studyoid=Mediflex"
 
 
 if __name__ == '__main__':

@@ -295,3 +295,31 @@ Example::
     </ODM>
 
 
+
+
+LabAnalyteRangesRequest(project_name)
+-----------------------------------------
+
+Authorization is required for this request.
+
+Retrieve Lab Data with the Lab Analyte Ranges CSV Dataset.
+**Note**: This service only outputs local lab data, and lab analyte unit ranges only.
+
+Calls::
+
+    https://{{ host }}/RaveWebServices/datasets/LabAnalyteRanges.csv?studyoid={project_name}
+
+
+Example::
+
+    >>> from rwslib import RWSConnection
+    >>> from rwslib.rws_requests.odm_adapter import *
+    >>> r = RWSConnection('https://innovate.mdsol.com', 'username', 'password')
+    >>> ranges = r.send_request(LabAnalyteRangesRequest('SIMPLESTUDY(Prod)'))
+    >>> import csv
+    >>> from io import StringIO
+    >>> f = StringIO(ranges)
+    >>> reader = csv.DictReader(f)
+    >>> for row in reader:
+    ...     print(row)
+
