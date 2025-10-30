@@ -7,26 +7,24 @@ on:
 jobs:
   publish:
     name: Publish to PyPI
-    runs-on:
-      self-hosted
-    environment: pypi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
     permissions:
       id-token: write
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [ "3.12" ]
-        os: [ ubuntu-latest ]
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v5
       - name: Install uv
         uses: astral-sh/setup-uv@v6
-        with:
-          version: 'latest'
-      - name: Build Project
+      - name: Install Python 3.13
+        run: uv python install 3.13
+      - name: Build
         run: uv build
-      - name: Upload release to PyPI
+      # Check that basic features work and we didn't miss to include crucial files
+      - name: Smoke test (wheel)
+        run: uv run --isolated --no-project --with dist/*.whl tests/smoke_test.py
+      - name: Smoke test (source distribution)
+        run: uv run --isolated --no-project --with dist/*.tar.gz tests/smoke_test.py
+      - name: Publish
         run: uv publish
