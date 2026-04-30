@@ -1,0 +1,31 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  json_schema: https://github.com/mdsol/platform-standards/blob/main/schemas/v1alpha1.schema.json
+  name: FIX_REQUIRED_NAME
+  description: FIX_REQUIRED_DESCRIPTION
+  people:
+    - role: technical owner
+      email: glow@mdsol.com
+    - role: product owner
+      email: Not Found in Factbook
+  teams:
+    - number: 214
+      name: Team 214
+  annotations:
+    runbook: No runbook found
+    healthcheck: NO HEALTH CHECK
+    product: Data Fabric
+  channels:
+    - url: FIX_REQUIRED_CHANNEL_URL
+      role: slack
+      automated_messaging: true
+      mention: FIX_REQUIRED_SLACK_MENTION
+    - url: FIX_REQUIRED_EMAIL_CHANNEL_URL
+      role: email
+      automated_messaging: false
+spec:
+  type: FIX_TYPE
+  lifecycle: FIX_REQUIRED_LIFECYCLE
+  owner: FIX_REQUIRED_OWNER
+  experience: enablement
