@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  json_schema: https://github.com/mdsol/platform-standards/blob/main/schemas/v1alpha1.schema.json
+  name: rwslib
+  description: Rave Web Services for Python
+  people:
+    - role: technical owner
+      email: geoff.low@3ds.com
+    - role: product owner
+      email: geoff.low@3ds.com
+  teams:
+    - number: 214
+      name: Team 214
+  annotations:
+    product: Data Fabric
+spec:
+  type: library
+  lifecycle: production
+  owner: geoff.low@3ds.com
+  experience: enablement
